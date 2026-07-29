@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 40" fill="none">
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="brandGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0abfc"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+    <linearGradient id="orangeGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: Shopping bag -->
+  <g transform="translate(2, 4)">
+    <!-- Bag body -->
+    <path d="M3 10C3 9.44772 3.44772 9 4 9H24C24.5523 9 25 9.44772 25 10L23.5 29C23.5 29.5523 23.0523 30 22.5 30H5.5C4.94772 30 4.5 29.5523 4.5 29L3 10Z" fill="url(#brandGradLight)"/>
+
+    <!-- Bag handle -->
+    <path d="M9 9V7C9 4.23858 11.2386 2 14 2C16.7614 2 19 4.23858 19 7V9" stroke="url(#brandGradLight)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+    <!-- L letter mark inside bag -->
+    <path d="M11 14V22H17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Accent diamond -->
+    <path d="M20 13L21.5 15L20 17L18.5 15L20 13Z" fill="url(#orangeGradLight)"/>
+  </g>
+
+  <!-- Wordmark "LUXE" in white -->
+  <g fill="#ffffff">
+    <!-- L -->
+    <path d="M42 10V30H54V26H47V10H42Z"/>
+    <!-- U -->
+    <path d="M58 10V24C58 27.3137 60.6863 30 64 30H68C71.3137 30 74 27.3137 74 24V10H69V24C69 24.5523 68.5523 25 68 25H64C63.4477 25 63 24.5523 63 24V10H58Z"/>
+    <!-- X -->
+    <path d="M78 10L84 20L78 30H84L87.5 24L91 30H97L91 20L97 10H91L87.5 16L84 10H78Z"/>
+    <!-- E -->
+    <path d="M101 10V30H117V26H106V22H115V18H106V14H117V10H101Z"/>
+  </g>
+
+  <!-- Accent underline -->
+  <rect x="42" y="33" width="75" height="2" rx="1" fill="url(#orangeGradLight)"/>
+</svg>
