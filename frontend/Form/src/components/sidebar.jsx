@@ -84,7 +84,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
     {
       label: "Dashboard Overview",
       icon: <DashboardIcon />,
-      value: "dashboard",
+      value: "Dashboard",
       description: "Analytics & insights",
     },
     {
@@ -131,14 +131,12 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
   }
 
   if (role === "Seller") {
-    menuItems.push(
-      {
-        label: "My Orders",
-        icon: <ReceiptIcon />,
-        value: "seller-orders",
-        description: "View orders for your products",
-      },
-    );
+    menuItems.push({
+      label: "My Orders",
+      icon: <ReceiptIcon />,
+      value: "seller-orders",
+      description: "View orders for your products",
+    });
   }
 
   return (

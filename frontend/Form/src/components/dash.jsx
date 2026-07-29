@@ -144,7 +144,7 @@ function Dash({ onNavigate }) {
           }));
         }
       })
-      .catch((err) => console.error("Error loading dashboard metrics:", err))
+      .catch((err) => console.error("Error loading Dashboard metrics:", err))
       .finally(() => setLoading(false));
   }, []);
 

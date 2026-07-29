@@ -1,6 +1,21 @@
 import React from "react";
-import { Box, Typography, TextField, Button, Link, InputAdornment, Select, MenuItem, FormControl } from "@mui/material";
-import { EmailOutlined, LockOutlined, PersonOutlined, GroupOutlined } from "@mui/icons-material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Link,
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
+import {
+  EmailOutlined,
+  LockOutlined,
+  PersonOutlined,
+  GroupOutlined,
+} from "@mui/icons-material";
 import { AuthStyles, commonTextFieldProps } from "../authstyles/style";
 
 const SignupView = ({ auth }) => {
@@ -10,7 +25,7 @@ const SignupView = ({ auth }) => {
         Join Us Today
       </Typography>
       <Typography sx={AuthStyles.viewSubtitle}>
-        Start your journey with our admin dashboard.
+        Start your journey with our admin Dashboard.
       </Typography>
 
       <TextField
@@ -88,7 +103,14 @@ const SignupView = ({ auth }) => {
           <MenuItem value="Buyer">Buyer</MenuItem>
         </Select>
         {auth.adminExists && (
-          <Typography sx={{ fontSize: "0.75rem", color: "#64748b", mt: 0.5, fontStyle: "italic" }}>
+          <Typography
+            sx={{
+              fontSize: "0.75rem",
+              color: "#64748b",
+              mt: 0.5,
+              fontStyle: "italic",
+            }}
+          >
             * Admin role unavailable (maximum 1 Admin allowed).
           </Typography>
         )}
@@ -120,7 +142,12 @@ const SignupView = ({ auth }) => {
         sx={AuthStyles.confirmPasswordField}
       />
 
-      <Button fullWidth type="submit" variant="contained" sx={AuthStyles.signupButton}>
+      <Button
+        fullWidth
+        type="submit"
+        variant="contained"
+        sx={AuthStyles.signupButton}
+      >
         Create Account
       </Button>
 

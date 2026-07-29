@@ -12,9 +12,9 @@ import { clearAuth, getUserFromToken, apiGet } from "@/API/api";
 
 function Dashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(
-    () => !!localStorage.getItem("accessToken")
+    () => !!localStorage.getItem("accessToken"),
   );
-  const [activeView, setActiveView] = useState("dashboard");
+  const [activeView, setActiveView] = useState("Dashboard");
   const [currentUser, setCurrentUser] = useState(() => getUserFromToken());
 
   const [toast, setToast] = useState({
@@ -34,14 +34,13 @@ function Dashboard() {
   useEffect(() => {
     const handleLogoutEvent = () => {
       setIsLoggedIn(false);
-      setActiveView("dashboard");
+      setActiveView("Dashboard");
       setCurrentUser(null);
     };
     window.addEventListener("logout", handleLogoutEvent);
     return () => window.removeEventListener("logout", handleLogoutEvent);
   }, []);
 
-  
   useEffect(() => {
     if (isLoggedIn) {
       const decodedUser = getUserFromToken();
@@ -63,7 +62,7 @@ function Dashboard() {
     clearAuth();
     setCurrentUser(null);
     setIsLoggedIn(false);
-    setActiveView("dashboard");
+    setActiveView("Dashboard");
   };
 
   const handleChangeView = (view) => {
@@ -79,7 +78,9 @@ function Dashboard() {
   }
 
   return (
-    <Box sx={{ display: "flex", backgroundColor: "#f8fafc", minHeight: "100vh" }}>
+    <Box
+      sx={{ display: "flex", backgroundColor: "#f8fafc", minHeight: "100vh" }}
+    >
       <CssBaseline />
       <Sidebar
         activeView={activeView}
@@ -96,16 +97,12 @@ function Dashboard() {
           background: "#f8fafc",
         }}
       >
-        {activeView === "dashboard" && <Dash />}
+        {activeView === "Dashboard" && <Dash />}
         {activeView === "user" && (
           <Form onLogout={handleLogout} currentUser={currentUser} />
         )}
-        {activeView === "requests" && (
-          <AdminRequests showToast={showToast} />
-        )}
-        {activeView === "orders" && (
-          <AdminOrders showToast={showToast} />
-        )}
+        {activeView === "requests" && <AdminRequests showToast={showToast} />}
+        {activeView === "orders" && <AdminOrders showToast={showToast} />}
         {activeView === "users" && <UsersDirectory roleFilter="All" />}
         {activeView === "buyers" && <UsersDirectory roleFilter="Buyer" />}
         {activeView === "sellers" && <UsersDirectory roleFilter="Seller" />}

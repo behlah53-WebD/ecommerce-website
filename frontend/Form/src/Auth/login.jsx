@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./Hook/loginhooks";
 import { AuthStyles } from "./authstyles/style"; 
 
-import LoginView from "./loginview/loginView";
+import LoginView from "./loginview/Loginview";
 import SignupView from "./signupview/signup";
 import ForgotPasswordView from "./forgotview/forgot";
 
