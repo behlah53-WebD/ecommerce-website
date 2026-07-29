@@ -5,9 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./Hook/loginhooks";
 import { AuthStyles } from "./authstyles/style"; 
 
-import LoginView from "./loginview/Loginview";
+import LoginView from "./loginview";
 import SignupView from "./signupview/signup";
-import ForgotPasswordView from "./forgotview/forgot";
+import ForgotPasswordView from "./forgotview/forgot"  ;
 
 export default function AuthPageMui({ setIsLoggedIn }) {
   const auth = useAuth(setIsLoggedIn);
