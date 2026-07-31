@@ -27,9 +27,11 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
 // CORS configuration – MUST be before routes
 const allowedOrigins = [
-  "https://ecommerce-website-c2tr.vercel.app",
+  // Frontend on Vercel
   "https://ecommerce-website-ten-beryl.vercel.app",
-  "https://ecommerce-website-32r5.vercel.app", // backend itself (optional)
+  "https://ecommerce-website-c2tr.vercel.app",
+
+  // Local dev
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
