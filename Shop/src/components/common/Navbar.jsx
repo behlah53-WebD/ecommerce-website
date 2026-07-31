@@ -155,9 +155,9 @@ export const Navbar = ({ onOpenSearch }) => {
               className="flex items-center gap-2 font-display text-2xl font-bold text-gray-900 dark:text-white tracking-tight"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-black text-lg">
-                L
+                Z
               </span>
-              <span>LUXE</span>
+              <span>ZYRA</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -426,7 +426,7 @@ export const Navbar = ({ onOpenSearch }) => {
                           </div>
                         </div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                          Welcome to LUXE
+                          Welcome to ZYRA
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                           Sign in to access your account and enjoy exclusive

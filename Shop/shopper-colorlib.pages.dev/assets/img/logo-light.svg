@@ -19,14 +19,14 @@
     <!-- Bag handle -->
     <path d="M9 9V7C9 4.23858 11.2386 2 14 2C16.7614 2 19 4.23858 19 7V9" stroke="url(#brandGradLight)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
 
-    <!-- L letter mark inside bag -->
-    <path d="M11 14V22H17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Z letter mark inside bag -->
+    <path d="M11 14H17M11 22H17M11 14L17 22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
     <!-- Accent diamond -->
     <path d="M20 13L21.5 15L20 17L18.5 15L20 13Z" fill="url(#orangeGradLight)"/>
   </g>
 
-  <!-- Wordmark "LUXE" in white -->
+  <!-- Wordmark "ZYRA" in white -->
   <g fill="#ffffff">
     <!-- L -->
     <path d="M42 10V30H54V26H47V10H42Z"/>

@@ -157,7 +157,7 @@ export const AccountPage = () => {
               L
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Welcome to LUXE
+              Welcome to ZYRA
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Sign in to your account or create a new one
@@ -731,7 +731,9 @@ export const AccountPage = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {accountOrders.slice(0, 3).map((order, index) => {
-                        const date = new Date(order.createdAt).toLocaleDateString("en-US", {
+                        const date = new Date(
+                          order.createdAt,
+                        ).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "short",
                           day: "numeric",

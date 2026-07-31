@@ -1,4 +1,4 @@
-# Luxe Storefront - React JS + Vite
+# Zyra Storefront - React JS + Vite
 
 A clean, modern, and high-performance e-commerce frontend architecture built with **React 18**, **Vite**, **Tailwind CSS**, and **React Router DOM**.
 
@@ -7,18 +7,23 @@ Designed specifically for seamless backend API integration.
 ## 🚀 Getting Started
 
 ### 1. Install Dependencies
+
 Run the following command in your terminal to install `node_modules`:
+
 ```bash
 npm install
 ```
 
 ### 2. Configure Environment Variables
+
 Create a `.env` file in the root directory (or copy from `.env.example`):
+
 ```env
 VITE_API_BASE_URL=http:
 ```
 
 ### 3. Start Development Server
+
 ```bash
 npm run dev
 ```
@@ -61,12 +66,13 @@ As requested, **product chips and arrays are left blank (`[]`)** with dynamic lo
 ### How to Connect Your Backend Products API:
 
 1. Update `src/api/productService.js` to point to your backend endpoints:
+
    ```javascript
-   import apiClient from './apiClient';
+   import apiClient from "./apiClient";
 
    export const fetchProducts = async (params = {}) => {
-     const response = await apiClient.get('/products', { params });
-     return response.data; 
+     const response = await apiClient.get("/products", { params });
+     return response.data;
    };
    ```
 

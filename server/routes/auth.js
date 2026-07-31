@@ -278,23 +278,27 @@ router.post('/forgot-password/send-otp', async (req, res) => {
 
     otpStore.set(email, { otp, expiresAt });
 
-    // Send email
-    await sendEmail({
-      to: email,
-      subject: 'Your Password Reset OTP',
-      html: `
-        <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-          <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
-            <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Password Reset</h1>
-            <p style="color:#bae6fd;margin:8px 0 0;font-size:14px;">Your one-time verification code</p>
+    // Fire-and-forget email sending so slow SMTP never blocks the response
+    setImmediate(() => {
+      sendEmail({
+        to: email,
+        subject: 'Your Password Reset OTP',
+        html: `
+          <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+            <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
+              <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Password Reset</h1>
+              <p style="color:#bae6fd;margin:8px 0 0;font-size:14px;">Your one-time verification code</p>
+            </div>
+            <div style="padding:32px 24px;text-align:center;">
+              <p style="color:#475569;font-size:15px;margin:0 0 24px;">Use this OTP to reset your password. It expires in <strong>10 minutes</strong>.</p>
+              <div style="display:inline-block;background:#0284c7;color:#fff;font-size:36px;font-weight:800;letter-spacing:12px;padding:16px 32px;border-radius:12px;">${otp}</div>
+              <p style="color:#94a3b8;font-size:12px;margin:24px 0 0;">If you did not request this, please ignore this email.</p>
+            </div>
           </div>
-          <div style="padding:32px 24px;text-align:center;">
-            <p style="color:#475569;font-size:15px;margin:0 0 24px;">Use this OTP to reset your password. It expires in <strong>10 minutes</strong>.</p>
-            <div style="display:inline-block;background:#0284c7;color:#fff;font-size:36px;font-weight:800;letter-spacing:12px;padding:16px 32px;border-radius:12px;">${otp}</div>
-            <p style="color:#94a3b8;font-size:12px;margin:24px 0 0;">If you did not request this, please ignore this email.</p>
-          </div>
-        </div>
-      `,
+        `,
+      }).catch((err) => {
+        console.error('[ForgotPassword] send-otp email failed:', err.message);
+      });
     });
 
     return res.json({ success: true, message: 'OTP sent to your email address.' });
@@ -366,23 +370,27 @@ router.post('/signup/send-otp', async (req, res) => {
 
     signupOtpStore.set(email, { otp, expiresAt });
 
-    // Send email
-    await sendEmail({
-      to: email,
-      subject: 'Verify Your Email - Shop Registration',
-      html: `
-        <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-          <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
-            <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Verify Your Email</h1>
-            <p style="color:#bae6fd;margin:8px 0 0;font-size:14px;">Your one-time verification code</p>
+    // Fire-and-forget email sending so slow SMTP never blocks the response
+    setImmediate(() => {
+      sendEmail({
+        to: email,
+        subject: 'Verify Your Email - Shop Registration',
+        html: `
+          <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+            <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
+              <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Verify Your Email</h1>
+              <p style="color:#bae6fd;margin:8px 0 0;font-size:14px;">Your one-time verification code</p>
+            </div>
+            <div style="padding:32px 24px;text-align:center;">
+              <p style="color:#475569;font-size:15px;margin:0 0 24px;">Use this OTP to verify your email address. It expires in <strong>10 minutes</strong>.</p>
+              <div style="display:inline-block;background:#0284c7;color:#fff;font-size:36px;font-weight:800;letter-spacing:12px;padding:16px 32px;border-radius:12px;">${otp}</div>
+              <p style="color:#94a3b8;font-size:12px;margin:24px 0 0;">If you did not request this, please ignore this email.</p>
+            </div>
           </div>
-          <div style="padding:32px 24px;text-align:center;">
-            <p style="color:#475569;font-size:15px;margin:0 0 24px;">Use this OTP to verify your email address. It expires in <strong>10 minutes</strong>.</p>
-            <div style="display:inline-block;background:#0284c7;color:#fff;font-size:36px;font-weight:800;letter-spacing:12px;padding:16px 32px;border-radius:12px;">${otp}</div>
-            <p style="color:#94a3b8;font-size:12px;margin:24px 0 0;">If you did not request this, please ignore this email.</p>
-          </div>
-        </div>
-      `,
+        `,
+      }).catch((err) => {
+        console.error('[Signup] send-otp email failed:', err.message);
+      });
     });
 
     return res.json({ success: true, message: 'OTP sent to your email address.' });

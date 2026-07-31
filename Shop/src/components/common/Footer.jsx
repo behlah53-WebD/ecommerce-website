@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Github, Twitter, Instagram } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Mail, Phone, MapPin, Github, Twitter, Instagram } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -9,14 +9,18 @@ export const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           {}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-gray-900 dark:text-white">
+            <Link
+              to="/"
+              className="flex items-center gap-2 font-display text-2xl font-bold text-gray-900 dark:text-white"
+            >
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-black text-lg">
-                L
+                Z
               </span>
-              <span>LUXE</span>
+              <span>ZYRA</span>
             </Link>
             <p className="mt-4 max-w-sm text-sm text-gray-600 dark:text-gray-400">
-              Discover curated collections of premium fashion and lifestyle products. Modern elegance designed for everyday life.
+              Discover curated collections of premium fashion and lifestyle
+              products. Modern elegance designed for everyday life.
             </p>
 
             {}
@@ -24,7 +28,10 @@ export const Footer = () => {
               <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
                 Subscribe to our newsletter
               </h4>
-              <form onSubmit={(e) => e.preventDefault()} className="mt-2 flex max-w-md gap-2">
+              <form
+                onSubmit={(e) => e.preventDefault()}
+                className="mt-2 flex max-w-md gap-2"
+              >
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -43,25 +50,39 @@ export const Footer = () => {
 
           {}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Shop</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Shop
+            </h3>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
-                <Link to="/shop" className="text-gray-600 hover:text-primary-600 dark:text-gray-400">
+                <Link
+                  to="/shop"
+                  className="text-gray-600 hover:text-primary-600 dark:text-gray-400"
+                >
                   All Products
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="text-gray-600 hover:text-primary-600 dark:text-gray-400">
+                <Link
+                  to="/categories"
+                  className="text-gray-600 hover:text-primary-600 dark:text-gray-400"
+                >
                   Categories
                 </Link>
               </li>
               <li>
-                <Link to="/shop?filter=new" className="text-gray-600 hover:text-primary-600 dark:text-gray-400">
+                <Link
+                  to="/shop?filter=new"
+                  className="text-gray-600 hover:text-primary-600 dark:text-gray-400"
+                >
                   New Arrivals
                 </Link>
               </li>
               <li>
-                <Link to="/shop?filter=sale" className="text-gray-600 hover:text-primary-600 dark:text-gray-400">
+                <Link
+                  to="/shop?filter=sale"
+                  className="text-gray-600 hover:text-primary-600 dark:text-gray-400"
+                >
                   Sale Items
                 </Link>
               </li>
@@ -70,7 +91,9 @@ export const Footer = () => {
 
           {}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Support</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Support
+            </h3>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
                 <span className="text-gray-600 hover:text-primary-600 dark:text-gray-400 cursor-pointer">
@@ -97,7 +120,9 @@ export const Footer = () => {
 
           {}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Connect</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Connect
+            </h3>
             <ul className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary-600" />
@@ -105,7 +130,7 @@ export const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary-600" />
-                <span>+1 (800) 555-LUXE</span>
+                <span>+1 (800) 555-ZYRA</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary-600" />
@@ -118,7 +143,8 @@ export const Footer = () => {
         {}
         <div className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Luxe Storefront. All rights reserved.
+            &copy; {new Date().getFullYear()} Zyra Storefront. All rights
+            reserved.
           </p>
           <div className="flex gap-4">
             <span className="text-gray-400 hover:text-primary-600 cursor-pointer">

@@ -8,6 +8,18 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 15000,
+});
+
+
+transporter.verify((err) => {
+  if (err) {
+    console.error('[Mailer] Transporter verification failed:', err.message);
+  } else {
+    console.log('[Mailer] Transporter ready');
+  }
 });
 
 
