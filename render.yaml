@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ecommerce-api
+    env: node
+    region: singapore # Change to your preferred region (e.g., oregon, frankfurt, ohio)
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    plan: free # Change to 'starter', 'standard', etc. as needed
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGO_URI
+        sync: false # Set this manually in the Render dashboard
+      - key: JWT_SECRET
+        sync: false # Set this manually in the Render dashboard
+      - key: EMAIL_USER
+        sync: false # Optional: if nodemailer is used
+      - key: EMAIL_PASS
+        sync: false # Optional: if nodemailer is used
