@@ -4,7 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./Hook/loginhooks";
 import { AuthStyles } from "./authstyles/style"; 
-import AdminImg from "../assets/Admin.png";
+
 
 import LoginView from "./loginview";
 import SignupView from "./signupview/signup";
@@ -20,7 +20,7 @@ export default function AuthPageMui({ setIsLoggedIn }) {
       <Paper elevation={0} sx={AuthStyles.paperWrapper}>
         <Box sx={AuthStyles.accentLine} />
         <Box sx={AuthStyles.headerBox}>
-          <Box component="img" src={AdminImg} sx={AuthStyles.logoImg} />
+          <Box component="img" src="../assets/Admin.png" sx={AuthStyles.logoImg} />
           <Typography sx={AuthStyles.headerText}>
             Admin-page
           </Typography>
