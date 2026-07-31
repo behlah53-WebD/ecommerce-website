@@ -17,7 +17,15 @@ services:
         sync: false # Set this manually in the Render dashboard
       - key: JWT_SECRET
         sync: false # Set this manually in the Render dashboard
-      - key: EMAIL_USER
-        sync: false # Optional: if nodemailer is used
-      - key: EMAIL_PASS
-        sync: false # Optional: if nodemailer is used
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_SECURE
+        value: true
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: App
