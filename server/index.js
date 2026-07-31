@@ -26,6 +26,11 @@ app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
 // CORS configuration – MUST be before routes
+const configuredOrigins = (process.env.FRONTEND_URLS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
   // Frontend on Vercel
   "https://ecommerce-website-shop.vercel.app",
@@ -35,7 +40,17 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
+  ...configuredOrigins,
 ];
+
+const isAllowedVercelOrigin = (origin) => {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+};
 
 app.use((req, res, next) => {
   console.log("CORS check:", req.method, req.path, "origin =", req.headers.origin);
@@ -48,7 +63,7 @@ app.use(
       // Allow requests with no origin (mobile apps, curl, Postman, etc.)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      if (allowedOrigins.indexOf(origin) !== -1 || isAllowedVercelOrigin(origin)) {
         console.log("CORS allowed for origin:", origin);
         callback(null, true);
       } else {

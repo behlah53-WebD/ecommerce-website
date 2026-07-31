@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -179,7 +180,6 @@ export const sendEmail = async (to, subject, html, text) => {
   }
 };
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 
 

@@ -4,8 +4,9 @@ import { toast } from "react-toastify";
 
 import { getUserFromToken } from "@/API/api";
 
-// Use environment variable for the base URL (supports both Create React App and Vite)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// Use environment variable for the base URL, with the deployed API as fallback.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
 
 export const useAuth = (setIsLoggedIn) => {
   const [view, setView] = useState("login");
