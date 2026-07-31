@@ -1,10 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Plus Jakarta Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+html {
+  min-width: 320px;
+  overflow-x: hidden;
 }
 
 body {
@@ -12,10 +21,57 @@ body {
   color: #0f172a;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%);
   background-attachment: fixed;
+  min-width: 320px;
+}
+
+#root,
+#root > div {
+  min-width: 0;
+  width: 100%;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+button,
+select,
+textarea {
+  max-width: 100%;
+}
+
+main {
+  min-width: 0;
+}
+
+.MuiPaper-root,
+.MuiCard-root,
+.MuiDialog-paper,
+.MuiTableContainer-root {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.MuiTableContainer-root {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.MuiTable-root {
+  min-width: 640px;
+}
+
+.MuiDialog-paper {
+  width: min(100% - 32px, 600px);
+  margin: 16px;
 }
 
 ::-webkit-scrollbar {
@@ -48,7 +104,8 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
     transform: scale(1);
   }
@@ -64,4 +121,108 @@ body {
 
 .pulse-glow {
   animation: pulseGlow 4s infinite ease-in-out;
+}
+
+@media (max-width: 899px) {
+  main {
+    width: calc(100% - 84px) !important;
+  }
+
+  .MuiDrawer-root,
+  .MuiDrawer-root .MuiDrawer-paper {
+    width: 84px !important;
+  }
+
+  .MuiDrawer-root .MuiDrawer-paper {
+    overflow-x: hidden;
+  }
+
+  .MuiDrawer-root .MuiListItemText-root,
+  .MuiDrawer-root .MuiTypography-caption,
+  .MuiDrawer-root .MuiDivider-root,
+  .MuiDrawer-root .MuiChip-root,
+  .MuiDrawer-root .MuiBadge-root + .MuiBox-root,
+  .MuiDrawer-root .MuiBox-root > .MuiBox-root > .MuiTypography-root {
+    display: none;
+  }
+
+  .MuiDrawer-root .MuiListItemButton-root {
+    justify-content: center;
+    min-height: 48px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .MuiDrawer-root .MuiListItemIcon-root {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .MuiDrawer-root .MuiAvatar-root {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .MuiDrawer-root [class*="MuiBox-root"] {
+    max-width: 100%;
+  }
+
+  .MuiSnackbar-root {
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  main {
+    width: calc(100% - 64px) !important;
+  }
+
+  .MuiDrawer-root,
+  .MuiDrawer-root .MuiDrawer-paper {
+    width: 64px !important;
+  }
+
+  .MuiDrawer-root .MuiPaper-root {
+    padding: 8px !important;
+  }
+
+  .MuiDrawer-root .MuiListItemButton-root {
+    min-height: 44px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .MuiDialog-paper {
+    width: calc(100% - 24px);
+    margin: 12px;
+  }
+
+  .MuiToolbar-root {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .MuiButton-root,
+  .MuiTextField-root,
+  .MuiFormControl-root {
+    max-width: 100%;
+  }
+
+  .MuiTypography-h2,
+  .MuiTypography-h3 {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
