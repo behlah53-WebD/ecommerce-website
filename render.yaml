@@ -24,8 +24,8 @@ services:
       - key: SMTP_SECURE
         value: true
       - key: SMTP_USER
-        sync: false
+        sync: true
       - key: SMTP_PASS
-        sync: false
+        sync: true
       - key: SMTP_FROM_NAME
         value: App
