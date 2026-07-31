@@ -278,12 +278,10 @@ router.post('/forgot-password/send-otp', async (req, res) => {
 
     otpStore.set(email, { otp, expiresAt });
 
-    // Fire-and-forget email sending so slow SMTP never blocks the response
-    setImmediate(() => {
-      sendEmail({
-        to: email,
-        subject: 'Your Password Reset OTP',
-        html: `
+    await sendEmail({
+      to: email,
+      subject: 'Your Password Reset OTP',
+      html: `
           <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
             <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
               <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Password Reset</h1>
@@ -296,9 +294,6 @@ router.post('/forgot-password/send-otp', async (req, res) => {
             </div>
           </div>
         `,
-      }).catch((err) => {
-        console.error('[ForgotPassword] send-otp email failed:', err.message);
-      });
     });
 
     return res.json({ success: true, message: 'OTP sent to your email address.' });
@@ -370,12 +365,10 @@ router.post('/signup/send-otp', async (req, res) => {
 
     signupOtpStore.set(email, { otp, expiresAt });
 
-    // Fire-and-forget email sending so slow SMTP never blocks the response
-    setImmediate(() => {
-      sendEmail({
-        to: email,
-        subject: 'Verify Your Email - Shop Registration',
-        html: `
+    await sendEmail({
+      to: email,
+      subject: 'Verify Your Email - Shop Registration',
+      html: `
           <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#f8fafc;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
             <div style="background:linear-gradient(135deg,#0284c7,#0369a1);padding:32px 24px;text-align:center;">
               <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Verify Your Email</h1>
@@ -388,9 +381,6 @@ router.post('/signup/send-otp', async (req, res) => {
             </div>
           </div>
         `,
-      }).catch((err) => {
-        console.error('[Signup] send-otp email failed:', err.message);
-      });
     });
 
     return res.json({ success: true, message: 'OTP sent to your email address.' });
