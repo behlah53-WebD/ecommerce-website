@@ -154,7 +154,7 @@ export const AccountPage = () => {
           {/* Brand Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white font-black text-2xl shadow-lg shadow-primary-500/20 mb-4">
-              L
+              Z
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Welcome to ZYRA
