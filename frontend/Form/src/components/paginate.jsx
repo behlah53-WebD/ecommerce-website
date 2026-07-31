@@ -14,7 +14,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       sx={{ 
         display: 'flex', 
         justifyContent: 'center', 
-        p: 3, 
+        p: { xs: 1.5, sm: 2, md: 3 }, 
         borderTop: '1px solid #f1f5f9',
         background: '#fafafa'
       }}
@@ -25,7 +25,14 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
         onChange={handleChange}
         shape="rounded"
         size="large"
+        siblingCount={0}
         sx={{
+          maxWidth: '100%',
+          overflowX: 'auto',
+          '& .MuiPagination-ul': {
+            flexWrap: 'nowrap',
+            justifyContent: 'center',
+          },
           '& .MuiPaginationItem-root': {
             color: '#64748b',
             border: '1px solid #e2e8f0',

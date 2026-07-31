@@ -18,8 +18,8 @@ const UserHeader = ({ onLogout, userRole }) => {
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 3, md: 5 },
-          borderRadius: 5,
+          p: { xs: 2, sm: 3, md: 5 },
+          borderRadius: { xs: 3, md: 5 },
           background: 'linear-gradient(135deg, #ffffff 0%, #fafbfd 100%)',
           border: "1px solid rgba(226, 232, 240, 0.8)",
           boxShadow: '0 20px 60px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03)',
@@ -45,11 +45,12 @@ const UserHeader = ({ onLogout, userRole }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexDirection: { xs: "column", md: "row" },
             flexWrap: "wrap",
-            gap: 3,
+            gap: { xs: 2.5, md: 3 },
           }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
               <Box
                 sx={{
@@ -88,7 +89,7 @@ const UserHeader = ({ onLogout, userRole }) => {
               variant="h2"
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: "1.8rem", md: "2.8rem" },
+                fontSize: { xs: "1.55rem", sm: "1.9rem", md: "2.8rem" },
                 background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -122,13 +123,14 @@ const UserHeader = ({ onLogout, userRole }) => {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 1,
-                px: 4,
-                py: 3,
-                borderRadius: 4,
+                px: { xs: 2, sm: 4 },
+                py: { xs: 2, sm: 3 },
+                borderRadius: { xs: 3, md: 4 },
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
                 border: "1px solid rgba(226, 232, 240, 0.6)",
                 boxShadow: '0 15px 40px rgba(15, 23, 42, 0.06)',
-                minWidth: 160,
+                minWidth: { xs: "100%", sm: 160 },
+                width: { xs: "100%", md: "auto" },
                 backdropFilter: 'blur(10px)',
                 position: 'relative',
                 overflow: 'hidden',

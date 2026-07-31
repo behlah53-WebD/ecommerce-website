@@ -238,7 +238,7 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
         minHeight: "100vh",
         bgcolor: "#f8fafc",
         background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-        py: 5,
+        py: { xs: 2, sm: 3, md: 5 },
         px: 0,
         position: "relative",
         '&::before': {
@@ -266,9 +266,9 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
       <Container
         maxWidth="lg"
         disableGutters
-        sx={{ position: "relative", zIndex: 1 }}
+        sx={{ position: "relative", zIndex: 1, maxWidth: "100%" }}
       >
-        <Box sx={{ px: { xs: 2, md: 4 } }}>
+        <Box sx={{ px: { xs: 1.5, sm: 2.5, md: 4 }, minWidth: 0 }}>
           <UserHeader onLogout={onLogout} userRole={userRole} />
 
           {error && (

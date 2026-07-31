@@ -188,7 +188,7 @@ const UserTable = ({
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 5,
+          borderRadius: { xs: 3, md: 5 },
           overflow: "hidden",
           background: "#ffffff",
           border: "1px solid rgba(226, 232, 240, 0.8)",
@@ -198,17 +198,27 @@ const UserTable = ({
         {/* Header Section */}
         <Box
           sx={{
-            p: 3,
+            p: { xs: 2, md: 3 },
             background: 'linear-gradient(135deg, #ffffff 0%, #fafbfd 100%)',
             borderBottom: "1px solid #f1f5f9",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexDirection: { xs: "column", lg: "row" },
             flexWrap: "wrap",
             gap: 2,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              width: { xs: "100%", lg: "auto" },
+              minWidth: 0,
+              flexWrap: "wrap",
+            }}
+          >
             <Box sx={{
               width: 40,
               height: 40,
@@ -245,7 +255,22 @@ const UserTable = ({
             )}
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", flexGrow: { xs: 1, sm: 0 } }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              flexWrap: "wrap",
+              width: { xs: "100%", lg: "auto" },
+              flexGrow: { xs: 1, lg: 0 },
+              "& .MuiTextField-root": {
+                flex: { xs: "1 1 100%", sm: "1 1 280px" },
+              },
+              "& .MuiButton-root": {
+                flex: { xs: "1 1 100%", sm: "0 0 auto" },
+              },
+            }}
+          >
             <SearchBar
               value={searchQuery}
               onChange={onSearchChange}
@@ -321,7 +346,7 @@ const UserTable = ({
 
         {data.length > 0 ? (
           <>
-            <TableContainer>
+            <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
               <Table>
                 <TableHead>
                   <TableRow sx={{ background: "#fafbfd" }}>
@@ -521,12 +546,12 @@ const UserTable = ({
         ) : (
           <Box
             sx={{
-              p: 8,
+              p: { xs: 3, sm: 5, md: 8 },
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              minHeight: 400,
+              minHeight: { xs: 320, md: 400 },
               bgcolor: '#fafbfd',
             }}
           >

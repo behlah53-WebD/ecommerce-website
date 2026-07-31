@@ -79,7 +79,13 @@ function Dashboard() {
 
   return (
     <Box
-      sx={{ display: "flex", backgroundColor: "#f8fafc", minHeight: "100vh" }}
+      sx={{
+        display: "flex",
+        backgroundColor: "#f8fafc",
+        minHeight: "100vh",
+        width: "100%",
+        minWidth: 0,
+      }}
     >
       <CssBaseline />
       <Sidebar
@@ -91,7 +97,8 @@ function Dashboard() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: "calc(100% - 260px)",
+          width: { xs: "calc(100% - 72px)", sm: "calc(100% - 84px)", md: "calc(100% - 280px)" },
+          minWidth: 0,
           minHeight: "100vh",
           overflow: "auto",
           background: "#f8fafc",

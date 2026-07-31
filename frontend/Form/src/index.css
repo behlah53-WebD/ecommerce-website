@@ -124,47 +124,9 @@ main {
 }
 
 @media (max-width: 899px) {
-  main {
-    width: calc(100% - 84px) !important;
-  }
-
-  .MuiDrawer-root,
-  .MuiDrawer-root .MuiDrawer-paper {
-    width: 84px !important;
-  }
-
-  .MuiDrawer-root .MuiDrawer-paper {
-    overflow-x: hidden;
-  }
-
-  .MuiDrawer-root .MuiListItemText-root,
-  .MuiDrawer-root .MuiTypography-caption,
-  .MuiDrawer-root .MuiDivider-root,
-  .MuiDrawer-root .MuiChip-root,
-  .MuiDrawer-root .MuiBadge-root + .MuiBox-root,
-  .MuiDrawer-root .MuiBox-root > .MuiBox-root > .MuiTypography-root {
-    display: none;
-  }
-
-  .MuiDrawer-root .MuiListItemButton-root {
-    justify-content: center;
-    min-height: 48px;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .MuiDrawer-root .MuiListItemIcon-root {
-    min-width: 0;
-    margin: 0;
-  }
-
-  .MuiDrawer-root .MuiAvatar-root {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .MuiDrawer-root [class*="MuiBox-root"] {
-    max-width: 100%;
+  html,
+  body {
+    width: 100%;
   }
 
   .MuiSnackbar-root {
@@ -175,25 +137,6 @@ main {
 }
 
 @media (max-width: 599px) {
-  main {
-    width: calc(100% - 64px) !important;
-  }
-
-  .MuiDrawer-root,
-  .MuiDrawer-root .MuiDrawer-paper {
-    width: 64px !important;
-  }
-
-  .MuiDrawer-root .MuiPaper-root {
-    padding: 8px !important;
-  }
-
-  .MuiDrawer-root .MuiListItemButton-root {
-    min-height: 44px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
   .MuiDialog-paper {
     width: calc(100% - 24px);
     margin: 12px;
