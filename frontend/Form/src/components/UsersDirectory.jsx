@@ -150,6 +150,32 @@ function UsersDirectory({ roleFilter = "All" }) {
     return allProducts.filter((p) => p.sellerId === sellerId);
   };
 
+  const getApprovalStatusChip = (user) => {
+    if (user.role !== "Seller") return null;
+
+    const status = user.approvalStatus || "approved";
+    const isPending = status === "pending";
+
+    return (
+      <Chip
+        size="small"
+        label={isPending ? "Pending Approval" : "Approved"}
+        icon={isPending ? <CircleIcon sx={{ fontSize: 12 }} /> : <VerifiedIcon sx={{ fontSize: 14 }} />}
+        sx={{
+          height: 24,
+          fontSize: "0.68rem",
+          fontWeight: 800,
+          backgroundColor: isPending ? "#fef3c7" : "#dcfce7",
+          color: isPending ? "#b45309" : "#15803d",
+          border: `1px solid ${isPending ? "#fde68a" : "#bbf7d0"}`,
+          "& .MuiChip-icon": {
+            color: isPending ? "#f59e0b" : "#16a34a",
+          },
+        }}
+      />
+    );
+  };
+
   const statCards = [
     {
       title: "Total Accounts",
@@ -637,21 +663,24 @@ function UsersDirectory({ roleFilter = "All" }) {
                         >
                           {user.name ? user.name[0].toUpperCase() : <PersonIcon />}
                         </Avatar>
-                        <Chip
-                          size="small"
-                          label={user.role}
-                          icon={user.role === "Seller" ? <StorefrontIcon sx={{ fontSize: 14 }} /> : user.role === "Buyer" ? <ShoppingBagIcon sx={{ fontSize: 14 }} /> : <VerifiedIcon sx={{ fontSize: 14 }} />}
-                          sx={{
-                            fontWeight: 800,
-                            fontSize: "0.7rem",
-                            height: 26,
-                            px: 1,
-                            backgroundColor: roleStyle.bg,
-                            color: roleStyle.color,
-                            border: `1px solid ${roleStyle.border}`,
-                            '& .MuiChip-icon': { color: roleStyle.color },
-                          }}
-                        />
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8, alignItems: "flex-end" }}>
+                          <Chip
+                            size="small"
+                            label={user.role}
+                            icon={user.role === "Seller" ? <StorefrontIcon sx={{ fontSize: 14 }} /> : user.role === "Buyer" ? <ShoppingBagIcon sx={{ fontSize: 14 }} /> : <VerifiedIcon sx={{ fontSize: 14 }} />}
+                            sx={{
+                              fontWeight: 800,
+                              fontSize: "0.7rem",
+                              height: 26,
+                              px: 1,
+                              backgroundColor: roleStyle.bg,
+                              color: roleStyle.color,
+                              border: `1px solid ${roleStyle.border}`,
+                              '& .MuiChip-icon': { color: roleStyle.color },
+                            }}
+                          />
+                          {getApprovalStatusChip(user)}
+                        </Box>
                       </Box>
 
                       <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a", mb: 0.5, lineHeight: 1.2, fontSize: '1rem' }}>
@@ -741,7 +770,7 @@ function UsersDirectory({ roleFilter = "All" }) {
                 <TableRow sx={{ bgcolor: '#fafbfd' }}>
                   <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>User Details</TableCell>
                   <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email Address</TableCell>
-                  <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Role</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Role / Status</TableCell>
                   <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Location</TableCell>
                   <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Joined</TableCell>
                   <TableCell sx={{ fontWeight: 800, color: "#475569", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Stats</TableCell>
@@ -798,18 +827,21 @@ function UsersDirectory({ roleFilter = "All" }) {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Chip
-                          size="small"
-                          label={user.role}
-                          sx={{
-                            fontWeight: 800,
-                            fontSize: "0.68rem",
-                            height: 24,
-                            backgroundColor: roleStyle.bg,
-                            color: roleStyle.color,
-                            border: `1px solid ${roleStyle.border}`,
-                          }}
-                        />
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0.8 }}>
+                          <Chip
+                            size="small"
+                            label={user.role}
+                            sx={{
+                              fontWeight: 800,
+                              fontSize: "0.68rem",
+                              height: 24,
+                              backgroundColor: roleStyle.bg,
+                              color: roleStyle.color,
+                              border: `1px solid ${roleStyle.border}`,
+                            }}
+                          />
+                          {getApprovalStatusChip(user)}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ color: "#475569", fontSize: '0.85rem' }}>

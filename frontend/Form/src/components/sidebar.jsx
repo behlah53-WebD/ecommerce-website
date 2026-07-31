@@ -104,7 +104,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
         description: "Review & moderate",
       },
       {
-        label: "Seller Register Approve",
+        label: "Seller Approval Requests",
         icon: <StorefrontIcon />,
         value: "seller-approvals",
         description: "Approve seller accounts",
