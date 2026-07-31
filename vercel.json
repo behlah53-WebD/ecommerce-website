@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm --prefix frontend/Form run build",
-  "outputDirectory": "frontend/Form/dist",
+  "buildCommand": "npm --prefix Shop run build",
+  "outputDirectory": "Shop/dist",
   "rewrites": [
     {
       "source": "/(.*)",
