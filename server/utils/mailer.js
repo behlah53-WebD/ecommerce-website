@@ -1,10 +1,12 @@
 const nodemailer = require("nodemailer");
 
+
 const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
 const smtpPort = Number(process.env.SMTP_PORT || 465);
 const smtpSecure = process.env.SMTP_SECURE === "true" || smtpPort === 465;
-const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
-const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+const smtpUser = process.env.SMTP_USER
+const smtpPass = process.env.SMTP_PASS
+
 
 const transporter = nodemailer.createTransport({
   host: smtpHost,
@@ -19,6 +21,7 @@ const transporter = nodemailer.createTransport({
   socketTimeout: 15000,
 });
 
+
 transporter.verify((err) => {
   if (err) {
     console.error("[Mailer] Transporter verification failed:", err.message);
@@ -27,15 +30,18 @@ transporter.verify((err) => {
   }
 });
 
+
 async function sendEmail({ to, subject, html, text, from }) {
   if (!smtpUser || !smtpPass) {
     throw new Error("SMTP credentials are not configured");
   }
 
+
   const fromName = process.env.SMTP_FROM_NAME || "App";
   const fromAddress =
     from ||
     `"${fromName}" <${smtpUser}>`;
+
 
   const mailOptions = {
     from: fromAddress,
@@ -45,9 +51,11 @@ async function sendEmail({ to, subject, html, text, from }) {
     ...(text ? { text } : {}),
   };
 
+
   const info = await transporter.sendMail(mailOptions);
   console.log(`[Mailer] Email sent to ${to} — MessageId: ${info.messageId}`);
   return info;
 }
+
 
 module.exports = { sendEmail, transporter };
