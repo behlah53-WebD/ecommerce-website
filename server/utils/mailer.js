@@ -1,10 +1,22 @@
 const nodemailer = require("nodemailer");
 
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpSecure = process.env.SMTP_SECURE === "true" || smtpPort === 465;
+const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
+const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  ...(smtpHost
+    ? {
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+      }
+    : { service: "gmail" }),
   auth: {
-    user: process.env.SMTP_USER || process.env.EMAIL_USER,
-    pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
+    user: smtpUser,
+    pass: smtpPass,
   },
   connectionTimeout: 10000,
   greetingTimeout: 5000,
@@ -20,10 +32,14 @@ transporter.verify((err) => {
 });
 
 async function sendEmail({ to, subject, html, text, from }) {
+  if (!smtpUser || !smtpPass) {
+    throw new Error("SMTP credentials are not configured");
+  }
+
   const fromName = process.env.SMTP_FROM_NAME || "App";
   const fromAddress =
     from ||
-    `"${fromName}" <${process.env.SMTP_USER || process.env.EMAIL_USER}>`;
+    `"${fromName}" <${smtpUser}>`;
 
   const mailOptions = {
     from: fromAddress,
