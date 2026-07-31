@@ -435,14 +435,14 @@ export const Navbar = ({ onOpenSearch }) => {
 
                         <div className="space-y-2 mt-5">
                           <Link
-                            to="/login"
+                            to="/account?authMode=login"
                             onClick={() => setShowProfileDropdown(false)}
                             className="block w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-all duration-150"
                           >
                             Sign In
                           </Link>
                           <Link
-                            to="/register"
+                            to="/account?authMode=signup"
                             onClick={() => setShowProfileDropdown(false)}
                             className="block w-full px-4 py-2.5 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all duration-150"
                           >

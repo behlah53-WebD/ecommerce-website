@@ -25,7 +25,7 @@ import {
   Calendar,
   Crown,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
@@ -38,8 +38,11 @@ export const AccountPage = () => {
   const { wishlistCount } = useWishlist();
   const { totalItems } = useCart();
   const navigate = useNavigate();
-
-  const [authMode, setAuthMode] = useState("login");
+  const [searchParams] = useSearchParams();
+  const [authMode, setAuthMode] = useState(() => {
+    const urlAuthMode = searchParams.get("authMode");
+    return urlAuthMode === "signup" ? "signup" : "login";
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
