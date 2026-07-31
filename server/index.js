@@ -15,7 +15,7 @@ const emailRoutes = require("./routes/email");
 const orderRoutes = require("./routes/orders");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
 
 // Swagger UI
@@ -53,7 +53,13 @@ const isAllowedVercelOrigin = (origin) => {
 };
 
 app.use((req, res, next) => {
-  console.log("CORS check:", req.method, req.path, "origin =", req.headers.origin);
+  console.log(
+    "CORS check:",
+    req.method,
+    req.path,
+    "origin =",
+    req.headers.origin,
+  );
   next();
 });
 
@@ -63,7 +69,10 @@ app.use(
       // Allow requests with no origin (mobile apps, curl, Postman, etc.)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.indexOf(origin) !== -1 || isAllowedVercelOrigin(origin)) {
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        isAllowedVercelOrigin(origin)
+      ) {
         console.log("CORS allowed for origin:", origin);
         callback(null, true);
       } else {
@@ -74,7 +83,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
     credentials: true,
-  })
+  }),
 );
 
 // Simple test route to verify CORS
