@@ -11,6 +11,13 @@ const publicUser = (user) => {
   if (!user) return null;
   const value = user.toObject ? user.toObject() : { ...user };
   delete value.authPassword;
+  if (value.details && Array.isArray(value.details)) {
+    value.details = value.details.map((d) => {
+      const cleaned = { ...d };
+      delete cleaned.password;
+      return cleaned;
+    });
+  }
   return value;
 };
 
@@ -429,6 +436,16 @@ router.get("/users-list", authenticateToken, async (req, res) => {
     
     const { Detail } = require("../models/Detail");
     const productsGrouped = await Detail.aggregate([
+      {
+        $match: {
+          productName: { $exists: true, $ne: "" },
+          $or: [
+            { username: { $exists: false } },
+            { username: "" },
+            { username: null }
+          ]
+        }
+      },
       {
         $group: {
           _id: "$sellerId",

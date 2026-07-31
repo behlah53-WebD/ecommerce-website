@@ -1,20 +1,58 @@
-import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { Search, ShoppingBag, Heart, Sun, Moon, User, Menu, X } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, NavLink } from "react-router-dom";
+import {
+  Search,
+  ShoppingBag,
+  Heart,
+  Sun,
+  Moon,
+  User,
+  Menu,
+  X,
+  Package,
+  MapPin,
+  CreditCard,
+  Bell,
+  Settings,
+  HelpCircle,
+  LogOut,
+  ChevronRight,
+  Clock,
+  Star,
+  Ticket,
+  Crown,
+  Gift,
+} from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = ({ onOpenSearch }) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { totalItems, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
-  const { currentUser, isLoggedIn } = useAuth();
+  const { currentUser, isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const accountName = currentUser?.name || currentUser?.displayName || 'Guest User';
-  const accountEmail = currentUser?.email || currentUser?.authEmail || '';
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const accountName =
+    currentUser?.name || currentUser?.displayName || "Guest User";
+  const accountEmail = currentUser?.email || currentUser?.authEmail || "";
   const accountAvatar =
     currentUser?.avatar ||
     currentUser?.photoURL ||
@@ -22,200 +60,450 @@ export const Navbar = ({ onOpenSearch }) => {
     currentUser?.profileImage;
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Shop', path: '/shop' },
-    { name: 'Categories', path: '/categories' },
-    { name: 'Wishlist', path: '/wishlist' },
-    { name: 'Account', path: '/account' },
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "Categories", path: "/categories" },
+    { name: "Wishlist", path: "/wishlist" },
+    { name: "Account", path: "/account" },
+  ];
+
+  // Profile dropdown menu items
+  const accountMenuItems = [
+    { icon: User, label: "My Profile", path: "/account" },
+    {
+      icon: Package,
+      label: "My Orders",
+      path: "/orders",
+      badge: "2",
+      badgeColor:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    },
+    { icon: Heart, label: "Wishlist", path: "/wishlist", count: wishlistCount },
+    { icon: MapPin, label: "Addresses", path: "/account/addresses" },
+    { icon: CreditCard, label: "Payment Methods", path: "/account/payments" },
+    {
+      icon: Bell,
+      label: "Notifications",
+      path: "/account/notifications",
+      dot: true,
+    },
+  ];
+
+  const activityItems = [
+    { icon: Star, label: "My Reviews", path: "/account/reviews" },
+    { icon: Clock, label: "Recently Viewed", path: "/account/recent" },
+    {
+      icon: Ticket,
+      label: "Coupons & Offers",
+      path: "/account/coupons",
+      badge: "3",
+      badgeColor:
+        "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    },
+  ];
+
+  const settingsItems = [
+    { icon: Settings, label: "Settings", path: "/account/settings" },
+    { icon: HelpCircle, label: "Help Center", path: "/help" },
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/90 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 transition-colors">
-      <div className="mx-auto max-w-7xl px-4 lg:px-8">
-        <div className="flex h-16 items-center justify-between lg:h-20">
-          {}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+    <>
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #374151;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #4b5563;
+        }
+      `}</style>
 
-          {}
-          <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-black text-lg">
-              L
-            </span>
-            <span>LUXE</span>
-          </Link>
-
-          {}
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors hover:text-primary-600 ${
-                    isActive
-                      ? 'text-primary-600 font-semibold'
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </nav>
-
-          {}
-          <div className="flex items-center gap-2">
-            {}
+      <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/90 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 transition-colors">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="flex h-16 items-center justify-between lg:h-20">
+            {/* Mobile menu button */}
             <button
               type="button"
-              onClick={onOpenSearch}
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Search"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
+              aria-label="Toggle menu"
             >
-              <Search className="h-5 w-5" />
-            </button>
-
-            {}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-gray-600" />}
-            </button>
-
-            {}
-            <Link
-              to="/wishlist"
-              className="relative hidden sm:block rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Wishlist"
-            >
-              <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  {wishlistCount}
-                </span>
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
               )}
+            </button>
+
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex items-center gap-2 font-display text-2xl font-bold text-gray-900 dark:text-white tracking-tight"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-black text-lg">
+                L
+              </span>
+              <span>LUXE</span>
             </Link>
 
-            {}
-            <div className="relative hidden sm:block group">
-              <Link
-                to="/account"
-                className="flex items-center gap-2 rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Account"
+            {/* Desktop Navigation */}
+            <nav className="hidden items-center gap-8 lg:flex">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `text-sm font-medium transition-colors hover:text-primary-600 ${
+                      isActive
+                        ? "text-primary-600 font-semibold"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`
+                  }
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+            </nav>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Search"
               >
-                {isLoggedIn ? (
-                  accountAvatar ? (
-                    <img
-                      src={accountAvatar}
-                      alt={accountName}
-                      className="h-6 w-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-[11px] font-bold text-white">
-                      {(accountName || accountEmail || 'B')[0].toUpperCase()}
-                    </span>
-                  )
+                <Search className="h-5 w-5" />
+              </button>
+
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Toggle dark mode"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-5 w-5 text-amber-400" />
                 ) : (
-                  <User className="h-5 w-5" />
+                  <Moon className="h-5 w-5 text-gray-600" />
+                )}
+              </button>
+
+              {/* Wishlist */}
+              <Link
+                to="/wishlist"
+                className="relative hidden sm:block rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Wishlist"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
                 )}
               </Link>
 
-              <div className="invisible absolute right-0 top-full z-50 mt-3 w-72 translate-y-2 rounded-2xl border border-gray-100 bg-white p-4 opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:border-gray-800 dark:bg-gray-900">
-                <div className="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
-                  {isLoggedIn && accountAvatar ? (
-                    <img
-                      src={accountAvatar}
-                      alt={accountName}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
+              {/* Profile Dropdown */}
+              <div className="relative hidden sm:block" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Account"
+                >
+                  {isLoggedIn ? (
+                    accountAvatar ? (
+                      <img
+                        src={accountAvatar}
+                        alt={accountName}
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-[11px] font-bold text-white">
+                        {(accountName || accountEmail || "B")[0].toUpperCase()}
+                      </span>
+                    )
                   ) : (
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-base font-bold text-white">
-                      {isLoggedIn
-                        ? (accountName || accountEmail || 'B')[0].toUpperCase()
-                        : <User className="h-6 w-6" />}
-                    </span>
+                    <User className="h-5 w-5" />
                   )}
+                </button>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                      {isLoggedIn ? accountName : 'Guest User'}
-                    </p>
-                    <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                      {isLoggedIn ? accountEmail || 'No email added' : 'Login to view profile'}
-                    </p>
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 dark:bg-gray-900 overflow-hidden z-50">
+                    {isLoggedIn ? (
+                      <>
+                        {/* User Info Header */}
+                        <div className="p-5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/50 border-b border-gray-100 dark:border-gray-700">
+                          <div className="flex items-center gap-3">
+                            {accountAvatar ? (
+                              <img
+                                src={accountAvatar}
+                                alt={accountName}
+                                className="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-700 flex-shrink-0"
+                              />
+                            ) : (
+                              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-base font-bold text-white flex-shrink-0">
+                                {(accountName ||
+                                  accountEmail ||
+                                  "B")[0].toUpperCase()}
+                              </span>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                                {accountName}
+                              </p>
+                              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                {accountEmail || "No email added"}
+                              </p>
+                              <div className="flex items-center gap-1 mt-1">
+                                <Crown className="h-3 w-3 text-yellow-500" />
+                                <span className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-500">
+                                  Premium Member
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quick Stats */}
+                          <div className="grid grid-cols-3 gap-2 mt-4">
+                            <div className="text-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                              <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                                12
+                              </p>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                Orders
+                              </p>
+                            </div>
+                            <div className="text-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                              <p className="text-lg font-bold text-pink-600 dark:text-pink-400">
+                                {wishlistCount}
+                              </p>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                Wishlist
+                              </p>
+                            </div>
+                            <div className="text-center p-2 bg-white dark:bg-gray-800 rounded-lg">
+                              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                450
+                              </p>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                Points
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Scrollable Menu Items */}
+                        <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                          {/* Account Section */}
+                          <div className="p-2">
+                            <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                              Account
+                            </p>
+                            <div className="space-y-0.5">
+                              {accountMenuItems.map((item, index) => (
+                                <Link
+                                  key={index}
+                                  to={item.path}
+                                  onClick={() => setShowProfileDropdown(false)}
+                                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-150 group"
+                                >
+                                  <item.icon className="h-4 w-4 text-gray-400 group-hover:text-primary-500 flex-shrink-0" />
+                                  <span className="flex-1">{item.label}</span>
+                                  {item.badge && (
+                                    <span
+                                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${item.badgeColor}`}
+                                    >
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                  {item.count > 0 && (
+                                    <span className="text-[10px] font-bold bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 px-2 py-0.5 rounded-full flex-shrink-0">
+                                      {item.count}
+                                    </span>
+                                  )}
+                                  {item.dot && (
+                                    <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+                                  )}
+                                  <ChevronRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-primary-400 flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="border-t border-gray-100 dark:border-gray-700 mx-3" />
+
+                          {/* Activity Section */}
+                          <div className="p-2">
+                            <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                              Activity
+                            </p>
+                            <div className="space-y-0.5">
+                              {activityItems.map((item, index) => (
+                                <Link
+                                  key={index}
+                                  to={item.path}
+                                  onClick={() => setShowProfileDropdown(false)}
+                                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-150 group"
+                                >
+                                  <item.icon className="h-4 w-4 text-gray-400 group-hover:text-primary-500 flex-shrink-0" />
+                                  <span className="flex-1">{item.label}</span>
+                                  {item.badge && (
+                                    <span
+                                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${item.badgeColor}`}
+                                    >
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                  <ChevronRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-primary-400 flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="border-t border-gray-100 dark:border-gray-700 mx-3" />
+
+                          {/* Settings Section */}
+                          <div className="p-2">
+                            <p className="px-3 py-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                              Settings
+                            </p>
+                            <div className="space-y-0.5">
+                              {settingsItems.map((item, index) => (
+                                <Link
+                                  key={index}
+                                  to={item.path}
+                                  onClick={() => setShowProfileDropdown(false)}
+                                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-150 group"
+                                >
+                                  <item.icon className="h-4 w-4 text-gray-400 group-hover:text-primary-500 flex-shrink-0" />
+                                  <span className="flex-1">{item.label}</span>
+                                  <ChevronRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-primary-400 flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Logout Button */}
+                        <div className="p-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700">
+                          <button
+                            onClick={() => {
+                              setShowProfileDropdown(false);
+                              logout();
+                              navigate("/account");
+                            }}
+                            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* Guest User View */
+                      <div className="p-5 text-center">
+                        <div className="flex justify-center mb-3">
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                            <User className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                          </div>
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                          Welcome to LUXE
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          Sign in to access your account and enjoy exclusive
+                          benefits
+                        </p>
+
+                        <div className="space-y-2 mt-5">
+                          <Link
+                            to="/login"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="block w-full px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-all duration-150"
+                          >
+                            Sign In
+                          </Link>
+                          <Link
+                            to="/register"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="block w-full px-4 py-2.5 text-sm font-semibold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-all duration-150"
+                          >
+                            Create Account
+                          </Link>
+                        </div>
+
+                        <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-700">
+                          <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Gift className="h-3.5 w-3.5" />
+                            <span>New members get 10% off first order</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                <div className="pt-3">
-                  <Link
-                    to="/account"
-                    className="block rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-primary-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-primary-400"
-                  >
-                    My Profile
-                  </Link>
-
-                  <Link
-                    to="/account"
-                    className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-primary-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-primary-400"
-                  >
-                    <User className="h-4 w-4" />
-                    Account
-                  </Link>
-                </div>
+                )}
               </div>
-            </div>
 
-            {}
-            <button
-              type="button"
-              onClick={() => setIsCartOpen(true)}
-              className="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Cart"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {totalItems > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </button>
+              {/* Cart */}
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                className="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Cart"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {}
-      {mobileMenuOpen && (
-        <div className="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:hidden">
-          <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary-50 text-primary-600 dark:bg-gray-900 dark:text-primary-400'
-                      : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900'
-                  }`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-      )}
-    </header>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:hidden">
+            <nav className="mx-auto max-w-7xl px-4 py-4 space-y-1">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `block rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary-50 text-primary-600 dark:bg-gray-900 dark:text-primary-400"
+                        : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900"
+                    }`
+                  }
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        )}
+      </header>
+    </>
   );
 };

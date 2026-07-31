@@ -91,11 +91,19 @@ export const getProducts = async (filters = {}) => {
 
 export const getProductById = async (id) => {
   try {
-    const { products } = await getProducts({ limit: 1000 });
-    return products.find((p) => String(p.id) === String(id) || String(p._id) === String(id)) || null;
+    const response = await apiClient.get(`/users/${id}`);
+    const item = response.data?.data;
+    if (!item) return null;
+    return normalizeProduct(item);
   } catch (error) {
-    console.warn(`Error getting product by id ${id}:`, error);
-    return null;
+    // Fallback: try to find in a small paginated fetch
+    console.warn(`Direct fetch for product ${id} failed, using fallback:`, error);
+    try {
+      const { products } = await getProducts({ limit: 50 });
+      return products.find((p) => String(p.id) === String(id) || String(p._id) === String(id)) || null;
+    } catch {
+      return null;
+    }
   }
 };
 

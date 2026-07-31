@@ -54,26 +54,33 @@ const getRequestBody = (req) =>
     resolve(req.body || {});
   });
 
-const detailsFromBody = (body) => ({
-  id: body.id,
-  productName: body.productName || body.name || body.firstName || "",
-  sku: body.sku || "",
-  category: body.category || "",
-  price: body.price !== undefined && body.price !== "" ? Number(body.price) : 0,
-  stock: body.stock !== undefined && body.stock !== "" ? Number(body.stock) : 0,
-  brand: body.brand || "",
-  description: body.description || "",
-  productStatus: body.productStatus || "In Stock",
-  firstName: body.firstName || body.productName || "",
-  lastName: body.lastName || "",
-  email: body.email || "",
-  phone: body.phone || "",
-  username: body.username || "",
-  password: body.password || "",
-  city: body.city || "",
-  state: body.state || "",
-  files: body.files || [],
-});
+const detailsFromBody = (body) => {
+  const stock = body.stock !== undefined && body.stock !== "" ? Number(body.stock) : 0;
+  const productStatus =
+    body.productStatus ||
+    (stock === 0 ? "Out of Stock" : stock <= 10 ? "Low Stock" : "In Stock");
+
+  return {
+    id: body.id,
+    productName: body.productName || body.name || body.firstName || "",
+    sku: body.sku || "",
+    category: body.category || "",
+    price: body.price !== undefined && body.price !== "" ? Number(body.price) : 0,
+    stock,
+    brand: body.brand || "",
+    description: body.description || "",
+    productStatus,
+    firstName: body.firstName || body.productName || "",
+    lastName: body.lastName || "",
+    email: body.email || "",
+    phone: body.phone || "",
+    username: body.username || "",
+    password: body.password || "",
+    city: body.city || "",
+    state: body.state || "",
+    files: body.files || [],
+  };
+};
 
 
 const getLoggedInUser = async (req) => {
@@ -90,6 +97,16 @@ const getDetailsHandler = async (req, res) => {
     const role = user ? (user.role || "Buyer") : "Buyer";
 
     const conditions = [];
+
+    // Only fetch actual products (which must have a productName, and not represent a user profile document)
+    conditions.push({ productName: { $exists: true, $ne: "" } });
+    conditions.push({
+      $or: [
+        { username: { $exists: false } },
+        { username: "" },
+        { username: null }
+      ]
+    });
 
     if (role === "Buyer") {
       conditions.push({ $or: [{ status: "approved" }, { status: { $exists: false } }, { status: null }] });
@@ -170,9 +187,11 @@ const getDetailsHandler = async (req, res) => {
     }
 
     const items = await Detail.find(filter)
+      .select("-password -username -phone -email -city -state -firstName -lastName")
       .sort(sortOption)
       .skip(pagination.skip)
-      .limit(pagination.limit);
+      .limit(pagination.limit)
+      .lean();
 
     return res.json({
       success: true,
@@ -430,7 +449,10 @@ router.get("/admin/requests", authenticateToken, async (req, res) => {
 
     const pendingRequests = await Detail.find({
       status: { $in: ["pending_add", "pending_edit", "pending_delete"] },
-    }).sort({ updatedAt: -1 });
+    })
+      .select("-password -username -phone -email -city -state -firstName -lastName")
+      .sort({ updatedAt: -1 })
+      .lean();
 
     return res.json({
       success: true,
@@ -531,8 +553,23 @@ router.post("/admin/requests/:id/decline", authenticateToken, async (req, res) =
 });
 
 
+
 router.get("/categories", optionalAuthenticateToken, getCategoriesHandler);
 router.get("/", optionalAuthenticateToken, getDetailsHandler);
+
+// Single product by ID — returns full data including files (used by product detail page)
+router.get("/:id", optionalAuthenticateToken, async (req, res) => {
+  try {
+    const item = await Detail.findOne({ id: req.params.id }).lean();
+    if (!item) {
+      return res.status(404).json({ success: false, message: "Product not found." });
+    }
+    return res.json({ success: true, data: item });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.post(["/", "/details"], authenticateToken, saveDetailsHandler);
 router.put(["/", "/:id"], authenticateToken, saveDetailsHandler);
 router.delete(["/", "/:id"], authenticateToken, deleteDetailsHandler);

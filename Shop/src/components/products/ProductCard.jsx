@@ -14,9 +14,9 @@ export const ProductCard = ({ product }) => {
   const isWishlisted = isInWishlist(id);
   
   const stock = product.stock || 0;
-  const productStatus = product.productStatus || (stock > 10 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock');
-  const isOutOfStock = stock <= 0 || productStatus === 'Out of Stock';
-  const isLowStock = stock > 0 && stock <= 10;
+  const productStatus = product.productStatus || (stock === 0 ? 'Out of Stock' : stock <= 10 ? 'Low Stock' : 'In Stock');
+  const isOutOfStock = productStatus === 'Out of Stock' || stock <= 0;
+  const isLowStock = productStatus === 'Low Stock' || (stock > 0 && stock <= 10);
 
   const getStockBadge = () => {
     if (isOutOfStock) {

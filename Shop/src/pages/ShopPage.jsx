@@ -1,28 +1,499 @@
-import React from 'react';
-import { ProductFilter } from '../components/products/ProductFilter';
-import { ProductGrid } from '../components/products/ProductGrid';
-import { useProducts } from '../hooks/useProducts';
+import React, { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { ProductCard } from "../components/products/ProductCard";
+import { ProductSkeleton } from "../components/products/ProductSkeleton";
+import { EmptyProductsState } from "../components/products/EmptyProductsState";
+import { useProducts } from "../hooks/useProducts";
+import {
+  Sparkles,
+  SlidersHorizontal,
+  X,
+  ChevronDown,
+  Grid3X3,
+  ArrowLeft,
+  Search,
+  Filter,
+  ChevronDown as ChevronDownIcon,
+  Loader2,
+} from "lucide-react";
 
 export const ShopPage = () => {
-  const { totalCount, selectedCategory } = useProducts();
+  const {
+    totalCount,
+    selectedCategory,
+    setSelectedCategory,
+    categories,
+    products,
+    isLoading,
+    hasMore,
+    loadMoreProducts,
+  } = useProducts();
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [sortBy, setSortBy] = useState("featured");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
+  const sortOptions = [
+    { value: "featured", label: "Featured" },
+    { value: "newest", label: "Newest" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+    { value: "rating", label: "Highest Rated" },
+    { value: "popular", label: "Most Popular" },
+  ];
+
+  // Sort products based on sortBy
+  const sortedProducts = useMemo(() => {
+    if (!products) return [];
+    const sorted = [...products];
+
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+      case "price-high":
+        return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+      case "newest":
+        return sorted.sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+        );
+      case "rating":
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case "popular":
+        return sorted.sort(
+          (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0),
+        );
+      case "featured":
+      default:
+        return sorted;
+    }
+  }, [products, sortBy]);
+
+  // Use actual categories from backend, filter out 'All'
+  const backendCategories = categories.filter((cat) => cat !== "All");
+
+  // Category icons mapping
+  const categoryIcons = {
+    clothing: "👕",
+    clothes: "👕",
+    apparel: "👕",
+    fashion: "👕",
+    footwear: "👟",
+    shoes: "👟",
+    sneakers: "👟",
+    accessories: "👜",
+    bags: "👜",
+    handbags: "👜",
+    watches: "⌚",
+    watch: "⌚",
+    jewelry: "💎",
+    jewellery: "💎",
+    electronics: "📱",
+    gadgets: "📱",
+    beauty: "💄",
+    cosmetics: "💄",
+    makeup: "💄",
+    sports: "⚽",
+    fitness: "⚽",
+    home: "🏠",
+    furniture: "🏠",
+    decor: "🏠",
+    books: "📚",
+    stationery: "📚",
+  };
+
+  const getCategoryIcon = (catName) => {
+    const key = String(catName || "")
+      .trim()
+      .toLowerCase();
+    return categoryIcons[key] || "📦";
+  };
+
+  const displayedCategories = showAllCategories
+    ? backendCategories
+    : backendCategories.slice(0, 6);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
-      {}
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-          {selectedCategory === 'All' ? 'All Products' : `${selectedCategory} Collection`}
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Showing {totalCount} products ready to sync with your backend API.
-        </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-10">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              {selectedCategory !== "All" && (
+                <Link
+                  to="/shop"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              )}
+              <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white">
+                {selectedCategory === "All" ? "All Products" : selectedCategory}
+              </h1>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {totalCount} {totalCount === 1 ? "product" : "products"} available
+            </p>
+          </div>
+
+          {/* Sort & Filter Controls */}
+          <div className="flex items-center gap-3">
+            {/* Sort Dropdown */}
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
+
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setShowMobileFilter(true)}
+              className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Filters
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex gap-8">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <div className="sticky top-24 space-y-5">
+              {/* Search in Sidebar */}
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div className="p-4">
+                  <div className="relative">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories Section */}
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-primary-500" />
+                    Categories
+                  </h3>
+                </div>
+                <div className="p-2">
+                  {/* All Products Option */}
+                  <button
+                    onClick={() => setSelectedCategory("All")}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      selectedCategory === "All"
+                        ? "bg-primary-50 text-primary-700 dark:bg-primary-950/30 dark:text-primary-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">🛍️</span>
+                      All Products
+                    </span>
+                    <span className="text-xs text-gray-400">{totalCount}</span>
+                  </button>
+
+                  {/* Dynamic Categories from Backend */}
+                  {displayedCategories.map((category, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                        selectedCategory === category
+                          ? "bg-primary-50 text-primary-700 dark:bg-primary-950/30 dark:text-primary-400"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">
+                          {getCategoryIcon(category)}
+                        </span>
+                        {category}
+                      </span>
+                    </button>
+                  ))}
+
+                  {/* Show More/Less Button */}
+                  {backendCategories.length > 6 && (
+                    <button
+                      onClick={() => setShowAllCategories(!showAllCategories)}
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 mt-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/30 rounded-xl transition-colors"
+                    >
+                      {showAllCategories ? (
+                        <>
+                          Show Less
+                          <ChevronDown className="h-3.5 w-3.5 rotate-180" />
+                        </>
+                      ) : (
+                        <>
+                          Show All ({backendCategories.length})
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Help Card */}
+              <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/30 dark:to-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <h4 className="text-sm font-bold text-primary-900 dark:text-primary-100">
+                    Need Help?
+                  </h4>
+                </div>
+                <p className="text-xs text-primary-700 dark:text-primary-300 mb-3">
+                  Can't find what you're looking for? Our support team is here
+                  to help.
+                </p>
+                <button className="w-full py-2 bg-white dark:bg-gray-800 text-primary-700 dark:text-primary-300 rounded-xl text-xs font-semibold border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-950/50 transition-colors">
+                  Contact Support
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Products Grid */}
+          <div className="flex-1 min-w-0">
+            {/* Active Filters Bar */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {selectedCategory !== "All" && (
+                <>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Category:
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
+                    {selectedCategory}
+                    <button onClick={() => setSelectedCategory("All")}>
+                      <X className="h-3 w-3 hover:text-primary-900 dark:hover:text-primary-300" />
+                    </button>
+                  </span>
+                </>
+              )}
+
+              {sortBy !== "featured" && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium">
+                  Sort: {sortOptions.find((opt) => opt.value === sortBy)?.label}
+                  <button onClick={() => setSortBy("featured")}>
+                    <X className="h-3 w-3 hover:text-gray-900 dark:hover:text-white" />
+                  </button>
+                </span>
+              )}
+            </div>
+
+            {/* Results Count */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing{" "}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {totalCount}
+                </span>{" "}
+                results
+                {sortBy !== "featured" && (
+                  <span className="ml-1">
+                    • Sorted by{" "}
+                    {sortOptions
+                      .find((opt) => opt.value === sortBy)
+                      ?.label.toLowerCase()}
+                  </span>
+                )}
+              </p>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                <Grid3X3 className="h-3.5 w-3.5" />
+                <span>Grid View</span>
+              </div>
+            </div>
+
+            {/* Products Display */}
+            {isLoading && (!sortedProducts || sortedProducts.length === 0) ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <ProductSkeleton key={idx} />
+                ))}
+              </div>
+            ) : !sortedProducts || sortedProducts.length === 0 ? (
+              <EmptyProductsState />
+            ) : (
+              <div className="flex flex-col items-center gap-8">
+                <div className="w-full grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {sortedProducts.map((product) => (
+                    <ProductCard
+                      key={product.id || product._id}
+                      product={product}
+                    />
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <div className="flex flex-col items-center justify-center pt-2 pb-6">
+                    {isLoading ? (
+                      <div className="flex flex-col items-center gap-2.5 text-gray-500 dark:text-gray-400">
+                        <Loader2 className="h-7 w-7 animate-spin text-primary-600" />
+                        <span className="text-xs font-semibold tracking-wide uppercase">
+                          Loading products...
+                        </span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={loadMoreProducts}
+                        className="group flex items-center gap-2.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-7 py-3.5 text-sm font-bold text-gray-800 dark:text-gray-200 shadow-sm transition-all duration-300 hover:border-primary-500 hover:text-primary-600 hover:shadow-md active:scale-95 cursor-pointer"
+                      >
+                        <span>Show More Products</span>
+                        <ChevronDownIcon className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5 text-gray-400 group-hover:text-primary-500" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {}
-      <ProductFilter />
+      {/* Mobile Filter Drawer */}
+      {showMobileFilter && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMobileFilter(false)}
+          />
 
-      {}
-      <ProductGrid />
+          {/* Filter Panel */}
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl animate-slideInRight overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 p-4 flex items-center justify-between z-10">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                  Filters
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowMobileFilter(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-5">
+              {/* Mobile Search */}
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Mobile Sort */}
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                  Sort By
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Mobile Categories */}
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary-500" />
+                  Categories
+                </h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      setSelectedCategory("All");
+                      setShowMobileFilter(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      selectedCategory === "All"
+                        ? "bg-primary-50 text-primary-700 dark:bg-primary-950/30 dark:text-primary-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">🛍️</span>
+                      All Products
+                    </span>
+                  </button>
+                  {backendCategories.map((category, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setShowMobileFilter(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                        selectedCategory === category
+                          ? "bg-primary-50 text-primary-700 dark:bg-primary-950/30 dark:text-primary-400"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">
+                          {getCategoryIcon(category)}
+                        </span>
+                        {category}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Apply Button */}
+            <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 p-4">
+              <button
+                onClick={() => setShowMobileFilter(false)}
+                className="w-full py-3 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/20"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

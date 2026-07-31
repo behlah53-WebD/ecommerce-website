@@ -36,6 +36,25 @@ const detailSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Indexes for fast query performance ───────────────────────────────────────
+// Primary listing query: status + productName + createdAt (most common)
+detailSchema.index({ status: 1, productName: 1, createdAt: -1 });
+// Seller dashboard: find all products by a seller quickly
+detailSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
+// Category filter
+detailSchema.index({ category: 1, status: 1 });
+// Price range filter
+detailSchema.index({ price: 1, status: 1 });
+// Text search on product fields (covers productName, brand, description, sku)
+detailSchema.index(
+  { productName: "text", brand: "text", description: "text", sku: "text", category: "text" },
+  { name: "product_text_search", weights: { productName: 10, brand: 5, category: 5, sku: 3, description: 1 } }
+);
+// Admin requests: pending items
+detailSchema.index({ status: 1, updatedAt: -1 });
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Detail = mongoose.models.Detail || mongoose.model("Detail", detailSchema);
 
-module.exports = {detailSchema, Detail}  ;
+module.exports = {detailSchema, Detail};
+

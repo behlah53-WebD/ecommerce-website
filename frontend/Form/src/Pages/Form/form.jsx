@@ -110,21 +110,31 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
     setOpen(true);
   };
 
-  const handleEditOpen = (item) => {
+  const handleEditOpen = async (item) => {
     setIsEditing(true);
+    // Fetch full product data (including files/images) from single-product endpoint
+    let fullItem = item;
+    try {
+      const res = await apiGet(`/users/${item.id || item._id}`);
+      if (res.data?.success && res.data?.data) {
+        fullItem = res.data.data;
+      }
+    } catch {
+      // fallback to list item if fetch fails
+    }
     setFormData({
       ...initialFormState,
-      ...item,
-      id: item.id || item._id,
-      productName: item.productName || item.firstName || "",
-      sku: item.sku || "",
-      category: item.category || "",
-      price: item.price !== undefined ? item.price : "",
-      stock: item.stock !== undefined ? item.stock : "",
-      brand: item.brand || "",
-      description: item.description || "",
-      productStatus: item.productStatus || "In Stock",
-      files: item.files || [],
+      ...fullItem,
+      id: fullItem.id || fullItem._id,
+      productName: fullItem.productName || fullItem.firstName || "",
+      sku: fullItem.sku || "",
+      category: fullItem.category || "",
+      price: fullItem.price !== undefined ? fullItem.price : "",
+      stock: fullItem.stock !== undefined ? fullItem.stock : "",
+      brand: fullItem.brand || "",
+      description: fullItem.description || "",
+      productStatus: fullItem.productStatus || "In Stock",
+      files: fullItem.files || [],
     });
     setOpen(true);
   };

@@ -4,7 +4,8 @@ import { toast } from "react-toastify";
 
 import { getUserFromToken } from "@/API/api";
 
-const API_URL = "http://localhost:3000/auth";
+// Use environment variable for the base URL (supports both Create React App and Vite)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export const useAuth = (setIsLoggedIn) => {
   const [view, setView] = useState("login");
@@ -21,7 +22,7 @@ export const useAuth = (setIsLoggedIn) => {
 
   const fetchAdminStatus = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/check-admin`);
+      const res = await axios.get(`${API_BASE_URL}/auth/check-admin`);
       if (res.data && res.data.success) {
         setAdminExists(res.data.adminExists);
       }
@@ -58,7 +59,7 @@ export const useAuth = (setIsLoggedIn) => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/signup`, {
+      const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
         name,
         email,
         password,
@@ -84,7 +85,7 @@ export const useAuth = (setIsLoggedIn) => {
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/login`, { email, password });
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
       if (response.data.success) {
         const { accessToken, refreshToken, data: userData } = response.data;
         localStorage.setItem("accessToken", accessToken);
@@ -110,7 +111,7 @@ export const useAuth = (setIsLoggedIn) => {
   const handleVerifyEmail = async (e) => {
     if (e) e.preventDefault();
     try {
-      const response = await axios.get(`${API_URL}/user`, {
+      const response = await axios.get(`${API_BASE_URL}/auth/user`, {
         params: { email },
       });
       if (response.data.success && response.data.data) {
@@ -138,7 +139,7 @@ export const useAuth = (setIsLoggedIn) => {
     }
     try {
       const targetEmail = targetUser?.authEmail || email;
-      const response = await axios.put(`${API_URL}/change-password`, {
+      const response = await axios.put(`${API_BASE_URL}/auth/change-password`, {
         email: targetEmail,
         password,
       });
