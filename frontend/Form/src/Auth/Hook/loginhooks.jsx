@@ -19,6 +19,7 @@ export const useAuth = (setIsLoggedIn) => {
   const [targetUser, setTargetUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => getUserFromToken());
   const [adminExists, setAdminExists] = useState(false);
+  const [otp, setOtp] = useState("");
 
   const fetchAdminStatus = useCallback(async () => {
     try {
@@ -111,22 +112,21 @@ export const useAuth = (setIsLoggedIn) => {
   const handleVerifyEmail = async (e) => {
     if (e) e.preventDefault();
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/user`, {
-        params: { email },
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password/send-otp`, {
+        email,
       });
-      if (response.data.success && response.data.data) {
-        setTargetUser(response.data.data);
+      if (response.data.success) {
+        toast.success(response.data.message || "OTP sent to your email address.");
         setView("change-password");
         setPassword("");
         setConfirmPassword("");
-        toast.success("Email verified. Please enter your new password.");
       } else {
-        toast.warn("Email not found.");
+        toast.error(response.data.message || "Failed to send OTP.");
       }
     } catch (error) {
-      console.error("Verification error:", error);
+      console.error("Send OTP error:", error);
       const errMsg =
-        error.response?.data?.message || "Error verifying email.";
+        error.response?.data?.message || "Failed to send OTP. Please try again.";
       toast.error(errMsg);
     }
   };
@@ -139,21 +139,25 @@ export const useAuth = (setIsLoggedIn) => {
     }
     try {
       const targetEmail = targetUser?.authEmail || email;
-      const response = await axios.put(`${API_BASE_URL}/auth/change-password`, {
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password/reset`, {
         email: targetEmail,
-        password,
+        otp,
+        newPassword: password,
       });
 
       if (response.data.success) {
-        toast.success(response.data.message || "Password updated!");
+        toast.success(response.data.message || "Password reset successfully!");
+        setOtp("");
+        setPassword("");
+        setConfirmPassword("");
         switchView("login");
       } else {
-        toast.error(response.data.message || "Failed to update password.");
+        toast.error(response.data.message || "Failed to reset password.");
       }
     } catch (error) {
-      console.error("Update password error:", error);
+      console.error("Reset password error:", error);
       const errMsg =
-        error.response?.data?.message || "Failed to update password.";
+        error.response?.data?.message || "Failed to reset password. Please try again.";
       toast.error(errMsg);
     }
   };
@@ -193,5 +197,7 @@ export const useAuth = (setIsLoggedIn) => {
     handleLogout,
     role,
     setRole,
+    otp,
+    setOtp,
   };
 };

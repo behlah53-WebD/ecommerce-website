@@ -21,18 +21,37 @@ const ForgotPasswordView = ({ auth }) => {
           : "Set your new secure password."}
       </Typography>
       
-      <TextField
-        {...commonTextFieldProps}
-        label={auth.view === "verify-email" ? "Email Address" : "New Password"}
-        type={auth.view === "verify-email" ? "email" : "password"}
-        value={auth.view === "verify-email" ? auth.email : auth.password}
-        onChange={(e) =>
-          auth.view === "verify-email"
-            ? auth.setEmail(e.target.value)
-            : auth.setPassword(e.target.value)
-        }
-        required
-      />
+      {auth.view === "verify-email" && (
+        <TextField
+          {...commonTextFieldProps}
+          label="Email Address"
+          type="email"
+          value={auth.email}
+          onChange={(e) => auth.setEmail(e.target.value)}
+          required
+        />
+      )}
+      
+      {auth.view === "change-password" && (
+        <TextField
+          {...commonTextFieldProps}
+          label="Enter OTP"
+          value={auth.otp}
+          onChange={(e) => auth.setOtp(e.target.value)}
+          required
+        />
+      )}
+      
+      {auth.view === "change-password" && (
+        <TextField
+          {...commonTextFieldProps}
+          label="New Password"
+          type="password"
+          value={auth.password}
+          onChange={(e) => auth.setPassword(e.target.value)}
+          required
+        />
+      )}
       
       {auth.view === "change-password" && (
         <TextField
