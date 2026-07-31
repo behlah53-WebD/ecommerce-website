@@ -21,43 +21,63 @@ const MONGO_URI = process.env.MONGO_URI;
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Body parsers
+// Body parsers – BEFORE routes
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
-// CORS configuration
+// CORS configuration – MUST be before routes
 const allowedOrigins = [
   "https://ecommerce-website-c2tr.vercel.app",
   "https://ecommerce-website-ten-beryl.vercel.app",
-  "http://localhost:5173", // local dev (Vite default)
-  "http://localhost:5174", // local dev (CRA/other)
+  "https://ecommerce-website-32r5.vercel.app", // backend itself (optional)
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
 ];
+
+app.use((req, res, next) => {
+  console.log("CORS check:", req.method, req.path, "origin =", req.headers.origin);
+  next();
+});
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, Postman, etc.)
+      // Allow requests with no origin (mobile apps, curl, Postman, etc.)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.indexOf(origin) !== -1) {
+        console.log("CORS allowed for origin:", origin);
         callback(null, true);
       } else {
+        console.log("CORS blocked for origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "x-user-id"],
-    credentials: true, // if you ever use cookies / auth headers
-  }),
+    credentials: true,
+  })
 );
 
-// Routes
+// Simple test route to verify CORS
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", origin: req.headers.origin });
+});
+
+// Routes – AFTER CORS
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/cart", cartRoutes);
 app.use("/wishlist", wishlistRoutes);
 app.use("/email", emailRoutes);
 app.use("/orders", orderRoutes);
+
+// Global error handler (after routes)
+app.use((err, req, res, next) => {
+  console.error("Global error:", err);
+  res.status(500).json({ message: "Something went wrong" });
+});
 
 async function startServer() {
   try {
@@ -66,10 +86,10 @@ async function startServer() {
     }
 
     await mongoose.connect(MONGO_URI, {
-      maxPoolSize: 10, // allow up to 10 concurrent connections
-      serverSelectionTimeoutMS: 8000, // fail fast if Atlas unreachable
-      socketTimeoutMS: 45000, // how long to wait for a response
-      connectTimeoutMS: 10000, // initial connection timeout
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 8000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
     });
     console.log("Connected to MongoDB successfully");
 
