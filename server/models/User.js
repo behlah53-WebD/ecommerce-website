@@ -67,6 +67,11 @@ const userSchema = new mongoose.Schema(
       enum: ["Admin", "Seller", "Buyer"],
       default: "Buyer",
     },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+    },
     details: { type: [detailsSchema], default: [] },
     cart: { type: [cartItemSchema], default: [] },
     wishlist: { type: [wishlistItemSchema], default: [] },

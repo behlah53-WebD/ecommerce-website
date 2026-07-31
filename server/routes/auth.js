@@ -131,12 +131,16 @@ router.post("/signup", async (req, res) => {
       authPassword: password,
       name,
       role,
+      approvalStatus: role === "Seller" ? "pending" : "approved",
       details: [],
     });
 
     return res.status(201).json({
       success: true,
-      message: "Account created successfully!",
+      message:
+        role === "Seller"
+          ? "Seller account created successfully and sent to Admin for approval."
+          : "Account created successfully!",
       data: publicUser(user),
     });
   } catch (error) {
@@ -168,6 +172,14 @@ router.post("/login", async (req, res) => {
         .json({ success: false, message: "Invalid email or password." });
     }
 
+    const sellerApprovalStatus = user.approvalStatus || "approved";
+    if (user.role === "Seller" && sellerApprovalStatus !== "approved") {
+      return res.status(403).json({
+        success: false,
+        message: "Admin has not approved your seller account yet.",
+      });
+    }
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -177,6 +189,59 @@ router.post("/login", async (req, res) => {
       data: publicUser(user),
       accessToken,
       refreshToken,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.get("/seller-approval-requests", authenticateToken, async (req, res) => {
+  try {
+    const admin = await User.findOne({ id: req.user.id });
+    if (!admin || admin.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only Admin accounts can access seller approval requests.",
+      });
+    }
+
+    const sellers = await User.find({ role: "Seller" }).sort({ updatedAt: -1 });
+    return res.json({
+      success: true,
+      data: sellers.map(publicUser),
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post("/seller-approval-requests/:id/approve", authenticateToken, async (req, res) => {
+  try {
+    const admin = await User.findOne({ id: req.user.id });
+    if (!admin || admin.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only Admin accounts can approve seller accounts.",
+      });
+    }
+
+    const seller = await User.findOneAndUpdate(
+      { id: req.params.id, role: "Seller" },
+      { $set: { approvalStatus: "approved" } },
+      { returnDocument: "after" },
+    );
+
+    if (!seller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller account not found.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `${seller.name || "Seller"} approved successfully.`,
+      data: publicUser(seller),
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

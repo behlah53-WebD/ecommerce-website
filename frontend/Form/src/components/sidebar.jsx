@@ -98,10 +98,16 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
   if (role === "Admin") {
     menuItems.push(
       {
-        label: "Approval Requests",
+        label: "Product Approval",
         icon: <HowToRegIcon />,
         value: "requests",
         description: "Review & moderate",
+      },
+      {
+        label: "Seller Register Approve",
+        icon: <StorefrontIcon />,
+        value: "seller-approvals",
+        description: "Approve seller accounts",
       },
       {
         label: "Orders Management",
