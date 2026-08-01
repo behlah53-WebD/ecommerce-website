@@ -333,7 +333,7 @@ export const ShopPage = () => {
 
             {/* Products Display */}
             {isLoading && (!sortedProducts || sortedProducts.length === 0) ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <ProductSkeleton key={idx} />
                 ))}
@@ -342,7 +342,7 @@ export const ShopPage = () => {
               <EmptyProductsState />
             ) : (
               <div className="flex flex-col items-center gap-8">
-                <div className="w-full grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="w-full grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
                   {sortedProducts.map((product) => (
                     <ProductCard
                       key={product.id || product._id}
