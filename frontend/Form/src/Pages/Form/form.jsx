@@ -235,7 +235,7 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", md: "100vh" },
         bgcolor: "#f8fafc",
         background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
         py: { xs: 2, sm: 3, md: 5 },

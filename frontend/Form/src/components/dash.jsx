@@ -438,7 +438,7 @@ function Dash({ onNavigate }) {
     <Box
       sx={{
         p: { xs: 2, md: 4 },
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", md: "100vh" },
         bgcolor: "#f8fafc",
         background: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
         position: "relative",
@@ -502,7 +502,7 @@ function Dash({ onNavigate }) {
               alignItems: "center",
               justifyContent: "space-between",
               flexWrap: "wrap",
-              gap: 3,
+              gap: { xs: 1.5, md: 3 },
               width: "100%",
             }}
           >
@@ -624,7 +624,7 @@ function Dash({ onNavigate }) {
                   : "Take control of your inventory management with powerful analytics, real-time stock monitoring, and streamlined product moderation."}
               </Typography>
 
-              <Box sx={{ display: "flex", gap: 3, mt: 3, flexWrap: "wrap" }}>
+              <Box sx={{ display: "flex", gap: { xs: 1.5, md: 3 }, mt: 3, flexWrap: "wrap" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Box
                     sx={{
@@ -975,7 +975,7 @@ function Dash({ onNavigate }) {
                 Request Status Overview
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+            <Box sx={{ display: "flex", gap: { xs: 1.5, md: 3 }, flexWrap: "wrap" }}>
               <Box sx={{ flex: 1, minWidth: 200 }}>
                 <Box
                   sx={{
@@ -1185,7 +1185,7 @@ function Dash({ onNavigate }) {
                 sx={{
                   border: "1px solid #f1f5f9",
                   borderRadius: 3,
-                  overflow: "hidden",
+                  overflow: { xs: "auto", md: "hidden" },
                   "& .MuiTableRow-root": {
                     transition: "all 0.2s ease",
                     "&:hover": {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,6 +7,7 @@ import { AuthStyles } from "./authstyles/style";
 
 import LoginView from "./loginview";
 import SignupView from "./signupview/signup";
+import SignupVerifyModal from "./signupview/SignupVerifyModal";
 import ForgotPasswordView from "./forgotview/forgot"  ;
 
 export default function AuthPageMui({ setIsLoggedIn }) {
@@ -34,6 +34,15 @@ export default function AuthPageMui({ setIsLoggedIn }) {
           <ForgotPasswordView auth={auth} />
         )}
       </Paper>
+
+      {auth.verifyOpen && (
+        <SignupVerifyModal
+          open={auth.verifyOpen}
+          onClose={() => auth.setVerifyOpen(false)}
+          email={auth.email}
+          onSignup={auth.handleSignupSubmit}
+        />
+      )}
     </Box>
   );
 }

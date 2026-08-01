@@ -83,7 +83,7 @@ function Dashboard() {
       sx={{
         display: "flex",
         backgroundColor: "#f8fafc",
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", md: "100vh" },
         width: "100%",
         minWidth: 0,
       }}
@@ -100,7 +100,7 @@ function Dashboard() {
           flexGrow: 1,
           width: { xs: "calc(100% - 72px)", sm: "calc(100% - 84px)", md: "calc(100% - 280px)" },
           minWidth: 0,
-          minHeight: "100vh",
+          minHeight: { xs: "100dvh", md: "100vh" },
           overflow: "auto",
           background: "#f8fafc",
         }}

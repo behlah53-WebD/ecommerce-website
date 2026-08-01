@@ -159,7 +159,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
           boxShadow:
             "8px 0 40px rgba(15, 23, 42, 0.06), 2px 0 8px rgba(15, 23, 42, 0.02)",
           position: "fixed",
-          height: "100vh",
+          height: { xs: "100dvh", md: "100vh" },
           top: 0,
           left: 0,
           overflow: "hidden",

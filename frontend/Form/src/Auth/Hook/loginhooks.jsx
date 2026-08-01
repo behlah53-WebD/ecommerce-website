@@ -19,10 +19,11 @@ export const useAuth = (setIsLoggedIn) => {
   const [emailError, setEmailError] = useState("");
   const [targetUser, setTargetUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(() => getUserFromToken());
-  const [adminExists, setAdminExists] = useState(false);
-  const [otp, setOtp] = useState("");
+    const [adminExists, setAdminExists] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [verifyOpen, setVerifyOpen] = useState(false);
 
-  const fetchAdminStatus = useCallback(async () => {
+    const fetchAdminStatus = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/auth/check-admin`);
       if (res.data && res.data.success) {
@@ -37,52 +38,59 @@ export const useAuth = (setIsLoggedIn) => {
     fetchAdminStatus();
   }, [fetchAdminStatus, view]);
 
-  const switchView = (newView) => {
-    setView(newView);
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setName("");
-    setEmailError("");
-    setRole("");
-    fetchAdminStatus();
-  };
+    const switchView = (newView) => {
+      setView(newView);
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setName("");
+      setEmailError("");
+      setRole("");
+      setVerifyOpen(false);
+      fetchAdminStatus();
+    };
 
-  const handleSignup = async (e) => {
-    if (e) e.preventDefault();
-    setEmailError("");
-    if (!role) {
-      toast.error("Please select a role!");
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
+    const handleSignupSubmit = async (signupPassword, signupConfirmPassword) => {
+      if (!role) {
+        toast.error("Please select a role!");
+        return false;
+      }
+      if (!signupPassword || signupPassword.length < 6) {
+        toast.error("Password must be at least 6 characters.");
+        return false;
+      }
+      if (signupPassword !== signupConfirmPassword) {
+        toast.error("Passwords do not match!");
+        return false;
+      }
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
-        name,
-        email,
-        password,
-        role,
-      });
-      if (response.data.success) {
-        toast.success(response.data.message || "Account created successfully!");
-        switchView("login");
-      } else {
-        toast.error(response.data.message || "Failed to create account.");
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
+          name,
+          email,
+          password: signupPassword,
+          role,
+        });
+        if (response.data.success) {
+          toast.success(response.data.message || "Account created successfully!");
+          setVerifyOpen(false);
+          switchView("login");
+          return true;
+        } else {
+          toast.error(response.data.message || "Failed to create account.");
+          return false;
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+        const errMsg =
+          error.response?.data?.message || "Failed to connect to server.";
+        if (errMsg.toLowerCase().includes("email")) {
+          setEmailError(errMsg);
+        }
+        toast.error(errMsg);
+        return false;
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-      const errMsg =
-        error.response?.data?.message || "Failed to connect to server.";
-      if (errMsg.toLowerCase().includes("email")) {
-        setEmailError(errMsg);
-      }
-      toast.error(errMsg);
-    }
-  };
+    };
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -110,7 +118,11 @@ export const useAuth = (setIsLoggedIn) => {
     }
   };
 
-  const handleVerifyEmail = async (e) => {
+    const handleVerifyEmailClick = () => {
+      setVerifyOpen(true);
+    };
+
+    const handleVerifyEmail = async (e) => {
     if (e) e.preventDefault();
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/forgot-password/send-otp`, {
@@ -191,14 +203,17 @@ export const useAuth = (setIsLoggedIn) => {
     setCurrentUser,
     adminExists,
     fetchAdminStatus,
-    handleSignup,
-    handleLogin,
-    handleVerifyEmail,
-    handleChangePassword,
-    handleLogout,
-    role,
-    setRole,
-    otp,
-    setOtp,
+     handleSignupSubmit,
+     handleLogin,
+     handleVerifyEmail,
+     handleChangePassword,
+     handleLogout,
+      role,
+      setRole,
+      otp,
+      setOtp,
+      verifyOpen,
+      setVerifyOpen,
+      handleVerifyEmailClick,
+    };
   };
-};

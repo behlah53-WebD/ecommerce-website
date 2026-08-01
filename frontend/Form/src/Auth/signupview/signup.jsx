@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -9,18 +8,17 @@ import {
   Select,
   MenuItem,
   FormControl,
+  InputLabel,
 } from "@mui/material";
 import {
   EmailOutlined,
-  LockOutlined,
   PersonOutlined,
-  GroupOutlined,
 } from "@mui/icons-material";
 import { AuthStyles, commonTextFieldProps } from "../authstyles/style";
 
 const SignupView = ({ auth }) => {
   return (
-    <Box component="form" onSubmit={auth.handleSignup}>
+    <Box>
       <Typography variant="h5" sx={AuthStyles.viewTitle}>
         Join Us Today
       </Typography>
@@ -64,12 +62,13 @@ const SignupView = ({ auth }) => {
       />
 
       <FormControl fullWidth sx={AuthStyles.roleSelect}>
-        <Typography sx={AuthStyles.roleLabel}>Role</Typography>
+        <InputLabel sx={AuthStyles.roleLabel}>Role</InputLabel>
         <Select
           value={auth.role}
           onChange={(e) => auth.setRole(e.target.value)}
           required
           displayEmpty
+          label="Role"
           sx={AuthStyles.roleSelect}
           MenuProps={{
             PaperProps: {
@@ -116,40 +115,27 @@ const SignupView = ({ auth }) => {
         )}
       </FormControl>
 
-      <TextField
-        {...commonTextFieldProps}
-        label="Password"
-        type="password"
-        value={auth.password}
-        onChange={(e) => auth.setPassword(e.target.value)}
-        required
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <LockOutlined sx={AuthStyles.iconAdornment} />
-            </InputAdornment>
-          ),
-        }}
-      />
-
-      <TextField
-        {...commonTextFieldProps}
-        label="Confirm Password"
-        type="password"
-        value={auth.confirmPassword}
-        onChange={(e) => auth.setConfirmPassword(e.target.value)}
-        required
-        sx={AuthStyles.confirmPasswordField}
-      />
-
-      <Button
-        fullWidth
-        type="submit"
-        variant="contained"
-        sx={AuthStyles.signupButton}
-      >
-        Create Account
-      </Button>
+      <Box>
+        <Button
+          fullWidth
+          type="button"
+          variant="contained"
+          sx={AuthStyles.signupButton}
+          onClick={() => {
+            if (!auth.email.trim()) {
+              auth.setEmailError("Email is required to verify.");
+              return;
+            }
+            auth.handleVerifyEmailClick();
+          }}
+        >
+          Verify Email Address
+        </Button>
+        <Typography sx={{ ...AuthStyles.bottomText, mt: 2 }}>
+          Verify your email to continue, then set your password in the next
+          step.
+        </Typography>
+      </Box>
 
       <Typography sx={AuthStyles.bottomText}>
         Already have an account?{" "}
