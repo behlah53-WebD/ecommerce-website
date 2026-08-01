@@ -250,6 +250,12 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
                   boxShadow:
                     "0 8px 24px rgba(102, 126, 234, 0.3), 0 2px 8px rgba(102, 126, 234, 0.15)",
                   position: "relative",
+                  cursor: "pointer",
+                  onClick: () => onMobileNavToggle && onMobileNavToggle(!mobileNavExpanded),
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    transition: "transform 0.2s ease",
+                  },
                   "&::after": {
                     content: '""',
                     position: "absolute",
