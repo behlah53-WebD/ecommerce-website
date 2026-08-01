@@ -47,11 +47,15 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
       if (res.data && res.data.success) {
         const { accessToken, refreshToken, data: userData } = res.data;
+        const loggedUser = userData || { email, role: 'Buyer', name: 'Buyer User' };
+        const userRole = loggedUser.role;
+        if (userRole?.toLowerCase() !== 'buyer') {
+          return { success: false, message: 'Only buyer accounts can log in to the shop.' };
+        }
         localStorage.setItem('accessToken', accessToken);
         if (refreshToken) {
           sessionStorage.setItem('refreshToken', refreshToken);
         }
-        const loggedUser = userData || { email, role: 'Buyer', name: 'Buyer User' };
         setCurrentUser(loggedUser);
         setIsAuthModalOpen(false);
         return { success: true, message: res.data.message || 'Login successful!' };
