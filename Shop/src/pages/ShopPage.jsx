@@ -126,8 +126,8 @@ export const ShopPage = () => {
     : backendCategories.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-10">
+    <div className="h-fit bg-gray-50 dark:bg-gray-950">
+      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:pt-10 lg:pb-4">
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           <div className="flex-1">
@@ -179,10 +179,10 @@ export const ShopPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex gap-8">
+        <div className="flex gap-8 h-[calc(100vh-300px)]">
           {/* Desktop Sidebar */}
           <div className="hidden lg:block w-72 flex-shrink-0">
-            <div className="sticky top-24 space-y-5">
+            <div className="h-full overflow-y-auto space-y-5">
               {/* Search in Sidebar */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div className="p-4">
@@ -312,7 +312,7 @@ export const ShopPage = () => {
           </div>
 
           {/* Products Grid */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-y-auto">
             {/* Active Filters Bar */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {selectedCategory !== "All" && (
