@@ -9,15 +9,15 @@ export const CartDrawer = () => {
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-[10000] overflow-hidden">
       {}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 h-full w-full max-w-md">
+        <div className="flex h-full flex-col bg-white dark:bg-gray-900 shadow-2xl">
           {}
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
             <div className="flex items-center gap-2">

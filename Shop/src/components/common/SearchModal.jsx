@@ -24,7 +24,7 @@ export const SearchModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-20 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-[10000] flex items-start justify-center bg-black/50 pt-20 backdrop-blur-sm px-4">
       <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 transition-all">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Search Products</h3>
