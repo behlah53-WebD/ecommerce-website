@@ -40,7 +40,7 @@ export const ProductProvider = ({ children }) => {
     try {
       const filters = {
         page,
-        limit: 10,
+        limit: 12,
         search: searchQuery.trim() || undefined,
         category: selectedCategory !== 'All' ? selectedCategory : undefined,
         sort: selectedSort !== 'featured' ? selectedSort : undefined,
