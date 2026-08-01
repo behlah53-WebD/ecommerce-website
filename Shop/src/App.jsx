@@ -44,7 +44,7 @@ export function App() {
                   <CartDrawer />
                   <LoginPromptModal />
 
-                  <main className="flex-1">
+                  <main className="flex-1 pt-[96px] lg:pt-[112px]">
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/shop" element={<ShopPage />} />

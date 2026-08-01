@@ -245,7 +245,7 @@ export const Navbar = ({ onOpenSearch }) => {
       </style>
 
       {/* Sticky Navbar */}
-      <header className="sticky top-0 z-[9999] w-full border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md transition-colors dark:border-gray-800 dark:bg-gray-950/95">
+      <header className="fixed top-8 left-0 z-[9999] w-full border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md transition-colors dark:border-gray-800 dark:bg-gray-950/95">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="flex h-16 items-center justify-between lg:h-20">
             {/* Mobile menu button */}

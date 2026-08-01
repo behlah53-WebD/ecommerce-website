@@ -4,6 +4,7 @@ import { ProductCard } from "../components/products/ProductCard";
 import { ProductSkeleton } from "../components/products/ProductSkeleton";
 import { EmptyProductsState } from "../components/products/EmptyProductsState";
 import { useProducts } from "../hooks/useProducts";
+import { PriceRangeSlider } from "../components/filters/PriceRangeSlider";
 import {
   Sparkles,
   SlidersHorizontal,
@@ -27,6 +28,8 @@ export const ShopPage = () => {
     isLoading,
     hasMore,
     loadMoreProducts,
+    priceRange,
+    setPriceRange,
   } = useProducts();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
@@ -38,6 +41,8 @@ export const ShopPage = () => {
     { value: "newest", label: "Newest" },
     { value: "price-low", label: "Price: Low to High" },
     { value: "price-high", label: "Price: High to Low" },
+    { value: "brand-asc", label: "Brand: A to Z" },
+    { value: "brand-desc", label: "Brand: Z to A" },
     { value: "rating", label: "Highest Rated" },
     { value: "popular", label: "Most Popular" },
   ];
@@ -58,6 +63,14 @@ export const ShopPage = () => {
         );
       case "rating":
         return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case "brand-asc":
+        return sorted.sort((a, b) =>
+          (a.brand || "").localeCompare(b.brand || ""),
+        );
+      case "brand-desc":
+        return sorted.sort((a, b) =>
+          (b.brand || "").localeCompare(a.brand || ""),
+        );
       case "popular":
         return sorted.sort(
           (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0),
@@ -261,6 +274,24 @@ export const ShopPage = () => {
                 </div>
               </div>
 
+              {/* Price Filter */}
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-primary-500" />
+                    Price Range
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <PriceRangeSlider
+                    min={0}
+                    max={1000}
+                    value={priceRange}
+                    onCommit={(range) => setPriceRange(range)}
+                  />
+                </div>
+              </div>
+
               {/* Help Card */}
               <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/30 dark:to-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800 p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -306,6 +337,19 @@ export const ShopPage = () => {
                   </button>
                 </span>
               )}
+
+              {priceRange[0] !== 0 ||
+              priceRange[1] !== 1000 ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
+                  Price: ${priceRange[0]} - ${priceRange[1]}
+                  <button
+                    onClick={() => setPriceRange([0, 1000])}
+                    aria-label="Clear price filter"
+                  >
+                    <X className="h-3 w-3 hover:text-primary-900 dark:hover:text-primary-300" />
+                  </button>
+                </span>
+              ) : null}
             </div>
 
             {/* Results Count */}
@@ -479,6 +523,18 @@ export const ShopPage = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+              {/* Mobile Price */}
+              <div>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                  Price Range
+                </label>
+                <PriceRangeSlider
+                  min={0}
+                  max={1000}
+                  value={priceRange}
+                  onCommit={(range) => setPriceRange(range)}
+                />
               </div>
             </div>
 
