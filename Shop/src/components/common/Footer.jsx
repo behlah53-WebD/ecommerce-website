@@ -126,7 +126,7 @@ export const Footer = () => {
             <ul className="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-400">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary-600" />
-                <span>support@luxeshop.com</span>
+                <span>support@zyrashop.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary-600" />
