@@ -16,6 +16,7 @@ function Dashboard() {
     () => !!localStorage.getItem("accessToken"),
   );
   const [activeView, setActiveView] = useState("Dashboard");
+  const [mobileNavExpanded, setMobileNavExpanded] = useState(false);
   const [currentUser, setCurrentUser] = useState(() => getUserFromToken());
 
   const [toast, setToast] = useState({
@@ -93,12 +94,18 @@ function Dashboard() {
         activeView={activeView}
         onChangeView={handleChangeView}
         currentUser={currentUser}
+        mobileNavExpanded={mobileNavExpanded}
+        onMobileNavToggle={setMobileNavExpanded}
       />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          width: { xs: "calc(100% - 72px)", sm: "calc(100% - 84px)", md: "calc(100% - 280px)" },
+          width: {
+            xs: mobileNavExpanded ? "calc(100% - 280px)" : "calc(100% - 72px)",
+            sm: "calc(100% - 84px)",
+            md: "calc(100% - 280px)",
+          },
           minWidth: 0,
           minHeight: { xs: "100dvh", md: "100vh" },
           overflow: "auto",

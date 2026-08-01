@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Box,
   Drawer,
@@ -31,9 +31,31 @@ import CircleIcon from "@mui/icons-material/Circle";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
-const drawerWidth = { xs: 72, sm: 84, md: 280 };
+function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = false, onMobileNavToggle }) {
+  const drawerWidth = mobileNavExpanded
+    ? { xs: 280, sm: 84, md: 280 }
+    : { xs: 72, sm: 84, md: 280 };
 
-function Sidebar({ activeView, onChangeView, currentUser }) {
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+      if (deltaX > 0 && !mobileNavExpanded && onMobileNavToggle) {
+        onMobileNavToggle(true);
+      } else if (deltaX < 0 && mobileNavExpanded && onMobileNavToggle) {
+        onMobileNavToggle(false);
+      }
+    }
+  };
+
   const role = currentUser?.role || "Buyer";
   const userName = currentUser?.name || "User";
 
@@ -148,6 +170,10 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
   return (
     <Drawer
       variant="permanent"
+      PaperProps={{
+        onTouchStart: handleTouchStart,
+        onTouchEnd: handleTouchEnd,
+      }}
       sx={{
         width: drawerWidth,
         flexShrink: 0,
@@ -202,12 +228,12 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
         {/* ===== FIXED TOP SECTION ===== */}
         <Box sx={{ flexShrink: 0 }}>
           {/* Brand Header */}
-          <Box sx={{ px: { xs: 1.5, md: 3 }, pt: 2.5, pb: 1 }}>
+          <Box sx={{ px: { xs: mobileNavExpanded ? 3 : 1.5, md: 3 }, pt: 2.5, pb: 1 }}>
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: { xs: "center", md: "flex-start" },
+                justifyContent: { xs: mobileNavExpanded ? "flex-start" : "center", md: "flex-start" },
                 gap: 2,
               }}
             >
@@ -255,7 +281,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                   }}
                 />
               </Box>
-              <Box sx={{ display: { xs: "none", md: "block" } }}>
+              <Box sx={{ display: { xs: mobileNavExpanded ? "block" : "none", md: "block" } }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -292,25 +318,25 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
           <Divider
             sx={{
               borderColor: "#f1f5f9",
-              mx: { xs: 1.5, md: 3 },
+              mx: { xs: mobileNavExpanded ? 3 : 1.5, md: 3 },
               my: 1.5,
               width: { xs: 44, md: "auto" },
             }}
           />
 
           {/* User Profile Card */}
-          <Box sx={{ px: { xs: 1, md: 2.5 }, py: 1.5 }}>
+          <Box sx={{ px: { xs: mobileNavExpanded ? 2.5 : 1, md: 2.5 }, py: 1.5 }}>
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 1, md: 2 },
+                p: { xs: mobileNavExpanded ? 2 : 1, md: 2 },
                 borderRadius: { xs: 3, md: 4 },
                 background: "linear-gradient(135deg, #ffffff 0%, #fafbfd 100%)",
                 border: "1px solid rgba(226, 232, 240, 0.8)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: { xs: "center", md: "flex-start" },
-                gap: { xs: 0, md: 2 },
+                justifyContent: { xs: mobileNavExpanded ? "flex-start" : "center", md: "flex-start" },
+                gap: { xs: mobileNavExpanded ? 2 : 0, md: 2 },
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 position: "relative",
                 overflow: "hidden",
@@ -379,7 +405,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                 sx={{
                   minWidth: 0,
                   flexGrow: 1,
-                  display: { xs: "none", md: "block" },
+                  display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
                 }}
               >
                 <Typography
@@ -420,7 +446,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                   position: "absolute",
                   top: 8,
                   right: 8,
-                  display: { xs: "none", md: "block" },
+                  display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
                 }}
               />
             </Paper>
@@ -432,7 +458,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
               px: 3,
               pt: 2,
               pb: 1.5,
-              display: { xs: "none", md: "block" },
+              display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
             }}
           >
             <Typography
@@ -459,7 +485,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
             flexGrow: 1,
             overflowY: "auto",
             overflowX: "hidden",
-            px: { xs: 1, md: 2 },
+            px: { xs: mobileNavExpanded ? 2 : 1, md: 2 },
             width: "100%",
             "&::-webkit-scrollbar": {
               width: "4px",
@@ -493,12 +519,12 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                       borderRadius: 3.5,
                       mb: 0.6,
                       py: { xs: 1.2, md: 1.4 },
-                      px: { xs: 1, md: 2 },
+                      px: { xs: mobileNavExpanded ? 2 : 1, md: 2 },
                       minHeight: { xs: 48, md: "auto" },
                       transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                       position: "relative",
                       overflow: "hidden",
-                      justifyContent: { xs: "center", md: "flex-start" },
+                      justifyContent: { xs: mobileNavExpanded ? "flex-start" : "center", md: "flex-start" },
                       animation: `slideIn 0.5s ease-out ${index * 0.05}s both`,
                       "@keyframes slideIn": {
                         "0%": { opacity: 0, transform: "translateX(-10px)" },
@@ -550,7 +576,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                     <ListItemIcon
                       className="menu-icon"
                       sx={{
-                        minWidth: { xs: 0, md: 40 },
+                        minWidth: { xs: mobileNavExpanded ? 40 : 0, md: 40 },
                         justifyContent: "center",
                         color: isActive ? "#6366f1" : "#64748b",
                         transition: "all 0.3s ease",
@@ -581,7 +607,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                       sx={{
                         color: isActive ? "#0f172a" : "#475569",
                         transition: "color 0.3s ease",
-                        display: { xs: "none", md: "block" },
+                        display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
                       }}
                     />
                     {isActive && (
@@ -590,7 +616,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                           fontSize: 20,
                           color: "#6366f1",
                           ml: 0.5,
-                          display: { xs: "none", md: "block" },
+                          display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
                           filter:
                             "drop-shadow(0 2px 4px rgba(99, 102, 241, 0.2))",
                           animation: "pulse 2s infinite",
@@ -613,26 +639,26 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
           <Divider
             sx={{
               borderColor: "#f1f5f9",
-              mx: { xs: 1.5, md: 3 },
-              my: { xs: 1, md: 2 },
+              mx: { xs: mobileNavExpanded ? 3 : 1.5, md: 3 },
+              my: { xs: mobileNavExpanded ? 2 : 1, md: 2 },
               width: { xs: 44, md: "auto" },
             }}
           />
 
           {/* Logout Button */}
-          <Box sx={{ px: { xs: 1, md: 2 }, pb: 1 }}>
+          <Box sx={{ px: { xs: mobileNavExpanded ? 2 : 1, md: 2 }, pb: 1 }}>
             <ListItemButton
               onClick={() => onChangeView("logout")}
               sx={{
                 borderRadius: 3.5,
                 mb: 0.5,
                 py: { xs: 1.2, md: 1.3 },
-                px: { xs: 1, md: 2 },
+                px: { xs: mobileNavExpanded ? 2 : 1, md: 2 },
                 minHeight: { xs: 48, md: "auto" },
                 transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                 position: "relative",
                 overflow: "hidden",
-                justifyContent: { xs: "center", md: "flex-start" },
+                justifyContent: { xs: mobileNavExpanded ? "flex-start" : "center", md: "flex-start" },
                 "&:hover": {
                   background:
                     "linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%)",
@@ -661,7 +687,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
             >
               <ListItemIcon
                 sx={{
-                  minWidth: { xs: 0, md: 40 },
+                  minWidth: { xs: mobileNavExpanded ? 40 : 0, md: 40 },
                   justifyContent: "center",
                   color: "#64748b",
                   transition: "all 0.3s ease",
@@ -679,7 +705,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
                 sx={{
                   color: "#475569",
                   transition: "color 0.3s ease",
-                  display: { xs: "none", md: "block" },
+                  display: { xs: mobileNavExpanded ? "block" : "none", md: "block" },
                 }}
               />
             </ListItemButton>
@@ -687,7 +713,7 @@ function Sidebar({ activeView, onChangeView, currentUser }) {
 
           {/* Footer */}
           <Box
-            sx={{ px: 3, pb: 3, pt: 1, display: { xs: "none", md: "block" } }}
+            sx={{ px: 3, pb: 3, pt: 1, display: { xs: mobileNavExpanded ? "block" : "none", md: "block" } }}
           >
             <Paper
               elevation={0}

@@ -33,8 +33,8 @@ const configuredOrigins = (process.env.FRONTEND_URLS || "")
 
 const allowedOrigins = [
   // Frontend on Vercel
-  "https://ecommerce-website-shop.vercel.app",
-  "https://ecommerce-website-c2tr.vercel.app",
+  "https://shopzyra.vercel.app",
+  "https://zyra-admin-page.vercel.app",
 
   // Local dev
   "http://localhost:5173",
