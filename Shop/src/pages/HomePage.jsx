@@ -5,6 +5,7 @@ import { HeroSection } from '../components/home/HeroSection';
 import { FeatureBanner } from '../components/home/FeatureBanner';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { ProductGrid } from '../components/products/ProductGrid';
+import {NewProductsSlider} from '../components/home/NewProductsSlider';
 
 export const HomePage = () => {
   return (
@@ -17,6 +18,8 @@ export const HomePage = () => {
 
       {}
       <CategoryGrid />
+
+      <NewProductsSlider/>
 
       {}
       <section className="bg-white py-16 dark:bg-gray-950 lg:py-24">

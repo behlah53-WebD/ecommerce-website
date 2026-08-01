@@ -17,6 +17,7 @@
     "react-dom": "^18.3.1",
     "react-google-places-autocomplete": "^4.1.0",
     "react-router-dom": "^6.23.1",
+    "solguruz-react-image-magnifier": "^1.0.2",
     "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {

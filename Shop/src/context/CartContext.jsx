@@ -1,84 +1,165 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAuth } from './AuthContext';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useAuth } from "./AuthContext";
 import {
   getBackendCart,
   addToBackendCart,
   updateBackendCartItem,
   removeFromBackendCart,
   clearBackendCart,
-  syncCartWithBackend,
-} from '../api/cartService';
-import { getProductById } from '../api/productService';
+} from "../api/cartService";
+import { getProductById } from "../api/productService";
 
 const CartContext = createContext();
 
+const getProductId = (product) =>
+  product?.id || product?._id || product?.productId;
+
+const getProductStock = (product) => {
+  const stock = Number(product?.stock);
+
+  return Number.isFinite(stock) && stock >= 0 ? stock : 0;
+};
+
+const getProductName = (product) =>
+  product?.name ||
+  product?.productName ||
+  [product?.firstName, product?.lastName].filter(Boolean).join(" ") ||
+  "Product";
+
+const getProductImage = (product) =>
+  product?.image || product?.images?.[0] || "";
+
+const getItemKey = (id, color = null, size = null) =>
+  `${String(id)}__${color || ""}__${size || ""}`;
+
 const formatBackendCartItems = (items) => {
-  if (!Array.isArray(items)) return [];
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
   return items.map((item) => ({
-    id: String(item.productId),
-    name: item.name,
-    price: item.price,
-    image: item.image,
-    color: item.color,
-    size: item.size,
-    quantity: item.quantity,
+    id: String(item.productId || item.id || item._id),
+    name: item.name || item.productName || "Product",
+    price: Number(item.price) || 0,
+    image: item.image || item.images?.[0] || "",
+    color: item.color || null,
+    size: item.size || null,
+    quantity: Math.max(1, Number(item.quantity) || 1),
+    stock:
+      item.stock === undefined || item.stock === null
+        ? undefined
+        : getProductStock(item),
   }));
 };
 
 export const CartProvider = ({ children }) => {
-  const { currentUser, isLoggedIn, promptLogin, pendingAction, clearPendingAction, isAuthLoading } = useAuth();
+  const {
+    currentUser,
+    isLoggedIn,
+    promptLogin,
+    pendingAction,
+    clearPendingAction,
+    isAuthLoading,
+  } = useAuth();
 
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "info",
+  });
 
-  const showToast = (message, type = 'info') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 3000);
-  };
-  
-  const checkStockAndAdd = async (product, quantity, selectedColor, selectedSize) => {
-    // Fetch latest product data to check stock
-    const productId = product.id || product._id || product.productId;
-    if (productId) {
+  const toastTimerRef = useRef(null);
+
+  const showToast = useCallback((message, type = "info") => {
+    setToast({
+      show: true,
+      message,
+      type,
+    });
+
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast({
+        show: false,
+        message: "",
+        type: "info",
+      });
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        window.clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
+
+  const getFreshProduct = useCallback(
+    async (productId, fallbackProduct = null) => {
       try {
         const freshProduct = await getProductById(productId);
+
         if (freshProduct) {
-          const availableStock = freshProduct.stock || 0;
-          const productStatus = freshProduct.productStatus || 'In Stock';
-          
-          // Check if out of stock
-          if (availableStock === 0 || productStatus === 'Out of Stock') {
-            showToast(`${freshProduct.name || 'This product'} is out of stock`, 'error');
-            return false;
-          }
-          
-          // Check if low stock
-          if (productStatus === 'Low Stock' || availableStock <= 10) {
-            showToast(`Only ${availableStock} items left in stock`, 'warning');
-          }
-          
-          // Check if requested quantity exceeds available stock
-          const existingItem = cartItems.find(
-            (item) => String(item.id) === String(productId) && item.color === selectedColor && item.size === selectedSize
-          );
-          const currentQtyInCart = existingItem ? existingItem.quantity : 0;
-          const totalRequested = currentQtyInCart + quantity;
-          
-          if (totalRequested > availableStock) {
-            showToast(`Cannot add more than ${availableStock} items (${currentQtyInCart} already in cart)`, 'error');
-            return false;
-          }
+          return freshProduct;
         }
-      } catch (err) {
-        console.warn('Failed to check stock:', err);
+      } catch (error) {
+        console.warn("Failed to fetch latest product stock:", error);
       }
-    }
-    return true;
-  };
+
+      return fallbackProduct;
+    },
+    [],
+  );
+
+  const updateCartItemsWithFreshStock = useCallback(
+    async (items) => {
+      if (!Array.isArray(items) || items.length === 0) {
+        return [];
+      }
+
+      const updatedItems = await Promise.all(
+        items.map(async (item) => {
+          const freshProduct = await getFreshProduct(item.id);
+
+          if (!freshProduct) {
+            return item;
+          }
+
+          return {
+            ...item,
+            name: getProductName(freshProduct),
+            price:
+              freshProduct.price !== undefined
+                ? Number(freshProduct.price) || 0
+                : item.price,
+            image: getProductImage(freshProduct) || item.image,
+            stock: getProductStock(freshProduct),
+          };
+        }),
+      );
+
+      return updatedItems;
+    },
+    [getFreshProduct],
+  );
 
   const loadUserCart = useCallback(async () => {
-    if (isAuthLoading) return;
+    if (isAuthLoading) {
+      return;
+    }
 
     if (!currentUser) {
       setCartItems([]);
@@ -87,152 +168,469 @@ export const CartProvider = ({ children }) => {
 
     try {
       const backendItems = await getBackendCart();
+
       if (Array.isArray(backendItems)) {
-        setCartItems(formatBackendCartItems(backendItems));
+        const formattedItems = formatBackendCartItems(backendItems);
+        const itemsWithStock =
+          await updateCartItemsWithFreshStock(formattedItems);
+
+        const validItems = itemsWithStock
+          .map((item) => {
+            if (item.stock === undefined) {
+              return item;
+            }
+
+            return {
+              ...item,
+              quantity: Math.min(item.quantity, item.stock),
+            };
+          })
+          .filter((item) => item.quantity > 0);
+
+        setCartItems(validItems);
       }
-    } catch (err) {
-      console.warn('Failed loading backend cart:', err);
+    } catch (error) {
+      console.warn("Failed loading backend cart:", error);
     }
-  }, [currentUser, isAuthLoading]);
+  }, [currentUser, isAuthLoading, updateCartItemsWithFreshStock]);
 
   useEffect(() => {
     loadUserCart();
   }, [loadUserCart]);
 
-  
+  const checkStockAndAdd = useCallback(
+    async (product, quantity, selectedColor, selectedSize) => {
+      const productId = getProductId(product);
+
+      if (!productId) {
+        showToast("Invalid product.", "error");
+        return {
+          allowed: false,
+          product: null,
+          quantity: 0,
+        };
+      }
+
+      const freshProduct = await getFreshProduct(productId, product);
+
+      if (!freshProduct) {
+        showToast("Unable to verify product stock.", "error");
+
+        return {
+          allowed: false,
+          product: null,
+          quantity: 0,
+        };
+      }
+
+      const availableStock = getProductStock(freshProduct);
+      const requestedQuantity = Math.max(1, Number(quantity) || 1);
+
+      const itemColor = selectedColor || freshProduct.colors?.[0] || null;
+
+      const itemSize = selectedSize || null;
+
+      const existingItem = cartItems.find(
+        (item) =>
+          String(item.id) === String(productId) &&
+          item.color === itemColor &&
+          item.size === itemSize,
+      );
+
+      const currentQuantityInCart = existingItem
+        ? Number(existingItem.quantity) || 0
+        : 0;
+
+      const totalRequestedQuantity = currentQuantityInCart + requestedQuantity;
+
+      if (availableStock <= 0) {
+        showToast(`${getProductName(freshProduct)} is out of stock.`, "error");
+
+        return {
+          allowed: false,
+          product: freshProduct,
+          quantity: 0,
+        };
+      }
+
+      if (totalRequestedQuantity > availableStock) {
+        const remainingStock = Math.max(
+          availableStock - currentQuantityInCart,
+          0,
+        );
+
+        if (remainingStock === 0) {
+          showToast(
+            `You already have the maximum available stock of ${availableStock} in your cart.`,
+            "error",
+          );
+        } else {
+          showToast(
+            `Only ${remainingStock} more item${
+              remainingStock === 1 ? "" : "s"
+            } can be added. Total stock is ${availableStock}.`,
+            "error",
+          );
+        }
+
+        return {
+          allowed: false,
+          product: freshProduct,
+          quantity: 0,
+        };
+      }
+
+      if (availableStock <= 10) {
+        showToast(
+          `Only ${availableStock} item${
+            availableStock === 1 ? "" : "s"
+          } left in stock.`,
+          "warning",
+        );
+      }
+
+      return {
+        allowed: true,
+        product: freshProduct,
+        quantity: requestedQuantity,
+      };
+    },
+    [cartItems, getFreshProduct, showToast],
+  );
+
+  const addToCartInternal = useCallback(
+    async (
+      product,
+      quantity = 1,
+      selectedColor = null,
+      selectedSize = null,
+    ) => {
+      const rawId = getProductId(product);
+
+      if (!rawId) {
+        showToast("Invalid product.", "error");
+        return false;
+      }
+
+      const pId = String(rawId);
+
+      const itemColor = selectedColor || product.colors?.[0] || null;
+
+      const itemSize = selectedSize || null;
+
+      const stockCheck = await checkStockAndAdd(
+        product,
+        quantity,
+        itemColor,
+        itemSize,
+      );
+
+      if (!stockCheck.allowed || !stockCheck.product) {
+        return false;
+      }
+
+      const freshProduct = stockCheck.product;
+      const safeQuantity = stockCheck.quantity;
+      const freshStock = getProductStock(freshProduct);
+
+      setCartItems((previousItems) => {
+        const existingIndex = previousItems.findIndex(
+          (item) =>
+            String(item.id) === pId &&
+            item.color === itemColor &&
+            item.size === itemSize,
+        );
+
+        if (existingIndex > -1) {
+          const updatedItems = [...previousItems];
+          const existingItem = updatedItems[existingIndex];
+
+          updatedItems[existingIndex] = {
+            ...existingItem,
+            name: getProductName(freshProduct),
+            price: Number(freshProduct.price) || existingItem.price || 0,
+            image: getProductImage(freshProduct) || existingItem.image,
+            stock: freshStock,
+            quantity: Math.min(
+              existingItem.quantity + safeQuantity,
+              freshStock,
+            ),
+          };
+
+          return updatedItems;
+        }
+
+        return [
+          ...previousItems,
+          {
+            id: pId,
+            name: getProductName(freshProduct),
+            price: Number(freshProduct.price) || 0,
+            image: getProductImage(freshProduct),
+            color: itemColor,
+            size: itemSize,
+            quantity: Math.min(safeQuantity, freshStock),
+            stock: freshStock,
+          },
+        ];
+      });
+
+      setIsCartOpen(true);
+
+      if (isLoggedIn) {
+        try {
+          const backendItems = await addToBackendCart(
+            freshProduct,
+            safeQuantity,
+            itemColor,
+            itemSize,
+          );
+
+          if (Array.isArray(backendItems)) {
+            const formattedItems = formatBackendCartItems(backendItems);
+
+            const itemsWithStock =
+              await updateCartItemsWithFreshStock(formattedItems);
+
+            setCartItems(
+              itemsWithStock
+                .map((item) => {
+                  if (item.stock === undefined) {
+                    return item;
+                  }
+
+                  return {
+                    ...item,
+                    quantity: Math.min(item.quantity, item.stock),
+                  };
+                })
+                .filter((item) => item.quantity > 0),
+            );
+          }
+        } catch (error) {
+          console.warn("Failed syncing added item with backend:", error);
+          showToast("Item added locally, but backend sync failed.", "warning");
+        }
+      }
+
+      return true;
+    },
+    [checkStockAndAdd, isLoggedIn, showToast, updateCartItemsWithFreshStock],
+  );
+
   useEffect(() => {
-    if (isLoggedIn && pendingAction && pendingAction.type === 'cart') {
+    if (isLoggedIn && pendingAction && pendingAction.type === "cart") {
       const { product, quantity, color, size } = pendingAction;
+
       if (product) {
         addToCartInternal(product, quantity, color, size);
       }
+
       clearPendingAction();
     }
-  }, [isLoggedIn, pendingAction]);
+  }, [isLoggedIn, pendingAction, addToCartInternal, clearPendingAction]);
 
-  const addToCartInternal = async (product, quantity = 1, selectedColor = null, selectedSize = null) => {
-    const rawId = product.id || product._id || product.productId;
-    if (!rawId) return;
-    const pId = String(rawId);
-    const itemColor = selectedColor || product.colors?.[0] || null;
-    const itemSize = selectedSize || null;
-    const prodName = product.name || product.productName || [product.firstName, product.lastName].filter(Boolean).join(' ') || 'Product';
+  const addToCart = useCallback(
+    (product, quantity = 1, selectedColor = null, selectedSize = null) => {
+      if (!isLoggedIn) {
+        promptLogin("Please log in to add items to your cart.", {
+          type: "cart",
+          product,
+          quantity,
+          color: selectedColor,
+          size: selectedSize,
+        });
 
-    // Check stock before adding
-    const canAdd = await checkStockAndAdd(product, quantity, itemColor, itemSize);
-    if (!canAdd) return;
+        return false;
+      }
 
-    setCartItems((prevItems) => {
-      const existingIndex = prevItems.findIndex(
-        (item) => String(item.id) === pId && item.color === itemColor && item.size === itemSize
+      return addToCartInternal(product, quantity, selectedColor, selectedSize);
+    },
+    [addToCartInternal, isLoggedIn, promptLogin],
+  );
+
+  const removeFromCart = useCallback(
+    async (id, color = null, size = null) => {
+      const targetId = String(id);
+
+      setCartItems((previousItems) =>
+        previousItems.filter(
+          (item) =>
+            !(
+              String(item.id) === targetId &&
+              item.color === color &&
+              item.size === size
+            ),
+        ),
       );
 
-      if (existingIndex > -1) {
-        const updated = [...prevItems];
-        updated[existingIndex].quantity += quantity;
-        return updated;
+      if (isLoggedIn) {
+        try {
+          const backendItems = await removeFromBackendCart(
+            targetId,
+            color,
+            size,
+          );
+
+          if (Array.isArray(backendItems)) {
+            const formattedItems = formatBackendCartItems(backendItems);
+
+            const itemsWithStock =
+              await updateCartItemsWithFreshStock(formattedItems);
+
+            setCartItems(itemsWithStock);
+          }
+        } catch (error) {
+          console.warn("Failed removing item from backend:", error);
+          showToast(
+            "Item removed locally, but backend sync failed.",
+            "warning",
+          );
+        }
       }
+    },
+    [isLoggedIn, showToast, updateCartItemsWithFreshStock],
+  );
 
-      return [
-        ...prevItems,
-        {
-          id: pId,
-          name: prodName,
-          price: Number(product.price) || 0,
-          image: product.image || product.images?.[0] || '',
-          color: itemColor,
-          size: itemSize,
-          quantity: Number(quantity) || 1,
-        },
-      ];
-    });
+  const updateQuantity = useCallback(
+    async (id, color = null, size = null, delta = 0) => {
+      const targetId = String(id);
+      const numericDelta = Number(delta) || 0;
 
-    setIsCartOpen(true);
-
-    if (isLoggedIn) {
-      const backendItems = await addToBackendCart(product, quantity, itemColor, itemSize);
-      if (Array.isArray(backendItems) && backendItems.length > 0) {
-        setCartItems(formatBackendCartItems(backendItems));
-      }
-    }
-  };
-
-  const addToCart = (product, quantity = 1, selectedColor = null, selectedSize = null) => {
-    if (!isLoggedIn) {
-      promptLogin('Please log in to add items to your cart.', {
-        type: 'cart',
-        product,
-        quantity,
-        color: selectedColor,
-        size: selectedSize,
-      });
-      return;
-    }
-
-    addToCartInternal(product, quantity, selectedColor, selectedSize);
-  };
-
-  const removeFromCart = async (id, color, size) => {
-    const targetId = String(id);
-    setCartItems((prevItems) =>
-      prevItems.filter(
-        (item) => !(String(item.id) === targetId && item.color === color && item.size === size)
-      )
-    );
-
-    if (isLoggedIn) {
-      const backendItems = await removeFromBackendCart(targetId, color, size);
-      if (Array.isArray(backendItems)) {
-        setCartItems(formatBackendCartItems(backendItems));
-      }
-    }
-  };
-
-  const updateQuantity = async (id, color, size, delta) => {
-    const targetId = String(id);
-    // Get current item to check stock
-    const currentItem = cartItems.find(
-      (item) => String(item.id) === targetId && item.color === color && item.size === size
-    );
-    
-    // Check stock limit
-    if (currentItem && currentItem.stock !== undefined) {
-      const newQty = currentItem.quantity + delta;
-      if (newQty > currentItem.stock) {
-        showToast(`Cannot exceed available stock (${currentItem.stock})`, 'error');
+      if (numericDelta === 0) {
         return;
       }
-    }
-    
-    setCartItems((prevItems) =>
-      prevItems
-        .map((item) => {
-          if (String(item.id) === targetId && item.color === color && item.size === size) {
-            const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
+
+      const currentItem = cartItems.find(
+        (item) =>
+          String(item.id) === targetId &&
+          item.color === color &&
+          item.size === size,
+      );
+
+      if (!currentItem) {
+        return;
+      }
+
+      const currentQuantity = Number(currentItem.quantity) || 0;
+      const requestedQuantity = currentQuantity + numericDelta;
+
+      if (requestedQuantity <= 0) {
+        await removeFromCart(targetId, color, size);
+        return;
+      }
+
+      const freshProduct = await getFreshProduct(targetId, currentItem);
+
+      if (!freshProduct) {
+        showToast("Unable to verify product stock.", "error");
+        return;
+      }
+
+      const availableStock = getProductStock(freshProduct);
+
+      if (availableStock <= 0) {
+        showToast(`${getProductName(freshProduct)} is out of stock.`, "error");
+        return;
+      }
+
+      if (requestedQuantity > availableStock) {
+        showToast(
+          `Cannot exceed available stock of ${availableStock}.`,
+          "error",
+        );
+        return;
+      }
+
+      if (availableStock <= 10 && numericDelta > 0) {
+        showToast(
+          `Only ${availableStock} item${
+            availableStock === 1 ? "" : "s"
+          } left in stock.`,
+          "warning",
+        );
+      }
+
+      setCartItems((previousItems) =>
+        previousItems.map((item) => {
+          if (
+            String(item.id) === targetId &&
+            item.color === color &&
+            item.size === size
+          ) {
+            return {
+              ...item,
+              name: getProductName(freshProduct),
+              price: Number(freshProduct.price) || item.price || 0,
+              image: getProductImage(freshProduct) || item.image,
+              stock: availableStock,
+              quantity: requestedQuantity,
+            };
           }
+
           return item;
-        })
-        .filter(Boolean)
-    );
+        }),
+      );
+
+      if (isLoggedIn) {
+        try {
+          const backendItems = await updateBackendCartItem(
+            targetId,
+            color,
+            size,
+            numericDelta,
+          );
+
+          if (Array.isArray(backendItems)) {
+            const formattedItems = formatBackendCartItems(backendItems);
+
+            const itemsWithStock =
+              await updateCartItemsWithFreshStock(formattedItems);
+
+            setCartItems(itemsWithStock);
+          }
+        } catch (error) {
+          console.warn("Failed updating backend cart item:", error);
+          showToast(
+            "Quantity updated locally, but backend sync failed.",
+            "warning",
+          );
+        }
+      }
+    },
+    [
+      cartItems,
+      getFreshProduct,
+      isLoggedIn,
+      removeFromCart,
+      showToast,
+      updateCartItemsWithFreshStock,
+    ],
+  );
+
+  const clearCart = useCallback(async () => {
+    setCartItems([]);
 
     if (isLoggedIn) {
-      const backendItems = await updateBackendCartItem(targetId, color, size, delta);
-      if (Array.isArray(backendItems)) {
-        setCartItems(formatBackendCartItems(backendItems));
+      try {
+        await clearBackendCart();
+      } catch (error) {
+        console.warn("Failed clearing backend cart:", error);
+        showToast("Cart cleared locally, but backend sync failed.", "warning");
       }
     }
-  };
+  }, [isLoggedIn, showToast]);
 
-  const clearCart = async () => {
-    setCartItems([]);
-    if (isLoggedIn) {
-      await clearBackendCart();
-    }
-  };
+  const totalItems = cartItems.reduce(
+    (total, item) => total + (Number(item.quantity) || 0),
+    0,
+  );
 
-  const totalItems = cartItems.length;
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce(
+    (total, item) =>
+      total + (Number(item.price) || 0) * (Number(item.quantity) || 0),
+    0,
+  );
 
   return (
     <CartContext.Provider
@@ -251,11 +649,17 @@ export const CartProvider = ({ children }) => {
       }}
     >
       {children}
+
       {toast.show && (
         <div
-          className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-xl text-sm font-medium shadow-lg transition-all ${
-            toast.type === 'error' ? 'bg-red-500 text-white' : toast.type === 'warning' ? 'bg-amber-500 text-white' : 'bg-primary-600 text-white'
+          className={`fixed bottom-4 right-4 z-50 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg transition-all ${
+            toast.type === "error"
+              ? "bg-red-500"
+              : toast.type === "warning"
+                ? "bg-amber-500"
+                : "bg-primary-600"
           }`}
+          role="alert"
         >
           {toast.message}
         </div>
@@ -266,8 +670,10 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
+
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
+
   return context;
 };
