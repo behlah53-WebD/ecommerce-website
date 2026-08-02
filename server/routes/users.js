@@ -187,7 +187,7 @@ const getDetailsHandler = async (req, res) => {
     }
 
     const items = await Detail.find(filter)
-      .select("-password -username -phone -email -city -state -firstName -lastName")
+      .select("-password -username -phone -email -city -state -firstName -lastName -files.data")
       .sort(sortOption)
       .skip(pagination.skip)
       .limit(pagination.limit)

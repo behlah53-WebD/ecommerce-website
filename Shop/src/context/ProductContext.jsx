@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthLoading } = useAuth();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,13 +85,15 @@ export const ProductProvider = ({ children }) => {
 
   
   useEffect(() => {
+    if (isAuthLoading) return;
     loadCategories();
-  }, [currentUser]);
+  }, [currentUser, isAuthLoading]);
 
   
   useEffect(() => {
+    if (isAuthLoading) return;
     fetchProductsList(1, false);
-  }, [searchQuery, selectedCategory, selectedSort, priceRange, currentUser]);
+  }, [searchQuery, selectedCategory, selectedSort, priceRange, currentUser, isAuthLoading]);
 
   return (
     <ProductContext.Provider

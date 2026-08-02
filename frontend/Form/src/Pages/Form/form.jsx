@@ -74,10 +74,13 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
   );
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      loadPage(1, searchQuery).catch(() => {});
+      return;
+    }
+
     const timer = setTimeout(() => {
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-      }
       loadPage(1, searchQuery).catch(() => {});
     }, 400);
 

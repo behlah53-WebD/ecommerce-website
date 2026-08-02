@@ -35,7 +35,6 @@ export const useHttp = () => {
       try {
         let targetEndpoint = "/users";
 
-       
         if (typeof param === "object" && param !== null) {
           const {
             page = 1,
@@ -80,7 +79,7 @@ export const useHttp = () => {
           setData([result.data]);
         else setData([]);
 
-       
+        
         if (result.pagination) {
           setPagination(result.pagination);
         }

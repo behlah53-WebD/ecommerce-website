@@ -5,6 +5,7 @@ const API_BASE_URL =
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 10000,
 });
 
 const getAccessToken = () => localStorage.getItem("accessToken");
