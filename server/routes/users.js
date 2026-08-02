@@ -187,17 +187,24 @@ const getDetailsHandler = async (req, res) => {
     }
 
     const items = await Detail.find(filter)
-      .select("-password -username -phone -email -city -state -firstName -lastName -files.data")
+      .select("-password -username -phone -email -city -state -firstName -lastName")
       .sort(sortOption)
       .skip(pagination.skip)
       .limit(pagination.limit)
       .lean();
 
+    const slimItems = items.map((item) => {
+      if (Array.isArray(item.files) && item.files.length > 0) {
+        return { ...item, files: [item.files[0]] };
+      }
+      return item;
+    });
+
     return res.json({
       success: true,
       message: "Products fetched successfully.",
       userRole: role,
-      data: items,
+      data: slimItems,
       pagination: pagination.metadata,
     });
   } catch (error) {
