@@ -5,8 +5,8 @@ import { Mail, Phone, MapPin, Github, Twitter, Instagram } from "lucide-react";
 export const Footer = () => {
   return (
     <footer className="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 transition-colors mt-auto">
-      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-10">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
           {}
           <div className="lg:col-span-2">
             <Link
@@ -141,7 +141,7 @@ export const Footer = () => {
         </div>
 
         {}
-        <div className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-8 border-t border-gray-200 pt-6 dark:border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} Zyra Storefront. All rights
             reserved.
