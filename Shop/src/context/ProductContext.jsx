@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getProducts, getCategories } from '../api/productService';
+import { getProducts, getCategories, fetchBrands } from '../api/productService';
 import { useAuth } from './AuthContext';
 
 const ProductContext = createContext();
@@ -8,6 +8,7 @@ export const ProductProvider = ({ children }) => {
   const { currentUser, isAuthLoading } = useAuth();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,6 +17,7 @@ export const ProductProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSort, setSelectedSort] = useState('featured');
   const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
 
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +36,16 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  const loadBrands = async () => {
+    try {
+      const brs = await fetchBrands();
+      setBrands(brs);
+    } catch (err) {
+      console.warn('Failed to load brands', err);
+      setBrands([]);
+    }
+  };
+
   const fetchProductsList = async (page = 1, append = false) => {
     setIsLoading(true);
     setError(null);
@@ -46,6 +58,7 @@ export const ProductProvider = ({ children }) => {
         sort: selectedSort !== 'featured' ? selectedSort : undefined,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
+        brand: selectedBrands.length > 0 ? selectedBrands.join(',') : undefined,
       };
 
       const result = await getProducts(filters);
@@ -74,6 +87,7 @@ export const ProductProvider = ({ children }) => {
 
   const refreshProducts = () => {
     loadCategories();
+    loadBrands();
     fetchProductsList(1, false);
   };
 
@@ -87,13 +101,14 @@ export const ProductProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthLoading) return;
     loadCategories();
+    loadBrands();
   }, [currentUser, isAuthLoading]);
 
   
   useEffect(() => {
     if (isAuthLoading) return;
     fetchProductsList(1, false);
-  }, [searchQuery, selectedCategory, selectedSort, priceRange, currentUser, isAuthLoading]);
+  }, [searchQuery, selectedCategory, selectedSort, priceRange, selectedBrands, currentUser, isAuthLoading]);
 
   return (
     <ProductContext.Provider
@@ -102,6 +117,8 @@ export const ProductProvider = ({ children }) => {
         setProducts,
         categories,
         setCategories,
+        brands,
+        setBrands,
         isLoading,
         error,
         refreshProducts,
@@ -118,6 +135,8 @@ export const ProductProvider = ({ children }) => {
         setSelectedSort,
         priceRange,
         setPriceRange,
+        selectedBrands,
+        setSelectedBrands,
       }}
     >
       {children}

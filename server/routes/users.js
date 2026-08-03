@@ -130,6 +130,29 @@ const getDetailsHandler = async (req, res) => {
       conditions.push({ price: { $lte: maxPrice } });
     }
 
+    const brandQuery = String(req.query.brand || "").trim();
+    if (brandQuery) {
+      const brandOr = brandQuery
+        .split(",")
+        .map((b) => b.trim())
+        .filter(Boolean);
+      if (brandOr.length === 1) {
+        const brandRegex = new RegExp(
+          brandOr[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          "i",
+        );
+        conditions.push({ brand: brandRegex });
+      } else {
+        conditions.push({
+          brand: {
+            $in: brandOr.map(
+              (b) => new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"),
+            ),
+          },
+        });
+      }
+    }
+
     const searchQuery = String(req.query.search || "").trim();
     if (searchQuery) {
       const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -229,6 +252,38 @@ const getCategoriesHandler = async (req, res) => {
     return res.json({
       success: true,
       data: categories.filter(Boolean),
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getBrandsHandler = async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    const role = user ? (user.role || "Buyer") : "Buyer";
+    const conditions = [];
+
+    conditions.push({ productName: { $exists: true, $ne: "" } });
+    conditions.push({
+      $or: [
+        { username: { $exists: false } },
+        { username: "" },
+        { username: null },
+      ],
+    });
+
+    if (role === "Buyer") {
+      conditions.push({ $or: [{ status: "approved" }, { status: { $exists: false } }, { status: null }] });
+    } else if (role === "Seller") {
+      conditions.push({ sellerId: user.id });
+    }
+
+    const filter = conditions.length > 0 ? { $and: conditions } : {};
+    const brands = await Detail.distinct("brand", filter);
+    return res.json({
+      success: true,
+      data: brands.filter(Boolean),
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -562,6 +617,7 @@ router.post("/admin/requests/:id/decline", authenticateToken, async (req, res) =
 
 
 router.get("/categories", optionalAuthenticateToken, getCategoriesHandler);
+router.get("/brands", optionalAuthenticateToken, getBrandsHandler);
 router.get("/", optionalAuthenticateToken, getDetailsHandler);
 
 // Single product by ID — returns full data including files (used by product detail page)

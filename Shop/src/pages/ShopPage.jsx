@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "../components/products/ProductCard";
 import { ProductSkeleton } from "../components/products/ProductSkeleton";
@@ -30,11 +30,23 @@ export const ShopPage = () => {
     loadMoreProducts,
     priceRange,
     setPriceRange,
+    brands,
+    selectedBrands,
+    setSelectedBrands,
+    searchQuery,
+    setSearchQuery,
   } = useProducts();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAllCategories, setShowAllCategories] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(searchTerm);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchTerm, setSearchQuery]);
 
   const sortOptions = [
     { value: "featured", label: "Featured" },
@@ -292,6 +304,55 @@ export const ShopPage = () => {
                 </div>
               </div>
 
+              {/* Brand Filter */}
+              {brands.length > 0 && (
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-primary-500" />
+                        Brand
+                      </h3>
+                      {selectedBrands.length > 0 && (
+                        <button
+                          onClick={() => setSelectedBrands([])}
+                          className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto p-2">
+                    {brands.map((brand) => {
+                      const isChecked = selectedBrands.includes(brand);
+                      return (
+                        <label
+                          key={brand}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedBrands([...selectedBrands, brand]);
+                              } else {
+                                setSelectedBrands(
+                                  selectedBrands.filter((b) => b !== brand),
+                                );
+                              }
+                            }}
+                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                          />
+                          <span className="truncate">{brand}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Help Card */}
               <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/30 dark:to-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800 p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -350,6 +411,26 @@ export const ShopPage = () => {
                   </button>
                 </span>
               ) : null}
+
+              {selectedBrands.length > 0 &&
+                selectedBrands.map((brand) => (
+                  <span
+                    key={brand}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium"
+                  >
+                    {brand}
+                    <button
+                      onClick={() =>
+                        setSelectedBrands(
+                          selectedBrands.filter((b) => b !== brand),
+                        )
+                      }
+                      aria-label={`Remove ${brand} filter`}
+                    >
+                      <X className="h-3 w-3 hover:text-primary-900 dark:hover:text-primary-300" />
+                    </button>
+                  </span>
+                ))}
             </div>
 
             {/* Results Count */}
@@ -536,6 +617,42 @@ export const ShopPage = () => {
                   onCommit={(range) => setPriceRange(range)}
                 />
               </div>
+
+              {/* Mobile Brand */}
+              {brands.length > 0 && (
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                    Brand
+                  </label>
+                  <div className="space-y-1 max-h-64 overflow-y-auto">
+                    {brands.map((brand) => {
+                      const isChecked = selectedBrands.includes(brand);
+                      return (
+                        <label
+                          key={brand}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedBrands([...selectedBrands, brand]);
+                              } else {
+                                setSelectedBrands(
+                                  selectedBrands.filter((b) => b !== brand),
+                                );
+                              }
+                            }}
+                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                          />
+                          <span className="truncate">{brand}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Apply Button */}

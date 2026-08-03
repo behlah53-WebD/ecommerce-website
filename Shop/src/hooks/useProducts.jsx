@@ -3,7 +3,9 @@ import { useProductContext } from '../context/ProductContext';
 export const useProducts = () => {
   const {
     products,
+    rawProducts,
     categories,
+    brands,
     isLoading,
     error,
     refreshProducts,
@@ -20,12 +22,15 @@ export const useProducts = () => {
     setSelectedSort,
     priceRange,
     setPriceRange,
+    selectedBrands,
+    setSelectedBrands,
   } = useProductContext();
 
   return {
     products,
-    rawProducts: products,
+    rawProducts: rawProducts || products,
     categories,
+    brands,
     totalCount,
     isLoading,
     error,
@@ -42,6 +47,7 @@ export const useProducts = () => {
     setSelectedSort,
     priceRange,
     setPriceRange,
+    selectedBrands,
+    setSelectedBrands,
   };
 };
-

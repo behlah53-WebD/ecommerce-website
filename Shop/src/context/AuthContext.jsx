@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_BASE ="https://ecommerce-api-9ayg.onrender.com" ;
+const API_BASE = "http://localhost:3000";
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -92,6 +92,40 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  const updateProfile = useCallback(
+    async (updates) => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        return { success: false, message: 'Not authenticated.' };
+      }
+
+      try {
+        const res = await axios.put(
+          `${API_BASE}/auth/profile`,
+          updates,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (res.data && res.data.success) {
+          setCurrentUser(res.data.data);
+          return { success: true, message: res.data.message || 'Profile updated.' };
+        }
+        return {
+          success: false,
+          message: res.data?.message || 'Failed to update profile.',
+        };
+      } catch (err) {
+        const errMsg = err.response?.data?.message || 'Failed to update profile.';
+        return { success: false, message: errMsg };
+      }
+    },
+    [],
+  );
+
   const promptLogin = useCallback((message, actionPayload = null) => {
     setAuthModalMessage(message || 'Please sign in to proceed.');
     setPendingAction(actionPayload);
@@ -117,12 +151,13 @@ export const AuthProvider = ({ children }) => {
         promptLogin,
         closeAuthModal,
         clearPendingAction,
-        login,
-        signup,
-        logout,
-        isLoggedIn: !!currentUser,
-        isAuthLoading,
-      }}
+         login,
+         signup,
+         logout,
+         updateProfile,
+         isLoggedIn: !!currentUser,
+         isAuthLoading,
+       }}
     >
       {children}
     </AuthContext.Provider>

@@ -32,6 +32,7 @@ import { useCart } from "../context/CartContext";
 import apiClient from "../api/apiClient";
 import ForgotPasswordModal from "../components/common/ForgotPasswordModal";
 import SignupVerifyModal from "../components/common/SignupVerifyModal";
+import EditProfileModal from "../components/common/EditProfileModal";
 
 export const AccountPage = () => {
   const { currentUser, isLoggedIn, login, signup, logout } = useAuth();
@@ -60,6 +61,7 @@ export const AccountPage = () => {
   const [accountOrders, setAccountOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState("");
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
   useEffect(() => {
     const fetchAccountOrders = async () => {
@@ -553,7 +555,10 @@ export const AccountPage = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              <button className="px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold text-sm hover:bg-white/30 transition-all flex items-center gap-2">
+              <button
+                onClick={() => setShowEditProfileModal(true)}
+                className="px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold text-sm hover:bg-white/30 transition-all flex items-center gap-2"
+              >
                 <Edit3 className="h-4 w-4" />
                 Edit Profile
               </button>
@@ -869,6 +874,11 @@ export const AccountPage = () => {
           </div>
         </div>
       </div>
+
+      <EditProfileModal
+        isOpen={showEditProfileModal}
+        onClose={() => setShowEditProfileModal(false)}
+      />
     </div>
   );
 };

@@ -122,6 +122,20 @@ export const getCategories = async () => {
   }
 };
 
+export const fetchBrands = async () => {
+  try {
+    const response = await apiClient.get('/users/brands');
+    const brands = response.data?.data || response.data || [];
+    if (Array.isArray(brands)) {
+      return brands.filter(Boolean);
+    }
+    return [];
+  } catch (error) {
+    console.warn('Failed to fetch backend brands, using empty list:', error);
+    return [];
+  }
+};
+
 export const searchProducts = async (query) => {
   try {
     const { products } = await getProducts({ search: query, limit: 50 });

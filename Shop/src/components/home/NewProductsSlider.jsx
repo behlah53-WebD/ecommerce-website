@@ -14,7 +14,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 
 const PRODUCTS_TO_SHOW = 5;
-const SLIDE_INTERVAL = 5000;
+const SLIDE_INTERVAL = 3500;
 const BACKEND_REFRESH_INTERVAL = 30000;
 
 const fallbackImage =

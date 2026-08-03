@@ -66,6 +66,57 @@ router.get("/me", authenticateToken, async (req, res) => {
   }
 });
 
+router.put("/profile", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ id: req.user.id });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+
+    const { name, authEmail } = req.body || {};
+
+    if (name !== undefined) {
+      const trimmedName = String(name || "").trim();
+      if (trimmedName === "") {
+        return res.status(400).json({
+          success: false,
+          message: "Name cannot be empty.",
+        });
+      }
+      user.name = trimmedName;
+    }
+
+    if (authEmail !== undefined) {
+      const trimmedEmail = normalizeEmail(authEmail);
+      if (!trimmedEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Email is required.",
+        });
+      }
+
+      const existing = await User.findOne({ authEmail: trimmedEmail, id: { $ne: user.id } });
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: "This email is already registered to another account.",
+        });
+      }
+      user.authEmail = trimmedEmail;
+    }
+
+    await user.save();
+    return res.json({
+      success: true,
+      message: "Profile updated successfully.",
+      data: publicUser(user),
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get("/user", async (req, res) => {
   try {
     const email = normalizeEmail(req.query.authEmail || req.query.email);
