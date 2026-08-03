@@ -99,12 +99,12 @@ export const ProductCard = ({ product }) => {
         </Link>
 
         {/* Product Badges */}
-        {/* <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
-          {product.isNew && (
+        <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+          {/* {product.isNew && (
             <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
               New
             </span>
-          )}
+          )} */}
 
           {product.isSale && (
             <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
