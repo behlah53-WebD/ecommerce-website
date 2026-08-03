@@ -7,6 +7,8 @@ const fileSchema = new mongoose.Schema({
   mimetype: String,
   size: Number,
   data: String,
+  url: String,
+  public_id: String,
 });
 
 const detailsSchema = new mongoose.Schema(

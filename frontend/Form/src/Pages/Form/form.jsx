@@ -180,7 +180,7 @@ const Form = ({ onLogout, currentUser: propsUser }) => {
         (formData.files || []).forEach((fileObj) => {
           if (fileObj instanceof File) {
             payload.append("file", fileObj);
-          } else if (fileObj && fileObj.data) {
+          } else if (fileObj && (fileObj.url || fileObj.data)) {
             existingBase64Files.push(fileObj);
           }
         });

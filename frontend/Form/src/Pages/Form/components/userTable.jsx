@@ -59,7 +59,13 @@ const UserTable = ({
     if (item.files && item.files.length > 0) {
       const firstFile = item.files[0];
       if (firstFile instanceof File) return URL.createObjectURL(firstFile);
-      if (firstFile.data) return `data:${firstFile.mimetype || "image/jpeg"};base64,${firstFile.data}`;
+      if (typeof firstFile === "string") return firstFile;
+      if (firstFile.url) return firstFile.url;
+      if (firstFile.data) {
+        return firstFile.data.startsWith("http://") || firstFile.data.startsWith("https://") || firstFile.data.startsWith("data:")
+          ? firstFile.data
+          : `data:${firstFile.mimetype || "image/jpeg"};base64,${firstFile.data}`;
+      }
     }
     return null;
   };

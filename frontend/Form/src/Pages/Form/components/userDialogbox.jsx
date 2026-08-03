@@ -96,7 +96,13 @@ const UserDialog = ({
       setSelectedFiles(initialFiles);
       const initialPreviews = initialFiles.map((file) => {
         if (file instanceof File) return URL.createObjectURL(file);
-        if (file && file.data) return `data:${file.mimetype || "image/jpeg"};base64,${file.data}`;
+        if (typeof file === "string") return file;
+        if (file && file.url) return file.url;
+        if (file && file.data) {
+          return file.data.startsWith("http://") || file.data.startsWith("https://") || file.data.startsWith("data:")
+            ? file.data
+            : `data:${file.mimetype || "image/jpeg"};base64,${file.data}`;
+        }
         return "";
       });
       setPreviews(initialPreviews);

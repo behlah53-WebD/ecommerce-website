@@ -106,6 +106,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong" });
 });
 
+const { runImageMigration } = require("./utils/migration");
+
 async function startServer() {
   try {
     if (!MONGO_URI) {
@@ -119,6 +121,9 @@ async function startServer() {
       connectTimeoutMS: 10000,
     });
     console.log("Connected to MongoDB successfully");
+
+    // Run migration in the background to clean up legacy base64 images
+    runImageMigration().catch((err) => console.error("Migration error:", err));
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

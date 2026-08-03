@@ -19,7 +19,7 @@ export const normalizeProduct = (item) => {
         if (typeof file === 'string') return file;
         if (file.url) return file.url;
         if (file.data) {
-          return file.data.startsWith('data:')
+          return file.data.startsWith('http://') || file.data.startsWith('https://') || file.data.startsWith('data:')
             ? file.data
             : `data:${file.mimetype || 'image/jpeg'};base64,${file.data}`;
         }

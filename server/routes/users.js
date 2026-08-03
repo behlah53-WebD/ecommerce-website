@@ -4,6 +4,7 @@ const { User } = require("../models/User");
 const { Detail } = require("../models/Detail");
 const { authenticateToken, optionalAuthenticateToken } = require("../middleware/auth");
 const { getPagination } = require("../utils/pagination");
+const { uploadBufferToCloudinary, isCloudinaryConfigured } = require("../utils/cloudinary");
 
 const router = express.Router();
 
@@ -19,34 +20,71 @@ const getRequestBody = (req) =>
         return reject(error);
       }
       const body = {};
-      const files = [];
+      const filePromises = [];
+
       busboy.on("field", (name, value) => {
         body[name] = value;
       });
+
       busboy.on("file", (fieldname, file, info) => {
         const chunks = [];
-        file.on("data", (chunk) => chunks.push(chunk));
-        file.on("end", () =>
-          files.push({
-            fieldname,
-            filename: info.filename,
-            encoding: info.encoding,
-            mimetype: info.mimeType,
-            size: Buffer.concat(chunks).length,
-            data: Buffer.concat(chunks).toString("base64"),
-          })
-        );
+        const filePromise = new Promise((resolveFile, rejectFile) => {
+          file.on("data", (chunk) => chunks.push(chunk));
+          file.on("end", async () => {
+            try {
+              const buffer = Buffer.concat(chunks);
+              if (isCloudinaryConfigured()) {
+                const cdnResult = await uploadBufferToCloudinary(buffer, {
+                  folder: "ecommerce_products",
+                });
+                resolveFile({
+                  fieldname,
+                  filename: info.filename,
+                  encoding: info.encoding,
+                  mimetype: info.mimeType,
+                  size: cdnResult.bytes || buffer.length,
+                  url: cdnResult.secure_url,
+                  data: cdnResult.secure_url,
+                  public_id: cdnResult.public_id,
+                });
+              } else {
+                const dataUrl = `data:${info.mimeType || "image/jpeg"};base64,${buffer.toString("base64")}`;
+                resolveFile({
+                  fieldname,
+                  filename: info.filename,
+                  encoding: info.encoding,
+                  mimetype: info.mimeType,
+                  size: buffer.length,
+                  url: dataUrl,
+                  data: dataUrl,
+                });
+              }
+            } catch (err) {
+              rejectFile(err);
+            }
+          });
+          file.on("error", rejectFile);
+        });
+
+        filePromises.push(filePromise);
       });
-      busboy.on("finish", () => {
-        let existingFiles = [];
+
+      busboy.on("finish", async () => {
         try {
-          existingFiles = body.existingFiles
-            ? JSON.parse(body.existingFiles)
-            : [];
-        } catch {}
-        delete body.existingFiles;
-        resolve({ ...body, files: [...existingFiles, ...files] });
+          const files = await Promise.all(filePromises);
+          let existingFiles = [];
+          try {
+            existingFiles = body.existingFiles
+              ? JSON.parse(body.existingFiles)
+              : [];
+          } catch {}
+          delete body.existingFiles;
+          resolve({ ...body, files: [...existingFiles, ...files] });
+        } catch (err) {
+          reject(err);
+        }
       });
+
       busboy.on("error", reject);
       req.pipe(busboy);
       return;
@@ -210,7 +248,7 @@ const getDetailsHandler = async (req, res) => {
     }
 
     const items = await Detail.find(filter)
-      .select("-password -username -phone -email -city -state -firstName -lastName")
+      .select("-password -username -phone -email -city -state -firstName -lastName -files.data")
       .sort(sortOption)
       .skip(pagination.skip)
       .limit(pagination.limit)
@@ -512,7 +550,7 @@ router.get("/admin/requests", authenticateToken, async (req, res) => {
     const pendingRequests = await Detail.find({
       status: { $in: ["pending_add", "pending_edit", "pending_delete"] },
     })
-      .select("-password -username -phone -email -city -state -firstName -lastName")
+      .select("-password -username -phone -email -city -state -firstName -lastName -files.data")
       .sort({ updatedAt: -1 })
       .lean();
 
