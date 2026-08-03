@@ -1,19 +1,18 @@
-import axios from 'axios';
+import axios from "axios";
 
 const BASE_URL = "http://localhost:3000";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   timeout: 10000,
 });
 
-
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,7 +20,6 @@ apiClient.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -37,7 +35,6 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -46,10 +43,8 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     const isTokenError = status === 401 || status === 403;
 
-    
-    if (isTokenError && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
+    if (isTokenError && !originalRequest._retry && !originalRequest.url?.includes("/auth/refresh")) {
       if (isRefreshing) {
-        
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -63,12 +58,11 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = sessionStorage.getItem('refreshToken');
+      const refreshToken = sessionStorage.getItem("refreshToken");
 
       if (!refreshToken) {
         isRefreshing = false;
-        
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem("accessToken");
         return Promise.reject(error);
       }
 
@@ -76,9 +70,9 @@ apiClient.interceptors.response.use(
         const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
 
         if (data.success && data.accessToken) {
-          localStorage.setItem('accessToken', data.accessToken);
+          localStorage.setItem("accessToken", data.accessToken);
           if (data.refreshToken) {
-            sessionStorage.setItem('refreshToken', data.refreshToken);
+            sessionStorage.setItem("refreshToken", data.refreshToken);
           }
 
           apiClient.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
@@ -88,18 +82,17 @@ apiClient.interceptors.response.use(
           isRefreshing = false;
           return apiClient(originalRequest);
         } else {
-          throw new Error('Refresh failed');
+          throw new Error("Refresh failed");
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        localStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
+        localStorage.removeItem("accessToken");
+        sessionStorage.removeItem("refreshToken");
         return Promise.reject(refreshError);
       }
     }
 
-    
     const errMsg = error.response?.data?.message || error.message;
     console.error(`API Error [${status}] ${originalRequest?.url}:`, errMsg);
 

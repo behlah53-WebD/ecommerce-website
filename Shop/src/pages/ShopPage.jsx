@@ -20,14 +20,15 @@ import {
 
 export const ShopPage = () => {
   const {
-    totalCount,
+    shopTotalCount,
     selectedCategory,
     setSelectedCategory,
     categories,
-    products,
-    isLoading,
-    hasMore,
-    loadMoreProducts,
+    shopProducts,
+    shopLoading,
+    shopHasMore,
+    refreshShopProducts,
+    loadMoreShopProducts,
     priceRange,
     setPriceRange,
     brands,
@@ -36,6 +37,7 @@ export const ShopPage = () => {
     searchQuery,
     setSearchQuery,
   } = useProducts();
+
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,6 +47,7 @@ export const ShopPage = () => {
     const handler = setTimeout(() => {
       setSearchQuery(searchTerm);
     }, 400);
+
     return () => clearTimeout(handler);
   }, [searchTerm, setSearchQuery]);
 
@@ -59,44 +62,50 @@ export const ShopPage = () => {
     { value: "popular", label: "Most Popular" },
   ];
 
-  // Sort products based on sortBy
   const sortedProducts = useMemo(() => {
-    if (!products) return [];
-    const sorted = [...products];
+    if (!shopProducts) return [];
+
+    const sorted = [...shopProducts];
 
     switch (sortBy) {
       case "price-low":
         return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+
       case "price-high":
         return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+
       case "newest":
         return sorted.sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+          (a, b) =>
+            new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
         );
+
       case "rating":
         return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
       case "brand-asc":
         return sorted.sort((a, b) =>
           (a.brand || "").localeCompare(b.brand || ""),
         );
+
       case "brand-desc":
         return sorted.sort((a, b) =>
           (b.brand || "").localeCompare(a.brand || ""),
         );
+
       case "popular":
         return sorted.sort(
           (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0),
         );
+
       case "featured":
       default:
         return sorted;
     }
-  }, [products, sortBy]);
+  }, [shopProducts, sortBy]);
 
-  // Use actual categories from backend, filter out 'All'
   const backendCategories = categories.filter((cat) => cat !== "All");
 
-  // Category icons mapping
   const categoryIcons = {
     clothing: "👕",
     clothes: "👕",
@@ -130,6 +139,7 @@ export const ShopPage = () => {
     const key = String(catName || "")
       .trim()
       .toLowerCase();
+
     return categoryIcons[key] || "📦";
   };
 
@@ -137,10 +147,17 @@ export const ShopPage = () => {
     ? backendCategories
     : backendCategories.slice(0, 6);
 
+  const hasActiveFilters =
+    selectedCategory !== "All" ||
+    selectedBrands.length > 0 ||
+    priceRange[0] !== 0 ||
+    priceRange[1] !== 1000 ||
+    Boolean(searchQuery);
+
   return (
     <div className="h-fit bg-gray-50 dark:bg-gray-950">
       <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:pt-10 lg:pb-4">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
@@ -152,18 +169,21 @@ export const ShopPage = () => {
                   <ArrowLeft className="h-5 w-5" />
                 </Link>
               )}
+
               <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white">
-                {selectedCategory === "All" ? "All Products" : selectedCategory}
+                {selectedCategory === "All"
+                  ? "All Products"
+                  : selectedCategory}
               </h1>
             </div>
+
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {totalCount} {totalCount === 1 ? "product" : "products"} available
+              {shopTotalCount}{" "}
+              {shopTotalCount === 1 ? "product" : "products"} available
             </p>
           </div>
 
-          {/* Sort & Filter Controls */}
           <div className="flex items-center gap-3">
-            {/* Sort Dropdown */}
             <div className="relative">
               <select
                 value={sortBy}
@@ -176,10 +196,10 @@ export const ShopPage = () => {
                   </option>
                 ))}
               </select>
+
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             </div>
 
-            {/* Mobile Filter Button */}
             <button
               onClick={() => setShowMobileFilter(true)}
               className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
@@ -193,13 +213,14 @@ export const ShopPage = () => {
         {/* Main Content */}
         <div className="flex gap-8 h-[calc(100vh-160px)]">
           {/* Desktop Sidebar */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
+          <aside className="hidden lg:block w-72 flex-shrink-0">
             <div className="h-full overflow-y-auto space-y-5">
-              {/* Search in Sidebar */}
+              {/* Search */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div className="p-4">
                   <div className="relative">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+
                     <input
                       type="text"
                       placeholder="Search products..."
@@ -207,10 +228,12 @@ export const ShopPage = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     />
+
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm("")}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        aria-label="Clear search"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -219,7 +242,7 @@ export const ShopPage = () => {
                 </div>
               </div>
 
-              {/* Categories Section */}
+              {/* Categories */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-gray-100 dark:border-gray-800">
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -227,8 +250,8 @@ export const ShopPage = () => {
                     Categories
                   </h3>
                 </div>
+
                 <div className="p-2">
-                  {/* All Products Option */}
                   <button
                     onClick={() => setSelectedCategory("All")}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
@@ -241,13 +264,15 @@ export const ShopPage = () => {
                       <span className="text-lg">🛍️</span>
                       All Products
                     </span>
-                    <span className="text-xs text-gray-400">{totalCount}</span>
+
+                    <span className="text-xs text-gray-400">
+                      {shopTotalCount}
+                    </span>
                   </button>
 
-                  {/* Dynamic Categories from Backend */}
-                  {displayedCategories.map((category, index) => (
+                  {displayedCategories.map((category) => (
                     <button
-                      key={index}
+                      key={category}
                       onClick={() => setSelectedCategory(category)}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                         selectedCategory === category
@@ -264,7 +289,6 @@ export const ShopPage = () => {
                     </button>
                   ))}
 
-                  {/* Show More/Less Button */}
                   {backendCategories.length > 6 && (
                     <button
                       onClick={() => setShowAllCategories(!showAllCategories)}
@@ -294,6 +318,7 @@ export const ShopPage = () => {
                     Price Range
                   </h3>
                 </div>
+
                 <div className="p-4">
                   <PriceRangeSlider
                     min={0}
@@ -313,6 +338,7 @@ export const ShopPage = () => {
                         <Filter className="h-4 w-4 text-primary-500" />
                         Brand
                       </h3>
+
                       {selectedBrands.length > 0 && (
                         <button
                           onClick={() => setSelectedBrands([])}
@@ -323,9 +349,11 @@ export const ShopPage = () => {
                       )}
                     </div>
                   </div>
+
                   <div className="max-h-64 overflow-y-auto p-2">
                     {brands.map((brand) => {
                       const isChecked = selectedBrands.includes(brand);
+
                       return (
                         <label
                           key={brand}
@@ -345,6 +373,7 @@ export const ShopPage = () => {
                             }}
                             className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                           />
+
                           <span className="truncate">{brand}</span>
                         </label>
                       );
@@ -361,29 +390,36 @@ export const ShopPage = () => {
                     Need Help?
                   </h4>
                 </div>
+
                 <p className="text-xs text-primary-700 dark:text-primary-300 mb-3">
                   Can't find what you're looking for? Our support team is here
                   to help.
                 </p>
+
                 <button className="w-full py-2 bg-white dark:bg-gray-800 text-primary-700 dark:text-primary-300 rounded-xl text-xs font-semibold border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-950/50 transition-colors">
                   Contact Support
                 </button>
               </div>
             </div>
-          </div>
+          </aside>
 
           {/* Products Grid */}
-          <div className="flex-1 min-w-0 overflow-y-auto">
-            {/* Active Filters Bar */}
+          <main className="flex-1 min-w-0 overflow-y-auto">
+            {/* Active Filters */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {selectedCategory !== "All" && (
                 <>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
                     Category:
                   </span>
+
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
                     {selectedCategory}
-                    <button onClick={() => setSelectedCategory("All")}>
+
+                    <button
+                      onClick={() => setSelectedCategory("All")}
+                      aria-label="Remove category filter"
+                    >
                       <X className="h-3 w-3 hover:text-primary-900 dark:hover:text-primary-300" />
                     </button>
                   </span>
@@ -393,16 +429,20 @@ export const ShopPage = () => {
               {sortBy !== "featured" && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium">
                   Sort: {sortOptions.find((opt) => opt.value === sortBy)?.label}
-                  <button onClick={() => setSortBy("featured")}>
+
+                  <button
+                    onClick={() => setSortBy("featured")}
+                    aria-label="Clear sorting"
+                  >
                     <X className="h-3 w-3 hover:text-gray-900 dark:hover:text-white" />
                   </button>
                 </span>
               )}
 
-              {priceRange[0] !== 0 ||
-              priceRange[1] !== 1000 ? (
+              {(priceRange[0] !== 0 || priceRange[1] !== 1000) && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
                   Price: ${priceRange[0]} - ${priceRange[1]}
+
                   <button
                     onClick={() => setPriceRange([0, 1000])}
                     aria-label="Clear price filter"
@@ -410,7 +450,7 @@ export const ShopPage = () => {
                     <X className="h-3 w-3 hover:text-primary-900 dark:hover:text-primary-300" />
                   </button>
                 </span>
-              ) : null}
+              )}
 
               {selectedBrands.length > 0 &&
                 selectedBrands.map((brand) => (
@@ -419,6 +459,7 @@ export const ShopPage = () => {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium"
                   >
                     {brand}
+
                     <button
                       onClick={() =>
                         setSelectedBrands(
@@ -431,6 +472,12 @@ export const ShopPage = () => {
                     </button>
                   </span>
                 ))}
+
+              {!hasActiveFilters && (
+                <span className="text-xs text-gray-400">
+                  No active filters
+                </span>
+              )}
             </div>
 
             {/* Results Count */}
@@ -438,7 +485,7 @@ export const ShopPage = () => {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Showing{" "}
                 <span className="font-semibold text-gray-900 dark:text-white">
-                  {totalCount}
+                  {shopTotalCount}
                 </span>{" "}
                 results
                 {sortBy !== "featured" && (
@@ -450,6 +497,7 @@ export const ShopPage = () => {
                   </span>
                 )}
               </p>
+
               <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
                 <Grid3X3 className="h-3.5 w-3.5" />
                 <span>Grid View</span>
@@ -457,14 +505,28 @@ export const ShopPage = () => {
             </div>
 
             {/* Products Display */}
-            {isLoading && (!sortedProducts || sortedProducts.length === 0) ? (
+            {shopLoading &&
+            (!sortedProducts || sortedProducts.length === 0) ? (
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <ProductSkeleton key={idx} />
                 ))}
               </div>
             ) : !sortedProducts || sortedProducts.length === 0 ? (
-              <EmptyProductsState />
+              <EmptyProductsState
+                title={
+                  hasActiveFilters
+                    ? "No products match your filters"
+                    : "No Products Available"
+                }
+                message={
+                  hasActiveFilters
+                    ? "Try adjusting or clearing your filters to see more products."
+                    : "The product catalog is currently blank and ready for your backend API data integration."
+                }
+                onRefresh={refreshShopProducts}
+                loading={shopLoading}
+              />
             ) : (
               <div className="flex flex-col items-center gap-8">
                 <div className="w-full grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
@@ -476,9 +538,9 @@ export const ShopPage = () => {
                   ))}
                 </div>
 
-                {hasMore && (
+                {shopHasMore && (
                   <div className="flex flex-col items-center justify-center pt-2 pb-6">
-                    {isLoading ? (
+                    {shopLoading ? (
                       <div className="flex flex-col items-center gap-2.5 text-gray-500 dark:text-gray-400">
                         <Loader2 className="h-7 w-7 animate-spin text-primary-600" />
                         <span className="text-xs font-semibold tracking-wide uppercase">
@@ -487,7 +549,7 @@ export const ShopPage = () => {
                       </div>
                     ) : (
                       <button
-                        onClick={loadMoreProducts}
+                        onClick={loadMoreShopProducts}
                         className="group flex items-center gap-2.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-7 py-3.5 text-sm font-bold text-gray-800 dark:text-gray-200 shadow-sm transition-all duration-300 hover:border-primary-500 hover:text-primary-600 hover:shadow-md active:scale-95 cursor-pointer"
                       >
                         <span>Show More Products</span>
@@ -498,20 +560,18 @@ export const ShopPage = () => {
                 )}
               </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
 
       {/* Mobile Filter Drawer */}
       {showMobileFilter && (
         <div className="fixed inset-0 z-[10000] lg:hidden">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowMobileFilter(false)}
           />
 
-          {/* Filter Panel */}
           <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl animate-slideInRight overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 p-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2">
@@ -520,9 +580,11 @@ export const ShopPage = () => {
                   Filters
                 </h2>
               </div>
+
               <button
                 onClick={() => setShowMobileFilter(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Close filters"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -532,6 +594,7 @@ export const ShopPage = () => {
               {/* Mobile Search */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -546,6 +609,7 @@ export const ShopPage = () => {
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
                   Sort By
                 </label>
+
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -565,6 +629,7 @@ export const ShopPage = () => {
                   <Filter className="h-4 w-4 text-primary-500" />
                   Categories
                 </h3>
+
                 <div className="space-y-1">
                   <button
                     onClick={() => {
@@ -582,9 +647,10 @@ export const ShopPage = () => {
                       All Products
                     </span>
                   </button>
-                  {backendCategories.map((category, index) => (
+
+                  {backendCategories.map((category) => (
                     <button
-                      key={index}
+                      key={category}
                       onClick={() => {
                         setSelectedCategory(category);
                         setShowMobileFilter(false);
@@ -605,11 +671,13 @@ export const ShopPage = () => {
                   ))}
                 </div>
               </div>
+
               {/* Mobile Price */}
               <div>
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
                   Price Range
                 </label>
+
                 <PriceRangeSlider
                   min={0}
                   max={1000}
@@ -624,9 +692,11 @@ export const ShopPage = () => {
                   <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
                     Brand
                   </label>
+
                   <div className="space-y-1 max-h-64 overflow-y-auto">
                     {brands.map((brand) => {
                       const isChecked = selectedBrands.includes(brand);
+
                       return (
                         <label
                           key={brand}
@@ -646,6 +716,7 @@ export const ShopPage = () => {
                             }}
                             className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                           />
+
                           <span className="truncate">{brand}</span>
                         </label>
                       );
@@ -655,7 +726,6 @@ export const ShopPage = () => {
               )}
             </div>
 
-            {/* Apply Button */}
             <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 p-4">
               <button
                 onClick={() => setShowMobileFilter(false)}
@@ -670,4 +740,3 @@ export const ShopPage = () => {
     </div>
   );
 };
-

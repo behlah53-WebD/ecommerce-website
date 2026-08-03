@@ -13,7 +13,7 @@ const cartRoutes = require("./routes/cart");
 const wishlistRoutes = require("./routes/wishlist");
 const emailRoutes = require("./routes/email");
 const orderRoutes = require("./routes/orders");
-
+const paymentRoutes = require("./routes/paymentRoutes");
 const app = express();
 const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
@@ -98,6 +98,7 @@ app.use("/cart", cartRoutes);
 app.use("/wishlist", wishlistRoutes);
 app.use("/email", emailRoutes);
 app.use("/orders", orderRoutes);
+app.use("/payments", paymentRoutes);
 
 // Global error handler (after routes)
 app.use((err, req, res, next) => {

@@ -2,8 +2,10 @@ import React from 'react';
 import { PackageOpen, RefreshCw, Server } from 'lucide-react';
 import { useProducts } from '../../hooks/useProducts';
 
-export const EmptyProductsState = ({ title, message }) => {
-  const { refreshProducts, isLoading } = useProducts();
+export const EmptyProductsState = ({ title, message, onRefresh, loading }) => {
+  const ctx = useProducts();
+  const refresh = onRefresh || ctx.refreshProducts;
+  const isLoading = loading !== undefined ? loading : ctx.isLoading;
 
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-12 text-center my-8">
@@ -21,7 +23,7 @@ export const EmptyProductsState = ({ title, message }) => {
 
       <div className="mt-6 flex flex-col sm:flex-row gap-3">
         <button
-          onClick={() => refreshProducts()}
+          onClick={() => refresh()}
           disabled={isLoading}
           className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 disabled:opacity-50"
         >
