@@ -29,6 +29,7 @@ export const CheckoutPage = () => {
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [submittedOrderId, setSubmittedOrderId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [paymentOpening, setPaymentOpening] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const [formData, setFormData] = useState({
@@ -41,6 +42,12 @@ export const CheckoutPage = () => {
     postalCode: "",
   });
 
+  const shipping = subtotal > 100 ? 0 : 15;
+  const tax = Number((subtotal * 0.08).toFixed(2));
+  const grandTotal = Number(
+    (subtotal + shipping + tax).toFixed(2)
+  );
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -50,38 +57,10 @@ export const CheckoutPage = () => {
     }));
   };
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.Razorpay) {
-        resolve();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Failed to load Razorpay script"));
-      document.body.appendChild(script);
-    });
-  };
-
-  const openRazorpayCheckout = async (paymentData) => {
-    try {
-      if (!window.Razorpay) {
-        await loadRazorpayScript();
-      }
-    } catch {
-      setErrorMsg(
-        "Razorpay Checkout could not be loaded. Please check your internet connection and try again."
-      );
-      return;
-    }
-
+  const openRazorpayCheckout = (paymentData) => {
     if (!window.Razorpay) {
       setErrorMsg(
-        "Razorpay Checkout is not loaded. Add the Razorpay checkout script to index.html."
+        "Razorpay Checkout is not loaded. Please refresh the page and try again."
       );
       return;
     }
@@ -107,8 +86,8 @@ export const CheckoutPage = () => {
 
       prefill: {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
-        email: formData.email,
-        contact: formData.phone,
+        email: formData.email.trim(),
+        contact: formData.phone.trim(),
       },
 
       notes: {
@@ -120,10 +99,19 @@ export const CheckoutPage = () => {
       },
 
       handler: async (response) => {
+        setPaymentOpening(false);
         setLoading(true);
         setErrorMsg("");
 
         try {
+          if (
+            !response?.razorpay_order_id ||
+            !response?.razorpay_payment_id ||
+            !response?.razorpay_signature
+          ) {
+            throw new Error("Incomplete Razorpay payment response.");
+          }
+
           const verifyResponse = await apiClient.post(
             "/payments/verify-payment",
             {
@@ -149,6 +137,7 @@ export const CheckoutPage = () => {
         } catch (error) {
           setErrorMsg(
             error.response?.data?.message ||
+              error.message ||
               "Payment verification failed."
           );
         } finally {
@@ -158,9 +147,11 @@ export const CheckoutPage = () => {
 
       modal: {
         ondismiss: () => {
-          if (!orderSubmitted) {
-            setErrorMsg("Payment popup closed.");
-          }
+          setPaymentOpening(false);
+          setLoading(false);
+          setErrorMsg(
+            "Payment was cancelled or the checkout window was closed."
+          );
         },
       },
     };
@@ -168,14 +159,16 @@ export const CheckoutPage = () => {
     const razorpayCheckout = new window.Razorpay(options);
 
     razorpayCheckout.on("payment.failed", (response) => {
-      const description = response?.error?.description;
+      setPaymentOpening(false);
+      setLoading(false);
 
       setErrorMsg(
-        description ||
+        response?.error?.description ||
           "Payment failed. Please try another payment method."
       );
     });
 
+    setPaymentOpening(true);
     razorpayCheckout.open();
   };
 
@@ -183,7 +176,7 @@ export const CheckoutPage = () => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (loading) {
+    if (loading || paymentOpening) {
       return;
     }
 
@@ -251,13 +244,13 @@ export const CheckoutPage = () => {
         return;
       }
 
-      await openRazorpayCheckout(responseData.data);
+      setLoading(false);
+      openRazorpayCheckout(responseData.data);
     } catch (error) {
       setErrorMsg(
         error.response?.data?.message ||
           "Failed to create payment order."
       );
-    } finally {
       setLoading(false);
     }
   };
@@ -341,12 +334,6 @@ export const CheckoutPage = () => {
       </div>
     );
   }
-
-  const shipping = subtotal > 100 ? 0 : 15;
-  const tax = Number((subtotal * 0.08).toFixed(2));
-  const grandTotal = Number(
-    (subtotal + shipping + tax).toFixed(2)
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -699,13 +686,19 @@ export const CheckoutPage = () => {
 
                 <button
                   type="submit"
-                  disabled={loading || !cartItems.length}
+                  disabled={
+                    loading ||
+                    paymentOpening ||
+                    !cartItems.length
+                  }
                   className="w-full rounded-2xl bg-primary-600 py-4 font-bold text-white transition-all hover:bg-primary-700 active:scale-[0.99] shadow-xl shadow-primary-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
                 >
-                  {loading ? (
+                  {loading || paymentOpening ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Processing...
+                      {paymentOpening
+                        ? "Waiting for payment..."
+                        : "Processing..."}
                     </>
                   ) : (
                     <>
@@ -767,3 +760,5 @@ export const CheckoutPage = () => {
     </div>
   );
 };
+
+export default CheckoutPage;
