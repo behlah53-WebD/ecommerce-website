@@ -654,6 +654,123 @@ router.post("/admin/requests/:id/decline", authenticateToken, async (req, res) =
 
 
 
+const { Hero } = require("../models/Hero");
+
+// GET /users/hero/list - Publicly accessible list of active hero slides
+router.get("/hero/list", async (req, res) => {
+  try {
+    const slides = await Hero.find({ isActive: true }).sort({ createdAt: -1 });
+    return res.json({ success: true, data: slides });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /users/hero/admin - Admin list of all hero slides
+router.get("/hero/admin", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+    const slides = await Hero.find().sort({ createdAt: -1 });
+    return res.json({ success: true, data: slides });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /users/hero - Create new hero slide
+router.post("/hero", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const body = await getRequestBody(req);
+    let imageUrl = body.imageUrl || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop";
+    if (body.files && body.files.length > 0) {
+      imageUrl = body.files[0].url || body.files[0].data;
+    }
+
+    const slide = await Hero.create({
+      subtitle: body.subtitle,
+      title: body.title,
+      description: body.description,
+      imageUrl,
+      buttonText1: body.buttonText1,
+      buttonLink1: body.buttonLink1,
+      buttonText2: body.buttonText2,
+      buttonLink2: body.buttonLink2,
+      isActive: body.isActive !== "false" && body.isActive !== false,
+    });
+
+    return res.json({ success: true, data: slide, message: "Hero slide created successfully!" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// PUT /users/hero/:id - Update existing hero slide
+router.put("/hero/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const body = await getRequestBody(req);
+    let imageUrl = body.imageUrl;
+    if (body.files && body.files.length > 0) {
+      imageUrl = body.files[0].url || body.files[0].data;
+    }
+
+    const updateData = {
+      subtitle: body.subtitle,
+      title: body.title,
+      description: body.description,
+      buttonText1: body.buttonText1,
+      buttonLink1: body.buttonLink1,
+      buttonText2: body.buttonText2,
+      buttonLink2: body.buttonLink2,
+      isActive: body.isActive !== "false" && body.isActive !== false,
+    };
+
+    if (imageUrl) {
+      updateData.imageUrl = imageUrl;
+    }
+
+    const slide = await Hero.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!slide) {
+      return res.status(404).json({ success: false, message: "Hero slide not found" });
+    }
+
+    return res.json({ success: true, data: slide, message: "Hero slide updated successfully!" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DELETE /users/hero/:id - Delete hero slide
+router.delete("/hero/:id", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const slide = await Hero.findByIdAndDelete(req.params.id);
+    if (!slide) {
+      return res.status(404).json({ success: false, message: "Hero slide not found" });
+    }
+
+    return res.json({ success: true, message: "Hero slide deleted successfully!" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get("/categories", optionalAuthenticateToken, getCategoriesHandler);
 router.get("/brands", optionalAuthenticateToken, getBrandsHandler);
 router.get("/", optionalAuthenticateToken, getDetailsHandler);

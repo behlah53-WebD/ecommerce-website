@@ -126,6 +126,12 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
         description: "Review & moderate",
       },
       {
+        label: "Hero Customization",
+        icon: <StarsIcon />,
+        value: "hero-customization",
+        description: "Customize shop banners",
+      },
+      {
         label: "Seller Approval Requests",
         icon: <StorefrontIcon />,
         value: "seller-approvals",

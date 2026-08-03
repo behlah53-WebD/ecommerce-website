@@ -9,6 +9,7 @@ import SellerApprovalRequests from "@/Pages/Form/components/SellerApprovalReques
 import UsersDirectory from "@/components/UsersDirectory";
 import AdminOrders from "@/Pages/Form/components/AdminOrders";
 import SellerOrders from "@/Pages/Form/components/SellerOrders";
+import HeroCustomization from "@/Pages/Form/components/HeroCustomization";
 import { clearAuth, getUserFromToken, apiGet } from "@/API/api";
 
 function Dashboard() {
@@ -117,6 +118,7 @@ function Dashboard() {
           <Form onLogout={handleLogout} currentUser={currentUser} />
         )}
         {activeView === "requests" && <AdminRequests showToast={showToast} />}
+        {activeView === "hero-customization" && <HeroCustomization showToast={showToast} />}
         {activeView === "seller-approvals" && (
           <SellerApprovalRequests showToast={showToast} />
         )}

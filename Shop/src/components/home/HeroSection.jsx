@@ -1,57 +1,105 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
+import apiClient from '../../api/apiClient';
+
+const HERO_CACHE_KEY = 'hero_banner_cache';
+
+const defaultHero = {
+  subtitle: "New Spring & Summer Collection",
+  title: "Elevate Your Everyday Style",
+  description: "Discover curated collections of premium fashion and lifestyle products. Timeless designs crafted for the modern individual.",
+  imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop",
+  buttonText1: "Shop Collection",
+  buttonLink1: "/shop",
+  buttonText2: "Browse Categories",
+  buttonLink2: "/categories",
+};
+
+const getCachedHero = () => {
+  try {
+    const cached = localStorage.getItem(HERO_CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch {}
+  return null;
+};
 
 export const HeroSection = () => {
+  // Initialize directly from localStorage cache to prevent any flash on reload
+  const [heroData, setHeroData] = useState(() => getCachedHero() || defaultHero);
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await apiClient.get('/users/hero/list');
+        if (response.data?.success && response.data.data?.length > 0) {
+          const slide = response.data.data[0];
+          // Only update state + cache if the data changed (prevents unnecessary re-render)
+          const current = getCachedHero();
+          if (!current || current._id !== slide._id || current.imageUrl !== slide.imageUrl) {
+            setHeroData(slide);
+            localStorage.setItem(HERO_CACHE_KEY, JSON.stringify(slide));
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load hero banner from database, using cached/fallback:", error);
+      }
+    };
+    fetchHeroData();
+  }, []);
+
   return (
     <section className="relative min-h-[85vh] overflow-hidden bg-gray-900 flex items-center">
-      {}
+      {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop"
-          alt="Fashion collection hero"
+          src={heroData.imageUrl}
+          alt={heroData.title}
           className="h-full w-full object-cover opacity-40"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-900/80 to-transparent" />
       </div>
 
-      {}
+      {/* Hero Content */}
       <div className="relative mx-auto flex min-h-[85vh] max-w-7xl items-center px-4 py-20 lg:px-8 w-full">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md border border-white/10">
-            <Sparkles className="h-4 w-4 text-primary-400" />
-            New Spring & Summer Collection
-          </span>
+          {heroData.subtitle && (
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md border border-white/10">
+              <Sparkles className="h-4 w-4 text-primary-400" />
+              {heroData.subtitle}
+            </span>
+          )}
 
           <h1 className="mt-6 font-display text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight">
-            Elevate Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-sky-200">
-              Everyday Style
-            </span>
+            {heroData.title}
           </h1>
 
           <p className="mt-6 text-lg text-gray-300 sm:text-xl">
-            Discover curated collections of premium fashion and lifestyle products. Timeless designs crafted for the modern individual.
+            {heroData.description}
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-8 py-4 font-semibold text-white transition-all hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/25"
-            >
-              Shop Collection
-              <ArrowRight className="h-5 w-5" />
-            </Link>
+            {heroData.buttonText1 && (
+              <Link
+                to={heroData.buttonLink1 || "/shop"}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-8 py-4 font-semibold text-white transition-all hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/25"
+              >
+                {heroData.buttonText1}
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            )}
 
-            <Link
-              to="/categories"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
-            >
-              Browse Categories
-            </Link>
+            {heroData.buttonText2 && (
+              <Link
+                to={heroData.buttonLink2 || "/categories"}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20"
+              >
+                {heroData.buttonText2}
+              </Link>
+            )}
           </div>
 
-          {}
+          {/* Bottom Stats Banner */}
           <div className="mt-16 flex items-center gap-8 border-t border-white/15 pt-8">
             <div>
               <div className="font-display text-2xl sm:text-3xl font-bold text-white">50K+</div>
@@ -73,7 +121,7 @@ export const HeroSection = () => {
           </div>
         </div>
 
-        {}
+        {/* Right Info Overlay Cards */}
         <div className="absolute bottom-12 right-8 hidden space-y-4 lg:block">
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 text-white">
             <div className="flex items-center gap-3">

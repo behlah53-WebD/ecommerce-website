@@ -1,5 +1,31 @@
 const { Detail } = require("../models/Detail");
+const { Hero } = require("../models/Hero");
 const { uploadBufferToCloudinary, isCloudinaryConfigured } = require("./cloudinary");
+
+/**
+ * Seeds a default hero section if the collection is empty.
+ */
+const seedDefaultHero = async () => {
+  try {
+    const count = await Hero.countDocuments();
+    if (count === 0) {
+      await Hero.create({
+        subtitle: "New Spring & Summer Collection",
+        title: "Elevate Your Everyday Style",
+        description: "Discover curated collections of premium fashion and lifestyle products. Timeless designs crafted for the modern individual.",
+        imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop",
+        buttonText1: "Shop Collection",
+        buttonLink1: "/shop",
+        buttonText2: "Browse Categories",
+        buttonLink2: "/categories",
+        isActive: true,
+      });
+      console.log("Default hero section seeded successfully.");
+    }
+  } catch (error) {
+    console.error("Error seeding default hero section:", error);
+  }
+};
 
 /**
  * Automatically migrates existing base64 images in MongoDB to Cloudinary CDN URLs.
@@ -7,6 +33,9 @@ const { uploadBufferToCloudinary, isCloudinaryConfigured } = require("./cloudina
  */
 const runImageMigration = async () => {
   try {
+    // Seed default hero section if it does not exist
+    await seedDefaultHero();
+
     if (!isCloudinaryConfigured()) {
       console.log("Cloudinary is not configured. Skipping database image migration.");
       return;
