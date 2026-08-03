@@ -9,7 +9,7 @@ import {NewProductsSlider} from '../components/home/NewProductsSlider';
 
 export const HomePage = () => {
   return (
-    <div className="space-y-12">
+    <div className="space-y-2">
       {}
       <HeroSection />
 
@@ -17,7 +17,9 @@ export const HomePage = () => {
       <FeatureBanner />
 
       {}
+      <div className="py-5 -mt-25">
       <CategoryGrid />
+    </div>
 
       <NewProductsSlider/>
 

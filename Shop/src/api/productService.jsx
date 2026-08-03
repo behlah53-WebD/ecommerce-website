@@ -97,7 +97,7 @@ export const getProductById = async (id) => {
     if (!item) return null;
     return normalizeProduct(item);
   } catch (error) {
-    // Fallback: try to find in a small paginated fetch
+    
     console.warn(`Direct fetch for product ${id} failed, using fallback:`, error);
     try {
       const { products } = await getProducts({ limit: 50 });

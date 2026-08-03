@@ -179,7 +179,7 @@ export const ShopPage = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex gap-8 h-[calc(100vh-300px)]">
+        <div className="flex gap-8 h-[calc(100vh-160px)]">
           {/* Desktop Sidebar */}
           <div className="hidden lg:block w-72 flex-shrink-0">
             <div className="h-full overflow-y-auto space-y-5">
@@ -553,3 +553,4 @@ export const ShopPage = () => {
     </div>
   );
 };
+
