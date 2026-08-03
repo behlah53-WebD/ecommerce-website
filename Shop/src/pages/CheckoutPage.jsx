@@ -50,7 +50,35 @@ export const CheckoutPage = () => {
     }));
   };
 
-  const openRazorpayCheckout = (paymentData) => {
+  const loadRazorpayScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.Razorpay) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () =>
+        reject(new Error("Failed to load Razorpay script"));
+      document.body.appendChild(script);
+    });
+  };
+
+  const openRazorpayCheckout = async (paymentData) => {
+    try {
+      if (!window.Razorpay) {
+        await loadRazorpayScript();
+      }
+    } catch {
+      setErrorMsg(
+        "Razorpay Checkout could not be loaded. Please check your internet connection and try again."
+      );
+      return;
+    }
+
     if (!window.Razorpay) {
       setErrorMsg(
         "Razorpay Checkout is not loaded. Add the Razorpay checkout script to index.html."
@@ -223,7 +251,7 @@ export const CheckoutPage = () => {
         return;
       }
 
-      openRazorpayCheckout(responseData.data);
+      await openRazorpayCheckout(responseData.data);
     } catch (error) {
       setErrorMsg(
         error.response?.data?.message ||
