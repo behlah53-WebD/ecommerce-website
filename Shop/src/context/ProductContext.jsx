@@ -70,7 +70,7 @@ export const ProductProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await getProducts({ page, limit: 12 });
+       const result = await getProducts({ page, limit: 8 });
       const newProducts = result.products || [];
       const pg = result.pagination || { currentPage: 1, totalPages: 1, totalRecords: 0, hasNextPage: false };
 
@@ -100,7 +100,7 @@ export const ProductProvider = ({ children }) => {
     setShopLoading(true);
     setShopError(null);
     try {
-      const result = await getProducts({ page, limit: 12, ...buildShopFilters() });
+       const result = await getProducts({ page, limit: 8, ...buildShopFilters() });
       const newProducts = result.products || [];
       const pg = result.pagination || { currentPage: 1, totalPages: 1, totalRecords: 0, hasNextPage: false };
 
