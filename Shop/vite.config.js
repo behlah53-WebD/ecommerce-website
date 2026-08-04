@@ -27,12 +27,12 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: '/logo.png',
+            src: '/logo1.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/logo.png',
+            src: '/logo1.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -40,14 +40,14 @@ export default defineConfig({
         ],
         screenshots: [
           {
-            src: '/logo.png',
+            src: '/logo1.png',
             sizes: '512x512',
             type: 'image/png',
             form_factor: 'wide',
             label: 'Zyra Storefront Desktop',
           },
           {
-            src: '/logo.png',
+            src: '/logo1.png',
             sizes: '512x512',
             type: 'image/png',
             form_factor: 'narrow',
