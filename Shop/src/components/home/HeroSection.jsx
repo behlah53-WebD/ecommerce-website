@@ -49,7 +49,7 @@ export const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] overflow-hidden bg-gray-900 flex items-center">
+    <section className="relative min-h-screen overflow-hidden bg-gray-900 flex items-center">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -61,7 +61,7 @@ export const HeroSection = () => {
       </div>
 
       {/* Hero Content */}
-      <div className="relative mx-auto flex min-h-[85vh] max-w-7xl items-center px-4 py-20 lg:px-8 w-full">
+      <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 pt-[112px] pb-20 lg:px-8 lg:pt-[120px] w-full">
         <div className="max-w-2xl">
           {heroData.subtitle && (
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md border border-white/10">

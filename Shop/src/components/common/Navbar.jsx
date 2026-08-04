@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   ShoppingBag,
@@ -36,9 +36,12 @@ export const Navbar = ({ onOpenSearch }) => {
   const { currentUser, isLoggedIn, logout } = useAuth();
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const dropdownRef = useRef(null);
 
@@ -54,6 +57,18 @@ export const Navbar = ({ onOpenSearch }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    // Set initial state in case page loads scrolled
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -245,7 +260,13 @@ export const Navbar = ({ onOpenSearch }) => {
       </style>
 
       {/* Sticky Navbar */}
-      <header className="fixed top-8 left-0 z-[9999] w-full border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md transition-colors dark:border-gray-800 dark:bg-gray-950/95">
+      <header
+        className={`fixed top-8 left-0 z-[9999] w-full transition-all duration-300 ease-in-out ${
+          !isHome || scrolled
+            ? "border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/95"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="flex h-16 items-center justify-between lg:h-20">
             {/* Mobile menu button */}
@@ -255,7 +276,11 @@ export const Navbar = ({ onOpenSearch }) => {
                 setMobileMenuOpen((currentValue) => !currentValue);
                 setShowProfileDropdown(false);
               }}
-              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
+              className={`rounded-lg p-2 transition-colors lg:hidden ${
+                !isHome || scrolled
+                  ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  : "text-white hover:bg-white/10"
+              }`}
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -270,7 +295,9 @@ export const Navbar = ({ onOpenSearch }) => {
             <Link
               to="/"
               onClick={closeMenus}
-              className="flex items-center gap-2 font-display text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+              className={`flex items-center gap-2 font-display text-2xl font-bold tracking-tight transition-colors ${
+                !isHome || scrolled ? "text-gray-900 dark:text-white" : "text-white"
+              }`}
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-lg font-black text-white">
                 Z
@@ -286,10 +313,14 @@ export const Navbar = ({ onOpenSearch }) => {
                   key={link.path}
                   to={link.path}
                   className={({ isActive }) =>
-                    `text-sm font-medium transition-colors hover:text-primary-600 ${
-                      isActive
-                        ? "font-semibold text-primary-600"
-                        : "text-gray-700 dark:text-gray-300"
+                    `text-sm font-medium transition-colors ${
+                      !isHome || scrolled
+                        ? isActive
+                          ? "font-semibold text-primary-600"
+                          : "text-gray-700 hover:text-primary-600 dark:text-gray-300"
+                        : isActive
+                          ? "font-semibold text-primary-400"
+                          : "text-white/90 hover:text-white"
                     }`
                   }
                 >
@@ -304,7 +335,11 @@ export const Navbar = ({ onOpenSearch }) => {
               <button
                 type="button"
                 onClick={onOpenSearch}
-                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                className={`rounded-lg p-2 transition-colors ${
+                  !isHome || scrolled
+                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    : "text-white hover:bg-white/10"
+                }`}
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" />
@@ -314,20 +349,30 @@ export const Navbar = ({ onOpenSearch }) => {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                className={`rounded-lg p-2 transition-colors ${
+                  !isHome || scrolled
+                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    : "text-white hover:bg-white/10"
+                }`}
                 aria-label="Toggle dark mode"
               >
                 {isDarkMode ? (
                   <Sun className="h-5 w-5 text-amber-400" />
-                ) : (
+                ) : (!isHome || scrolled) ? (
                   <Moon className="h-5 w-5 text-gray-600" />
+                ) : (
+                  <Moon className="h-5 w-5 text-white" />
                 )}
               </button>
 
               {/* Wishlist */}
               <Link
                 to="/wishlist"
-                className="relative hidden rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 sm:block"
+                className={`relative hidden rounded-lg p-2 transition-colors sm:block ${
+                  !isHome || scrolled
+                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    : "text-white hover:bg-white/10"
+                }`}
                 aria-label="Wishlist"
               >
                 <Heart className="h-5 w-5" />
@@ -347,7 +392,11 @@ export const Navbar = ({ onOpenSearch }) => {
                     setShowProfileDropdown((currentValue) => !currentValue);
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  className={`flex items-center gap-2 rounded-lg p-2 transition-colors ${
+                    !isHome || scrolled
+                      ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      : "text-white hover:bg-white/10"
+                  }`}
                   aria-label="Account"
                   aria-expanded={showProfileDropdown}
                 >
@@ -549,7 +598,11 @@ export const Navbar = ({ onOpenSearch }) => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="relative rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                className={`relative rounded-lg p-2 transition-colors ${
+                  !isHome || scrolled
+                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    : "text-white hover:bg-white/10"
+                }`}
                 aria-label="Cart"
               >
                 <ShoppingBag className="h-5 w-5" />
