@@ -31,7 +31,7 @@ transporter.verify((err) => {
 });
 
 
-async function sendEmail({ to, subject, html, text, from }) {
+async function sendEmail({ to, subject, html, text, from, attachments }) {
   if (!smtpUser || !smtpPass) {
     throw new Error("SMTP credentials are not configured");
   }
@@ -49,6 +49,7 @@ async function sendEmail({ to, subject, html, text, from }) {
     subject,
     ...(html ? { html } : {}),
     ...(text ? { text } : {}),
+    ...(attachments ? { attachments } : {}),
   };
 
 

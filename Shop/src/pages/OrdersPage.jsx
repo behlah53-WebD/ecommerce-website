@@ -74,6 +74,9 @@ const handleDownloadInvoice = (order) => {
           background-color: #ffffff;
           line-height: 1.5;
           padding: 40px;
+          /* Force backgrounds & colors to print exactly as shown on screen */
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
         }
 
         .no-print-bar {
@@ -267,15 +270,37 @@ const handleDownloadInvoice = (order) => {
         @media print {
           body {
             padding: 0;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
           }
           .no-print-bar {
             display: none !important;
           }
           .invoice-card {
-            border: none;
+            border: 1px solid #e2e8f0 !important;
             box-shadow: none;
-            padding: 0;
+            padding: 30px;
             max-width: 100%;
+          }
+          /* Gradient text doesn't render in PDF — use solid indigo instead */
+          .logo-area h1 {
+            background: none !important;
+            -webkit-text-fill-color: #4f46e5 !important;
+            color: #4f46e5 !important;
+          }
+          /* Force table header background to print */
+          th {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+          }
+          /* Force badge backgrounds to print */
+          .badge-paid {
+            background-color: #dcfce7 !important;
+            color: #15803d !important;
+          }
+          .badge-unpaid {
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
           }
         }
       </style>
@@ -478,6 +503,37 @@ const getTrackingStepIndex = (order, now) => {
   return step;
 };
 
+const resolveOrderStatus = (order, now) => {
+  if (
+    order.cancelRequest?.requested === true &&
+    order.cancelRequest?.status === "Pending"
+  ) {
+    return "Cancellation Pending";
+  }
+  if (
+    order.cancelRequest?.requested === true &&
+    order.cancelRequest?.status === "Approved"
+  ) {
+    return "Cancelled";
+  }
+  if (
+    order.returnRequest?.requested === true &&
+    order.returnRequest?.status === "Approved"
+  ) {
+    return "Returned";
+  }
+  if (
+    order.returnRequest?.requested === true &&
+    order.returnRequest?.status === "Pending"
+  ) {
+    return "Return Pending";
+  }
+
+  const stepIndex = getTrackingStepIndex(order, now);
+  if (stepIndex < 0) return "Pending";
+  return TRACKING_STEPS[stepIndex]?.badge || "Pending";
+};
+
 const OrderCard = ({ order }) => {
   const [expanded, setExpanded] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -506,35 +562,7 @@ const OrderCard = ({ order }) => {
       ? TRACKING_STEPS[currentStepIndex]?.badge || "Pending"
       : "Pending";
 
-  const getDisplayStatus = () => {
-    if (
-      order.cancelRequest?.requested === true &&
-      order.cancelRequest?.status === "Pending"
-    ) {
-      return "Cancellation Pending";
-    }
-    if (
-      order.cancelRequest?.requested === true &&
-      order.cancelRequest?.status === "Approved"
-    ) {
-      return "Cancelled";
-    }
-    if (
-      order.returnRequest?.requested === true &&
-      order.returnRequest?.status === "Approved"
-    ) {
-      return "Returned";
-    }
-    if (
-      order.returnRequest?.requested === true &&
-      order.returnRequest?.status === "Pending"
-    ) {
-      return "Return Pending";
-    }
-    return trackingBadge;
-  };
-
-  const displayStatus = getDisplayStatus();
+  const displayStatus = resolveOrderStatus(order, now);
   const StatusIcon = STATUS_ICONS[displayStatus] || Clock;
 
   const showToastMessage = (message, type = "info") => {
@@ -1174,27 +1202,7 @@ export const OrdersPage = () => {
     return () => clearInterval(pollId);
   }, [isLoggedIn, isAuthLoading, navigate]);
 
-  const getOrderDisplayStatus = (order) => {
-    if (
-      order.cancelRequest?.requested === true &&
-      order.cancelRequest?.status === "Pending"
-    )
-      return "Cancellation Pending";
-    if (
-      order.cancelRequest?.requested === true &&
-      order.cancelRequest?.status === "Approved"
-    )
-      return "Cancelled";
-    if (
-      order.returnRequest?.requested === true &&
-      order.returnRequest?.status === "Pending"
-    )
-      return "Return Pending";
-
-    const stepIndex = getTrackingStepIndex(order, now);
-    if (stepIndex < 0) return "Pending";
-    return TRACKING_STEPS[stepIndex]?.badge || "Pending";
-  };
+  const getOrderDisplayStatus = (order) => resolveOrderStatus(order, now);
 
   const filteredOrders = orders.filter((order) => {
     const displayStatus = getOrderDisplayStatus(order);

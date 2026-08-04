@@ -6,6 +6,8 @@ const { User } = require("../models/User");
 const orderModule = require("../models/Order");
 const { Detail } = require("../models/Detail");
 const { authenticateToken } = require("../middleware/auth");
+const { sendEmail } = require("../utils/mailer");
+const { generateInvoicePdf, generateInvoiceHtml } = require("../utils/invoiceGenerator");
 
 const Order = orderModule.Order || orderModule.default || orderModule;
 
@@ -271,7 +273,8 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
       // Signature mismatch → payment invalid, do NOT create the order
       return res.status(400).json({
         success: false,
-        message: "Payment signature verification failed. Order was not created.",
+        message:
+          "Payment signature verification failed. Order was not created.",
       });
     }
 
@@ -329,6 +332,41 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
     // Clear the cart after payment success
     user.cart = [];
     await user.save();
+
+    // Generate and send invoice PDF asynchronously so we don't delay the response
+    if (order.shippingAddress?.email) {
+      generateInvoicePdf(order)
+        .then((pdfBuffer) => {
+          return sendEmail({
+            to: order.shippingAddress.email,
+            subject: `Invoice for Order #${order.orderId}`,
+            text: `Thank you for your order! Please find attached the invoice PDF for your order #${order.orderId}.`,
+            html: generateInvoiceHtml(order),
+            attachments: [
+              {
+                filename: `invoice_${order.orderId}.pdf`,
+                content: pdfBuffer,
+                contentType: "application/pdf",
+              },
+            ],
+          });
+        })
+        .then(() => {
+          console.log(
+            `[Invoice] Sent successfully to ${order.shippingAddress.email}`,
+          );
+        })
+        .catch((err) => {
+          console.error(
+            "[Invoice] Failed to generate or send invoice email:",
+            err,
+          );
+        });
+    } else {
+      console.warn(
+        `[Invoice] No shipping email found for order ${order.orderId}, skipping email.`,
+      );
+    }
 
     return res.status(200).json({
       success: true,
