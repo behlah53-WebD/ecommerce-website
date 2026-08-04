@@ -65,6 +65,11 @@ router.post('/admin/:orderId/status', authenticateToken, async (req, res) => {
 
     const previousStatus = order.status;
     order.status = status;
+
+    if (['Processing', 'Shipped', 'Delivered'].includes(status) && !order.approvedAt) {
+      order.approvedAt = new Date();
+    }
+
     await order.save();
 
     
@@ -419,7 +424,7 @@ router.post('/', authenticateToken, async (req, res) => {
       shipping: shipping || 0,
       tax: tax || 0,
       grandTotal: grandTotal || 0,
-      status: 'Processing',
+      status: 'Pending',
       paymentMethod: 'Card',
     });
 

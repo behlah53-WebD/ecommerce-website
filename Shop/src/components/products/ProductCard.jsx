@@ -168,6 +168,13 @@ export const ProductCard = ({ product }) => {
               {product.category || 'General'}
             </p>
 
+            {/* Brand Name - Added below category */}
+            {product.brand && (
+              <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+                {product.brand}
+              </p>
+            )}
+
             <h3 className="mt-1 truncate text-sm font-semibold text-gray-900 dark:text-white">
               <Link
                 to={`/product/${id}`}

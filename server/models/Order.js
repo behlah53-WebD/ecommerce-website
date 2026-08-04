@@ -116,6 +116,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
+        "Pending",
         "Processing",
         "Shipped",
         "Delivered",
@@ -123,7 +124,12 @@ const orderSchema = new mongoose.Schema(
         "Return Requested",
         "Returned",
       ],
-      default: "Processing",
+      default: "Pending",
+    },
+
+    approvedAt: {
+      type: Date,
+      default: null,
     },
 
     paymentMethod: {

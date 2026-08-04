@@ -182,7 +182,7 @@ router.post("/create-order", authenticateToken, async (req, res) => {
       shipping,
       tax,
       grandTotal,
-      status: "Processing",
+      status: "Pending",
       paymentMethod: "Razorpay",
       razorpayOrderId: razorpayOrder.id,
       paymentStatus: "Pending",
@@ -291,7 +291,6 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
     order.razorpaySignature = razorpay_signature;
     order.paymentStatus = "Paid";
     order.paymentVerifiedAt = new Date();
-    order.status = "Processing";
 
     await order.save();
 
