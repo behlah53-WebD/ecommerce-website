@@ -1,7 +1,7 @@
 {
   "name": "My App",
   "short_name": "MyApp",
-  "description": "My React Vite app",
+  "description": "My React Vite ap",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
