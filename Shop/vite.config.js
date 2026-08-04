@@ -38,6 +38,22 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        screenshots: [
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Zyra Storefront Desktop',
+          },
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Zyra Storefront Mobile',
+          },
+        ],
       },
     }),
   ],
