@@ -394,6 +394,8 @@ const STATUS_COLORS = {
     "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800",
   "Return Pending":
     "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
+  Returned:
+    "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800",
 };
 
 const STATUS_ICONS = {
@@ -404,6 +406,7 @@ const STATUS_ICONS = {
   Cancelled: XCircle,
   "Cancellation Pending": AlertTriangle,
   "Return Pending": RotateCcw,
+  Returned: Package,
 };
 
 const TRACKING_STEPS = [
@@ -411,6 +414,8 @@ const TRACKING_STEPS = [
   { key: "shipped", label: "Order Shipped", badge: "Shipped" },
   { key: "out_for_delivery", label: "Out for Delivery", badge: "Shipped" },
   { key: "delivered", label: "Order Delivered", badge: "Delivered" },
+  { key: "return_requested", label: "Return Requested", badge: "Return Pending" },
+  { key: "returned", label: "Returned", badge: "Returned" },
 ];
 
 // Time thresholds (in milliseconds) AFTER the order is approved by admin.
@@ -428,7 +433,7 @@ const isOrderApproved = (order) => {
   const status = String(order?.status ?? "Pending")
     .trim()
     .toLowerCase();
-  return ["processing", "shipped", "delivered"].includes(status);
+  return ["processing", "shipped", "delivered", "returned"].includes(status);
 };
 
 const getTrackingStepIndex = (order, now) => {
@@ -449,6 +454,27 @@ const getTrackingStepIndex = (order, now) => {
       break;
     }
   }
+
+  // After the order is delivered (step 3), evaluate the return flow:
+  // - Return requested (pending)        → step 4 (Return Requested checkpoint)
+  // - Return approved but < 1 min        → step 4 (still Return Requested)
+  // - Return approved and >= 1 min       → step 5 (Returned)
+  if (step >= 3 && order.returnRequest?.requested) {
+    if (order.returnRequest?.status === "Pending") {
+      return 4;
+    }
+    if (
+      order.returnRequest?.status === "Approved" &&
+      order.returnRequest?.processedAt
+    ) {
+      const processedTime = new Date(order.returnRequest.processedAt).getTime();
+      if (Number.isNaN(processedTime) || now - processedTime >= 60000) {
+        return 5;
+      }
+      return 4;
+    }
+  }
+
   return step;
 };
 
@@ -492,6 +518,12 @@ const OrderCard = ({ order }) => {
       order.cancelRequest?.status === "Approved"
     ) {
       return "Cancelled";
+    }
+    if (
+      order.returnRequest?.requested === true &&
+      order.returnRequest?.status === "Approved"
+    ) {
+      return "Returned";
     }
     if (
       order.returnRequest?.requested === true &&
@@ -584,26 +616,43 @@ const OrderCard = ({ order }) => {
   });
 
   const canCancel =
-    (order.status === "Pending" || order.status === "Processing") &&
+    (displayStatus === "Pending" ||
+      displayStatus === "Processing" ||
+      displayStatus === "Shipped") &&
     !order.cancelRequest?.requested &&
     !order.returnRequest?.requested;
 
+  // canReturn: show the Return button when:
+  //  - Order has been admin-approved and is not already cancelled/returned
+  //  - The frontend tracking shows step >= 3 (Delivered)
+  //  - No return request has been made yet
   const canReturn =
-    order.status === "Delivered" && !order.returnRequest?.requested;
+    approved &&
+    currentStepIndex >= 3 &&
+    !order.returnRequest?.requested &&
+    !order.cancelRequest?.requested &&
+    order.status !== "Cancelled" &&
+    order.status !== "Returned";
 
   const isCancelled =
     displayStatus === "Cancelled" || displayStatus === "Cancellation Pending";
 
-  // Progress width is forced to 0% until approved
-  const progressWidth = !approved
-    ? "0%"
-    : currentStepIndex <= 0
-      ? "0%"
-      : currentStepIndex === 1
-        ? "25%"
-        : currentStepIndex === 2
-          ? "50%"
-          : "76%";
+  // Only show return-tracking steps when a return has actually been requested
+  const hasReturnFlow = Boolean(order.returnRequest?.requested);
+  const visibleSteps = hasReturnFlow
+    ? TRACKING_STEPS
+    : TRACKING_STEPS.slice(0, 4);
+
+  // Progress width: fraction of the progress bar that should be filled.
+  // Bar spans from left-[8%] to right-[8%], width = 84% of container.
+  const getProgressWidth = () => {
+    if (!approved || currentStepIndex < 0) return "0%";
+    const totalSegments = visibleSteps.length - 1; // gaps between nodes
+    const filledSegments = Math.min(currentStepIndex, visibleSteps.length - 1);
+    if (filledSegments <= 0) return "0%";
+    return `${(filledSegments / totalSegments) * 84}%`;
+  };
+  const progressWidth = getProgressWidth();
 
   return (
     <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
@@ -821,24 +870,25 @@ const OrderCard = ({ order }) => {
 
                 <div className="relative px-1 sm:px-2">
                   {/* Background line */}
-                  <div className="absolute top-4 left-[12%] right-[12%] h-0.5 bg-gray-200 dark:bg-gray-700" />
+                  <div className="absolute top-4 left-[8%] right-[8%] h-0.5 bg-gray-200 dark:bg-gray-700" />
 
                   {/* Active progress line – only moves after approval */}
                   <div
-                    className="absolute top-4 left-[12%] h-0.5 bg-emerald-500 transition-all duration-700 ease-out"
+                    className="absolute top-4 left-[8%] h-0.5 bg-emerald-500 transition-all duration-700 ease-out"
                     style={{ width: progressWidth }}
                   />
 
                   <div className="relative flex justify-between">
-                    {TRACKING_STEPS.map((step, index) => {
+                    {visibleSteps.map((step, index) => {
                       const isCompleted = approved && index <= currentStepIndex;
                       const isCurrent = approved && index === currentStepIndex;
+                      const nodeWidth = visibleSteps.length === 6 ? "w-[16%]" : "w-[22%]";
 
                       return (
-                        <div
-                          key={step.key}
-                          className="flex flex-col items-center w-[22%] sm:w-[20%]"
-                        >
+                          <div
+                           key={step.key}
+                           className={`flex flex-col items-center ${nodeWidth}`}
+                         >
                           <div
                             className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
                               isCompleted
@@ -1116,6 +1166,12 @@ export const OrdersPage = () => {
     };
 
     fetchOrders();
+
+    const pollId = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+
+    return () => clearInterval(pollId);
   }, [isLoggedIn, isAuthLoading, navigate]);
 
   const getOrderDisplayStatus = (order) => {

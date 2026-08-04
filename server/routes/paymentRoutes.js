@@ -174,30 +174,29 @@ router.post("/create-order", authenticateToken, async (req, res) => {
       },
     });
 
-    const newOrder = await Order.create({
-      orderId: appOrderId,
-      userId: storedUserId,
-      items,
-      shippingAddress,
-      subtotal,
-      shipping,
-      tax,
-      grandTotal,
-      status: "Pending",
-      paymentMethod: "Razorpay",
-      razorpayOrderId: razorpayOrder.id,
-      paymentStatus: "Pending",
-    });
+    // ⚠️  Do NOT save the order to the database here.
+    // The order will only be created in the DB after payment is verified.
+    // Pass all order data back to the client so it can be forwarded
+    // to /verify-payment on success.
 
     return res.status(200).json({
       success: true,
       message: "Payment order created successfully.",
       data: {
-        orderId: newOrder.orderId,
+        orderId: appOrderId,
         razorpayOrderId: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         keyId: process.env.RAZORPAY_KEY_ID,
+        // Forward the order payload so the client can send it to verify-payment
+        orderPayload: {
+          items,
+          shippingAddress,
+          subtotal,
+          shipping,
+          tax,
+          grandTotal,
+        },
       },
     });
   } catch (error) {
@@ -228,6 +227,8 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       orderId,
+      // Full order payload forwarded from the frontend
+      orderPayload,
     } = req.body;
 
     if (!authUserId) {
@@ -260,41 +261,49 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
 
     const storedUserId = getStoredUserId(user);
 
-    const order = await Order.findOne({
-      orderId,
-      userId: storedUserId,
-      razorpayOrderId: razorpay_order_id,
-    });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found.",
-      });
-    }
-
+    // Verify the Razorpay payment signature FIRST
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
     if (generatedSignature !== razorpay_signature) {
-      order.paymentStatus = "Failed";
-      await order.save();
-
+      // Signature mismatch → payment invalid, do NOT create the order
       return res.status(400).json({
         success: false,
-        message: "Payment signature verification failed.",
+        message: "Payment signature verification failed. Order was not created.",
       });
     }
 
-    order.razorpayPaymentId = razorpay_payment_id;
-    order.razorpaySignature = razorpay_signature;
-    order.paymentStatus = "Paid";
-    order.paymentVerifiedAt = new Date();
-    order.stockDecremented = true;
+    // Payment is genuine — now create the order in the database
+    const { items, shippingAddress, subtotal, shipping, tax, grandTotal } =
+      orderPayload || {};
 
-    await order.save();
+    if (!items || !items.length || !shippingAddress) {
+      return res.status(400).json({
+        success: false,
+        message: "Order payload is missing. Cannot create order.",
+      });
+    }
+
+    const order = await Order.create({
+      orderId,
+      userId: storedUserId,
+      items,
+      shippingAddress,
+      subtotal,
+      shipping,
+      tax,
+      grandTotal,
+      status: "Pending",
+      paymentMethod: "Razorpay",
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+      paymentStatus: "Paid",
+      paymentVerifiedAt: new Date(),
+      stockDecremented: true,
+    });
 
     // Decrease stock for each product in the order on successful payment
     for (const item of order.items) {
@@ -323,7 +332,7 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Payment verified successfully.",
+      message: "Payment verified and order created successfully.",
       data: {
         orderId: order.orderId,
         paymentStatus: order.paymentStatus,

@@ -44,6 +44,8 @@ const TRACKING_STEPS = [
     badge: "Out for Delivery",
   },
   { key: "delivered", label: "Order Delivered", badge: "Order Delivered" },
+  { key: "return_requested", label: "Return Requested", badge: "Return Pending" },
+  { key: "returned", label: "Returned", badge: "Returned" },
 ];
 
 // Time thresholds in ms AFTER admin approval
@@ -58,7 +60,7 @@ const isOrderApproved = (order) => {
   const s = String(order?.status ?? "Pending")
     .trim()
     .toLowerCase();
-  return ["processing", "shipped", "delivered"].includes(s);
+  return ["processing", "shipped", "delivered", "returned"].includes(s);
 };
 
 const getTrackingStepIndex = (order, now) => {
@@ -71,6 +73,27 @@ const getTrackingStepIndex = (order, now) => {
     if (elapsed >= STEP_THRESHOLDS_MS[i]) step = i;
     else break;
   }
+
+  // After the order is delivered (step 3), evaluate the return flow:
+  // - Return requested (pending)        → step 4 (Return Requested checkpoint)
+  // - Return approved but < 1 min        → step 4 (still Return Requested)
+  // - Return approved and >= 1 min       → step 5 (Returned)
+  if (step >= 3 && order.returnRequest?.requested) {
+    if (order.returnRequest?.status === "Pending") {
+      return 4;
+    }
+    if (
+      order.returnRequest?.status === "Approved" &&
+      order.returnRequest?.processedAt
+    ) {
+      const processedTime = new Date(order.returnRequest.processedAt).getTime();
+      if (Number.isNaN(processedTime) || now - processedTime >= 60000) {
+        return 5;
+      }
+      return 4;
+    }
+  }
+
   return step;
 };
 
@@ -321,6 +344,20 @@ const AdminOrders = ({ showToast }) => {
               color: "#92400e",
               border: "1px solid #fcd34d",
               "& .MuiChip-icon": { color: "#92400e" },
+            }}
+          />
+        );
+      case "Returned":
+        return (
+          <Chip
+            icon={<ConfirmedIcon sx={{ fontSize: 15 }} />}
+            label="Returned"
+            sx={{
+              ...baseSx,
+              backgroundColor: "#d1fae5",
+              color: "#065f46",
+              border: "1px solid #6ee7b7",
+              "& .MuiChip-icon": { color: "#065f46" },
             }}
           />
         );

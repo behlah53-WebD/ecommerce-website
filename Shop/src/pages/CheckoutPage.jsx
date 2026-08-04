@@ -16,6 +16,9 @@ import {
   Building,
   Hash,
   Phone,
+  AlertTriangle,
+  XCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -33,6 +36,8 @@ export const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [paymentOpening, setPaymentOpening] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  // Payment failure modal state
+  const [paymentFailure, setPaymentFailure] = useState(null); // { title, description, code }
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -121,14 +126,19 @@ export const CheckoutPage = () => {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               orderId: paymentData.orderId,
+              // Forward the order payload so the server can create the order on success
+              orderPayload: paymentData.orderPayload,
             }
           );
 
           if (!verifyResponse.data?.success) {
-            setErrorMsg(
-              verifyResponse.data?.message ||
-                "Payment verification failed."
-            );
+            setPaymentFailure({
+              title: "Payment Verification Failed",
+              description:
+                verifyResponse.data?.message ||
+                "We could not verify your payment. Please contact support.",
+              code: null,
+            });
             return;
           }
 
@@ -141,11 +151,14 @@ export const CheckoutPage = () => {
           setSubmittedOrderId(paymentData.orderId);
           setOrderSubmitted(true);
         } catch (error) {
-          setErrorMsg(
-            error.response?.data?.message ||
+          setPaymentFailure({
+            title: "Payment Error",
+            description:
+              error.response?.data?.message ||
               error.message ||
-              "Payment verification failed."
-          );
+              "An unexpected error occurred. Please try again.",
+            code: null,
+          });
         } finally {
           setLoading(false);
         }
@@ -155,9 +168,12 @@ export const CheckoutPage = () => {
         ondismiss: () => {
           setPaymentOpening(false);
           setLoading(false);
-          setErrorMsg(
-            "Payment was cancelled or the checkout window was closed."
-          );
+          setPaymentFailure({
+            title: "Payment Cancelled",
+            description:
+              "You closed the payment window before completing the transaction. No amount has been charged.",
+            code: "PAYMENT_CANCELLED",
+          });
         },
       },
     };
@@ -168,10 +184,16 @@ export const CheckoutPage = () => {
       setPaymentOpening(false);
       setLoading(false);
 
-      setErrorMsg(
-        response?.error?.description ||
-          "Payment failed. Please try another payment method."
-      );
+      setPaymentFailure({
+        title: "Payment Failed",
+        description:
+          response?.error?.description ||
+          "Your payment could not be processed. Please try a different payment method.",
+        code: response?.error?.code || null,
+        reason: response?.error?.reason || null,
+        source: response?.error?.source || null,
+        step: response?.error?.step || null,
+      });
     });
 
     setPaymentOpening(true);
@@ -763,6 +785,99 @@ export const CheckoutPage = () => {
           background: #374151;
         }
       `}</style>
+
+      {/* Payment Failure Modal */}
+      {paymentFailure && (
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setPaymentFailure(null)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Red top bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-red-500 to-rose-600" />
+
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start gap-4 mb-5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-950/50">
+                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                    {paymentFailure.title}
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    No amount has been charged to your account.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPaymentFailure(null)}
+                  className="shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <XCircle className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Description */}
+              <div className="rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900 p-4 mb-5">
+                <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
+                  {paymentFailure.description}
+                </p>
+              </div>
+
+              {/* Error details grid */}
+              {(paymentFailure.code || paymentFailure.reason || paymentFailure.source || paymentFailure.step) && (
+                <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 p-4 mb-5 grid grid-cols-2 gap-3">
+                  {paymentFailure.code && (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Error Code</p>
+                      <p className="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300">{paymentFailure.code}</p>
+                    </div>
+                  )}
+                  {paymentFailure.reason && (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Reason</p>
+                      <p className="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300">{paymentFailure.reason}</p>
+                    </div>
+                  )}
+                  {paymentFailure.source && (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Source</p>
+                      <p className="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300">{paymentFailure.source}</p>
+                    </div>
+                  )}
+                  {paymentFailure.step && (
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">Step</p>
+                      <p className="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300">{paymentFailure.step}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPaymentFailure(null)}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 px-4 py-3 text-sm font-semibold text-white transition-colors shadow-lg shadow-primary-500/20"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Try Again
+                </button>
+                <button
+                  onClick={() => { setPaymentFailure(null); navigate("/cart"); }}
+                  className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Back to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

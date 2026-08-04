@@ -166,14 +166,18 @@ router.post('/:orderId/return-request', authenticateToken, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
-    if (order.status !== 'Delivered') {
-      return res.status(400).json({ success: false, message: 'Can only request return for delivered orders.' });
+    // Allow return when order has been admin-approved AND it's not cancelled/returned.
+    // The "Delivered" state is tracked on the frontend based on elapsed time from approvedAt,
+    // so the DB status may still be "Processing" even though it shows as Delivered to the user.
+    const notEligibleStatuses = ['Pending', 'Cancelled', 'Returned'];
+    if (notEligibleStatuses.includes(order.status)) {
+      return res.status(400).json({ success: false, message: 'Order is not eligible for a return request.' });
     }
-    if (order.status === 'Returned') {
-      return res.status(400).json({ success: false, message: 'Order is already returned.' });
+    if (!order.approvedAt) {
+      return res.status(400).json({ success: false, message: 'Order has not been approved yet.' });
     }
     if (order.returnRequest?.requested) {
-      return res.status(400).json({ success: false, message: 'Return request already pending.' });
+      return res.status(400).json({ success: false, message: 'Return request already submitted.' });
     }
 
     order.returnRequest = {
