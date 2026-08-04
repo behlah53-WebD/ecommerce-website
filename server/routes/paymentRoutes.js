@@ -4,6 +4,7 @@ const Razorpay = require("razorpay");
 
 const { User } = require("../models/User");
 const orderModule = require("../models/Order");
+const { Detail } = require("../models/Detail");
 const { authenticateToken } = require("../middleware/auth");
 
 const Order = orderModule.Order || orderModule.default || orderModule;
@@ -291,9 +292,32 @@ router.post("/verify-payment", authenticateToken, async (req, res) => {
     order.razorpaySignature = razorpay_signature;
     order.paymentStatus = "Paid";
     order.paymentVerifiedAt = new Date();
+    order.stockDecremented = true;
 
     await order.save();
 
+    // Decrease stock for each product in the order on successful payment
+    for (const item of order.items) {
+      const productId = item.productId;
+      const quantity = item.quantity || 1;
+
+      const product = await Detail.findOne({ id: productId });
+      if (product) {
+        const newStock = Math.max(0, (product.stock || 0) - quantity);
+        product.stock = newStock;
+
+        if (newStock === 0) {
+          product.productStatus = "Out of Stock";
+        } else if (newStock <= 10) {
+          product.productStatus = "Low Stock";
+        } else {
+          product.productStatus = "In Stock";
+        }
+        await product.save();
+      }
+    }
+
+    // Clear the cart after payment success
     user.cart = [];
     await user.save();
 

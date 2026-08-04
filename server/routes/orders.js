@@ -72,32 +72,12 @@ router.post('/admin/:orderId/status', authenticateToken, async (req, res) => {
 
     await order.save();
 
-    
-    if ((status === 'Delivered' || status === 'Shipped') && previousStatus === 'Processing') {
-      for (const item of order.items) {
-        const productId = item.productId;
-        const quantity = item.quantity || 1;
+    // Stock is decreased at payment verification time (paymentRoutes.js)
+    // or at order creation (POST /orders). No need to decrease again here.
 
-        
-        const product = await Detail.findOne({ id: productId });
-        if (product) {
-          const newStock = Math.max(0, (product.stock || 0) - quantity);
-          product.stock = newStock;
-          
-          if (newStock === 0) {
-            product.productStatus = 'Out of Stock';
-          } else if (newStock <= 10) {
-            product.productStatus = 'Low Stock';
-          } else {
-            product.productStatus = 'In Stock';
-          }
-          await product.save();
-        }
-      }
-    }
-
-    
-    if (status === 'Cancelled' && (previousStatus === 'Delivered' || previousStatus === 'Shipped')) {
+    // Restore stock if order is cancelled and stock was previously decremented
+    // Also handle legacy orders where stock was decremented at shipped/delivered
+    if (status === 'Cancelled' && (order.stockDecremented || previousStatus === 'Delivered' || previousStatus === 'Shipped')) {
       for (const item of order.items) {
         const productId = item.productId;
         const quantity = item.quantity || 1;
@@ -116,6 +96,8 @@ router.post('/admin/:orderId/status', authenticateToken, async (req, res) => {
           await product.save();
         }
       }
+      order.stockDecremented = false;
+      await order.save();
     }
 
     return res.json({
@@ -238,8 +220,8 @@ router.post('/admin/:orderId/cancel-request', authenticateToken, async (req, res
       order.status = 'Cancelled';
       order.cancelRequest = { ...order.cancelRequest, status: 'Approved', processedAt: new Date(), processedBy: user.id };
 
-      // Restore stock if order was shipped/delivered
-      if (previousStatus === 'Delivered' || previousStatus === 'Shipped') {
+      // Restore stock if order was shipped/delivered or stock was previously decremented
+      if (order.stockDecremented || previousStatus === 'Delivered' || previousStatus === 'Shipped') {
         for (const item of order.items) {
           const productId = item.productId;
           const quantity = item.quantity || 1;
@@ -253,6 +235,7 @@ router.post('/admin/:orderId/cancel-request', authenticateToken, async (req, res
             await product.save();
           }
         }
+        order.stockDecremented = false;
       }
     } else {
       order.cancelRequest = { ...order.cancelRequest, status: 'Rejected', processedAt: new Date(), processedBy: user.id };
@@ -291,22 +274,26 @@ router.post('/admin/:orderId/return-request', authenticateToken, async (req, res
     }
 
     if (action === 'approve') {
+      const returnPreviousStatus = order.status;
       order.status = 'Returned';
       order.returnRequest = { ...order.returnRequest, status: 'Approved', processedAt: new Date(), processedBy: user.id };
 
-      // Restore stock for returned items
-      for (const item of order.items) {
-        const productId = item.productId;
-        const quantity = item.quantity || 1;
-        const product = await Detail.findOne({ id: productId });
-        if (product) {
-          const newStock = (product.stock || 0) + quantity;
-          product.stock = newStock;
-          if (newStock === 0) product.productStatus = 'Out of Stock';
-          else if (newStock <= 10) product.productStatus = 'Low Stock';
-          else product.productStatus = 'In Stock';
-          await product.save();
+      // Restore stock for returned items (only if stock was previously decremented)
+      if (order.stockDecremented || returnPreviousStatus === 'Delivered' || returnPreviousStatus === 'Shipped') {
+        for (const item of order.items) {
+          const productId = item.productId;
+          const quantity = item.quantity || 1;
+          const product = await Detail.findOne({ id: productId });
+          if (product) {
+            const newStock = (product.stock || 0) + quantity;
+            product.stock = newStock;
+            if (newStock === 0) product.productStatus = 'Out of Stock';
+            else if (newStock <= 10) product.productStatus = 'Low Stock';
+            else product.productStatus = 'In Stock';
+            await product.save();
+          }
         }
+        order.stockDecremented = false;
       }
     } else {
       order.returnRequest = { ...order.returnRequest, status: 'Rejected', processedAt: new Date(), processedBy: user.id };
@@ -426,9 +413,31 @@ router.post('/', authenticateToken, async (req, res) => {
       grandTotal: grandTotal || 0,
       status: 'Pending',
       paymentMethod: 'Card',
+      stockDecremented: true,
     });
 
     await order.save();
+
+    // Decrease stock for each product in the order
+    for (const item of enrichedItems) {
+      const productId = item.productId;
+      const quantity = item.quantity || 1;
+
+      const product = await Detail.findOne({ id: productId });
+      if (product) {
+        const newStock = Math.max(0, (product.stock || 0) - quantity);
+        product.stock = newStock;
+
+        if (newStock === 0) {
+          product.productStatus = 'Out of Stock';
+        } else if (newStock <= 10) {
+          product.productStatus = 'Low Stock';
+        } else {
+          product.productStatus = 'In Stock';
+        }
+        await product.save();
+      }
+    }
 
     return res.status(201).json({
       success: true,

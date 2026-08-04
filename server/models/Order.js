@@ -159,9 +159,14 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
 
-    paymentVerifiedAt: {
+     paymentVerifiedAt: {
       type: Date,
       default: null,
+    },
+
+    stockDecremented: {
+      type: Boolean,
+      default: false,
     },
 
     returnRequest: {

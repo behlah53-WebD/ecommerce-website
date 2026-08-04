@@ -19,11 +19,13 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useProductContext } from "../context/ProductContext";
 import apiClient from "../api/apiClient";
 
 export const CheckoutPage = () => {
   const { cartItems, subtotal, clearCart } = useCart();
   const { isLoggedIn, promptLogin } = useAuth();
+  const { refreshProducts, refreshShopProducts } = useProductContext();
   const navigate = useNavigate();
 
   const [orderSubmitted, setOrderSubmitted] = useState(false);
@@ -131,6 +133,10 @@ export const CheckoutPage = () => {
           }
 
           await clearCart();
+
+          // Refresh product data so updated stock is reflected everywhere
+          refreshProducts();
+          refreshShopProducts();
 
           setSubmittedOrderId(paymentData.orderId);
           setOrderSubmitted(true);
