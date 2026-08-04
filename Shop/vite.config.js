@@ -8,6 +8,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+      },
       manifest: {
         name: 'My App',
         short_name: 'MyApp',
@@ -19,17 +22,17 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
-            src: '/pwa-192x192.png',
+            src: '/logo.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
