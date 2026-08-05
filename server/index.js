@@ -78,7 +78,7 @@ app.use(
         console.log("CORS allowed for origin:", origin);
         callback(null, true);
       } else {
-        console.log("CORS blocked for origin:", origin);
+        console.log("CORS blocked for origins:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
