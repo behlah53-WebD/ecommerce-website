@@ -788,6 +788,86 @@ router.get("/:id", optionalAuthenticateToken, async (req, res) => {
   }
 });
 
+const { ShockingDeal } = require("../models/ShockingDeal");
+
+// GET /users/shocking-deal/active - Publicly accessible active shocking deal
+router.get("/shocking-deal/active", async (req, res) => {
+  try {
+    const deal = await ShockingDeal.findOne({
+      isActive: true,
+      endTime: { $gt: new Date() },
+    });
+    return res.json({ success: true, data: deal });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// GET /users/shocking-deal/admin - Admin list/details of current shocking deal
+router.get("/shocking-deal/admin", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+    const deal = await ShockingDeal.findOne().sort({ createdAt: -1 });
+    return res.json({ success: true, data: deal });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /users/shocking-deal - Create or update shocking deal settings
+router.post("/shocking-deal", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const body = await getRequestBody(req);
+    const { title, subtitle, endTime, products } = body;
+
+    // Deactivate previous deals
+    await ShockingDeal.updateMany({}, { $set: { isActive: false } });
+
+    const newDeal = await ShockingDeal.create({
+      title: title || "SHOCKING DEAL",
+      subtitle: subtitle || "The opportunity will quickly pass. Take it!",
+      endTime: new Date(endTime),
+      products: products || [],
+      isActive: true,
+    });
+
+    return res.json({
+      success: true,
+      data: newDeal,
+      message: "Shocking Deal saved successfully!",
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// POST /users/shocking-deal/deactivate - Deactivate all active shocking deals
+router.post("/shocking-deal/deactivate", authenticateToken, async (req, res) => {
+  try {
+    const user = await getLoggedInUser(req);
+    if (!user || user.role !== "Admin") {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    await ShockingDeal.updateMany({}, { $set: { isActive: false } });
+
+    return res.json({
+      success: true,
+      message: "Shocking Deal deactivated successfully!",
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.post(["/", "/details"], authenticateToken, saveDetailsHandler);
 router.put(["/", "/:id"], authenticateToken, saveDetailsHandler);
 router.delete(["/", "/:id"], authenticateToken, deleteDetailsHandler);

@@ -30,6 +30,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import CircleIcon from "@mui/icons-material/Circle";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 
 function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = false, onMobileNavToggle }) {
   const drawerWidth = mobileNavExpanded
@@ -130,6 +131,12 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
         icon: <StarsIcon />,
         value: "hero-customization",
         description: "Customize shop banners",
+      },
+      {
+        label: "Shocking Deals",
+        icon: <ElectricBoltIcon />,
+        value: "shocking-deals",
+        description: "Customize shocking deals",
       },
       {
         label: "Seller Approval Requests",

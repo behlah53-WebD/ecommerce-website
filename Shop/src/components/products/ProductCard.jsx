@@ -107,8 +107,8 @@ export const ProductCard = ({ product }) => {
           )} */}
 
           {product.isSale && (
-            <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
-              Sale
+            <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm animate-pulse">
+              {product.shockingDiscount ? `-${product.shockingDiscount}%` : 'Sale'}
             </span>
           )}
 

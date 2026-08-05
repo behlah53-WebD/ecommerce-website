@@ -1,16 +1,46 @@
 import apiClient from './apiClient';
 
-export const normalizeProduct = (item) => {
+let cachedActiveDeal = null;
+let lastDealFetchTime = 0;
+const DEAL_CACHE_DURATION = 15000; // 15 seconds
+
+export const getActiveShockingDeal = async () => {
+  try {
+    const response = await apiClient.get('/users/shocking-deal/active');
+    return response.data?.data || null;
+  } catch (error) {
+    console.warn('Failed to fetch active shocking deal:', error);
+    return null;
+  }
+};
+
+export const getActiveShockingDealCached = async () => {
+  const now = Date.now();
+  if (!cachedActiveDeal || (now - lastDealFetchTime > DEAL_CACHE_DURATION)) {
+    cachedActiveDeal = await getActiveShockingDeal();
+    lastDealFetchTime = now;
+  }
+  if (cachedActiveDeal && new Date(cachedActiveDeal.endTime) <= new Date()) {
+    cachedActiveDeal = null;
+  }
+  return cachedActiveDeal;
+};
+
+export const clearShockingDealCache = () => {
+  cachedActiveDeal = null;
+  lastDealFetchTime = 0;
+};
+
+export const normalizeProduct = (item, activeDeal = null) => {
   if (!item) return null;
   const rawId = item.id || item._id || item.productId;
   if (!rawId) return null;
   const pId = String(rawId);
   const fullName = [item.firstName, item.lastName].filter(Boolean).join(' ');
   const name = item.productName || item.name || fullName || 'Product';
-  const price = Number(item.price) || 0;
+  let price = Number(item.price) || 0;
   const stock = Number(item.stock) !== undefined ? Number(item.stock) : 10;
 
-  
   let images = [];
   if (Array.isArray(item.files) && item.files.length > 0) {
     images = item.files
@@ -35,13 +65,26 @@ export const normalizeProduct = (item) => {
     ];
   }
 
+  let originalPrice = price > 0 ? Math.round(price * 1.2) : 99;
+  let shockingDiscount = null;
+
+  if (activeDeal && Array.isArray(activeDeal.products)) {
+    const dealProduct = activeDeal.products.find((p) => String(p.productId) === pId);
+    if (dealProduct) {
+      originalPrice = price; // Original is the base price
+      shockingDiscount = Number(dealProduct.discountPercentage) || 0;
+      price = Number((originalPrice * (1 - shockingDiscount / 100)).toFixed(2));
+    }
+  }
+
   return {
     id: pId,
     _id: pId,
     name,
     productName: name,
     price,
-    originalPrice: price > 0 ? Math.round(price * 1.2) : 99,
+    originalPrice,
+    shockingDiscount,
     stock,
     inStock: stock > 0,
     category: item.category || 'General',
@@ -56,11 +99,13 @@ export const normalizeProduct = (item) => {
     reviewsCount: 24,
     sizes: ['S', 'M', 'L', 'XL'],
     isNew: true,
+    isSale: shockingDiscount ? true : item.isSale,
   };
 };
 
 export const getProducts = async (filters = {}) => {
   try {
+    const activeDeal = await getActiveShockingDealCached();
     const response = await apiClient.get('/users', { params: filters });
     const rawData = response.data?.data || [];
     const pagination = response.data?.pagination || {
@@ -72,7 +117,7 @@ export const getProducts = async (filters = {}) => {
     };
 
     return {
-      products: Array.isArray(rawData) ? rawData.map(normalizeProduct).filter(Boolean) : [],
+      products: Array.isArray(rawData) ? rawData.map(item => normalizeProduct(item, activeDeal)).filter(Boolean) : [],
       pagination,
     };
   } catch (error) {
@@ -92,12 +137,12 @@ export const getProducts = async (filters = {}) => {
 
 export const getProductById = async (id) => {
   try {
+    const activeDeal = await getActiveShockingDealCached();
     const response = await apiClient.get(`/users/${id}`);
     const item = response.data?.data;
     if (!item) return null;
-    return normalizeProduct(item);
+    return normalizeProduct(item, activeDeal);
   } catch (error) {
-    
     console.warn(`Direct fetch for product ${id} failed, using fallback:`, error);
     try {
       const { products } = await getProducts({ limit: 50 });

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { FeatureBanner } from '../components/home/FeatureBanner';
+import { ShockingDealSection } from '../components/home/ShockingDealSection';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { ProductGrid } from '../components/products/ProductGrid';
 import {NewProductsSlider} from '../components/home/NewProductsSlider';
@@ -15,6 +16,8 @@ export const HomePage = () => {
 
       {}
       <FeatureBanner />
+
+      <ShockingDealSection />
 
       {}
       <div className="py-5 -mt-25">
