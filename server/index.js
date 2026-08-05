@@ -42,6 +42,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "capacitor://localhost",
   "http://localhost",
+  "https://localhost",
   ...configuredOrigins,
 ];
 
