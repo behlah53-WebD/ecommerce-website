@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Zap, Timer } from 'lucide-react';
-import { getProducts, getActiveShockingDealCached, clearShockingDealCache } from '../../api/productService';
+import { getProductById, getActiveShockingDealCached, clearShockingDealCache } from '../../api/productService';
 import { ProductCard } from '../products/ProductCard';
 
 const calculateTimeLeft = (endTimeStr) => {
@@ -53,13 +53,18 @@ export const ShockingDealSection = () => {
       setDeal(activeDeal);
       setTimeLeft(initialTime);
 
-      // Fetch all products (normalizer automatically applies active deal discounts)
-      const productsRes = await getProducts();
-      const allProducts = productsRes.products || [];
-
-      // Filter products belonging to this deal
-      const dealProductIds = new Set((activeDeal.products || []).map((p) => String(p.productId)));
-      const filtered = allProducts.filter((p) => dealProductIds.has(String(p.id)));
+      // Fetch the specific deal products in parallel
+      const dealProductsData = await Promise.all(
+        (activeDeal.products || []).map(async (item) => {
+          try {
+            return await getProductById(item.productId);
+          } catch (e) {
+            console.error(`Failed to fetch deal product ${item.productId}`, e);
+            return null;
+          }
+        })
+      );
+      const filtered = dealProductsData.filter(Boolean);
       
       setProducts(filtered);
     } catch (error) {
