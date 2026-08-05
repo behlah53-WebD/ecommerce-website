@@ -121,43 +121,43 @@ export const ProductCard = ({ product }) => {
           {getStockBadge()}
         </div>
 
-        {/* Hover Actions */}
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100">
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold shadow-lg transition-colors ${
-              isOutOfStock
-                ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
-                : 'bg-white text-gray-900 hover:bg-primary-600 hover:text-white dark:bg-gray-900 dark:text-white dark:hover:bg-primary-600'
-            }`}
-          >
-            <ShoppingBag className="h-4 w-4" />
-            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </button>
+         {/* Hover Actions - hidden on mobile, shown on desktop */}
+         <div className="absolute bottom-3 left-3 right-3 hidden gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100 md:flex">
+           <button
+             type="button"
+             onClick={handleAddToCart}
+             disabled={isOutOfStock}
+             className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold shadow-lg transition-colors ${
+               isOutOfStock
+                 ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                 : 'bg-white text-gray-900 hover:bg-primary-600 hover:text-white dark:bg-gray-900 dark:text-white dark:hover:bg-primary-600'
+             }`}
+           >
+             <ShoppingBag className="h-4 w-4" />
+             {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+           </button>
 
-          <button
-            type="button"
-            onClick={handleWishlistToggle}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg transition-colors dark:bg-gray-900 ${
-              isWishlisted
-                ? 'text-red-500'
-                : 'text-gray-700 hover:text-red-500 dark:text-gray-300'
-            }`}
-            aria-label={
-              isWishlisted
-                ? 'Remove from wishlist'
-                : 'Add to wishlist'
-            }
-          >
-            <Heart
-              className={`h-5 w-5 ${
-                isWishlisted ? 'fill-red-500' : ''
-              }`}
-            />
-          </button>
-        </div>
+           <button
+             type="button"
+             onClick={handleWishlistToggle}
+             className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg transition-colors dark:bg-gray-900 ${
+               isWishlisted
+                 ? 'text-red-500'
+                 : 'text-gray-700 hover:text-red-500 dark:text-gray-300'
+             }`}
+             aria-label={
+               isWishlisted
+                 ? 'Remove from wishlist'
+                 : 'Add to wishlist'
+             }
+           >
+             <Heart
+               className={`h-5 w-5 ${
+                 isWishlisted ? 'fill-red-500' : ''
+               }`}
+             />
+           </button>
+         </div>
       </div>
 
       {/* Product Information */}
@@ -207,6 +207,41 @@ export const ProductCard = ({ product }) => {
                 ${product.originalPrice}
               </span>
             )}
+        </div>
+
+        {/* Mobile Actions - shown below price only on mobile */}
+        <div className="mt-2 flex items-center gap-2 md:hidden">
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-3 py-2 text-[10px] font-bold shadow-md transition-colors whitespace-nowrap sm:text-xs ${
+              isOutOfStock
+                ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                : 'bg-primary-600 text-white hover:bg-primary-700'
+            }`}
+          >
+            <ShoppingBag className="h-3 w-3" />
+            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleWishlistToggle}
+            className={`flex h-8 w-8 items-center justify-center rounded-full shadow-md transition-colors ${
+              isWishlisted
+                ? 'bg-white text-red-500'
+                : 'bg-gray-100 text-gray-500 hover:text-red-500 dark:bg-gray-800'
+            }`}
+            aria-label={
+              isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'
+            }
+          >
+            <Heart
+              fill={isWishlisted ? 'currentColor' : 'none'}
+              className="h-4 w-4"
+            />
+          </button>
         </div>
 
         {/* Colors */}

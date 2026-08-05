@@ -19,12 +19,12 @@ export const HomePage = () => {
 
       <ShockingDealSection />
 
+      <NewProductsSlider/>
+
       {}
       <div className="py-5 -mt-25">
       <CategoryGrid />
     </div>
-
-      <NewProductsSlider/>
 
       {}
       <section className="bg-white py-16 dark:bg-gray-950 lg:py-24">
