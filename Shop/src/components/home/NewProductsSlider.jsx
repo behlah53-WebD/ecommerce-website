@@ -380,24 +380,24 @@ export const NewProductsSlider = ({
               </div>
             </div>
 
-            <div className="mt-5 flex gap-3">
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:gap-3">
               <button
                 type="button"
                 onClick={(event) => handleAddToCart(event, activeProduct)}
                 disabled={activeIsOutOfStock}
-                className={`inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 font-semibold shadow-lg transition-all active:scale-[0.98] ${
+                className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold shadow-lg transition-all active:scale-[0.98] sm:h-12 sm:w-auto sm:px-6 sm:text-base ${
                   activeIsOutOfStock
                     ? "cursor-not-allowed bg-white/20 text-white/50 shadow-none"
                     : "bg-white text-gray-900 hover:bg-primary-600 hover:text-white"
                 }`}
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 {activeIsOutOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
 
               <Link
                 to={`/product/${activeProductId}`}
-                className="inline-flex h-12 items-center justify-center rounded-full border-2 border-white/40 px-6 font-semibold text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/10 active:scale-[0.98]"
+                className="inline-flex h-11 w-full items-center justify-center rounded-full border-2 border-white/40 px-5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/10 active:scale-[0.98] sm:h-12 sm:w-auto sm:px-6 sm:text-base"
               >
                 View Details
               </Link>
