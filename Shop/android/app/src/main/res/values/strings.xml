@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">luxe-shop</string>
+    <string name="title_activity_main">luxe-shop</string>
+    <string name="package_name">app.vercel.shopzyra</string>
+    <string name="custom_url_scheme">app.vercel.shopzyra</string>
+</resources>
