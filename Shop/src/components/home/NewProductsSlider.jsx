@@ -412,7 +412,7 @@ export const NewProductsSlider = ({
               type="button"
               onClick={goToPrevious}
               aria-label="Previous product"
-              className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:left-5 sm:h-11 sm:w-11"
+              className="absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:left-5 sm:h-11 sm:w-11 sm:flex"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -421,7 +421,7 @@ export const NewProductsSlider = ({
               type="button"
               onClick={goToNext}
               aria-label="Next product"
-              className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:right-5 sm:h-11 sm:w-11"
+              className="absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30 active:scale-95 sm:right-5 sm:h-11 sm:w-11 sm:flex"
             >
               <ChevronRight className="h-5 w-5" />
             </button>

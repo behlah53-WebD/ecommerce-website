@@ -11,7 +11,7 @@ export const ProductGrid = () => {
 
   if (isLoading && (!products || products.length === 0)) {
     return (
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, idx) => (
           <ProductSkeleton key={idx} />
         ))}
@@ -41,7 +41,7 @@ export const ProductGrid = () => {
       }
       scrollThreshold="200px"
     >
-      <div className="w-full grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="w-full grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.id || product._id} product={product} />
         ))}
