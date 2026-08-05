@@ -14,7 +14,7 @@ const Order = orderModule.Order || orderModule.default || orderModule;
 const router = express.Router();
 
 if (!process.env.RAZORPAY_KEY_ID) {
-  console.error("Missing RAZORPAY_KEY_ID in server/.env");
+  console.error("Missing RAZORPAY_KEY_ID in servers/.env");
 }
 
 if (!process.env.RAZORPAY_KEY_SECRET) {
