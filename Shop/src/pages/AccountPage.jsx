@@ -36,7 +36,8 @@ import SignupVerifyModal from "../components/common/SignupVerifyModal";
 import EditProfileModal from "../components/common/EditProfileModal";
 
 export const AccountPage = () => {
-  const { currentUser, isLoggedIn, isAuthLoading, login, signup, logout } = useAuth();
+  const { currentUser, isLoggedIn, isAuthLoading, login, signup, logout } =
+    useAuth();
   const { wishlistCount } = useWishlist();
   const { totalItems } = useCart();
   const navigate = useNavigate();
@@ -157,9 +158,7 @@ export const AccountPage = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Loading...
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -175,7 +174,7 @@ export const AccountPage = () => {
               Z
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Welcome to ZYRA
+              Welcome to ZYRA!!!!!
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Sign in to your account or create a new one
