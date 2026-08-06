@@ -677,7 +677,7 @@ const AdminOrders = ({ showToast }) => {
                         {[
                           {
                             label: "TOTAL",
-                            value: `$${(order.grandTotal || 0).toFixed(2)}`,
+                            value: `₹${(order.grandTotal || 0).toFixed(2)}`,
                             bold: true,
                           },
                           {
@@ -1080,7 +1080,7 @@ const AdminOrders = ({ showToast }) => {
                           variant="body2"
                           sx={{ fontWeight: 600, color: "#0f172a" }}
                         >
-                          ${(selectedOrder.subtotal || 0).toFixed(2)}
+                          ₹{(selectedOrder.subtotal || 0).toFixed(2)}
                         </Typography>
                       </Box>
                       <Box
@@ -1098,7 +1098,7 @@ const AdminOrders = ({ showToast }) => {
                         >
                           {selectedOrder.shipping === 0
                             ? "FREE"
-                            : `$${(selectedOrder.shipping || 0).toFixed(2)}`}
+                            : `₹${(selectedOrder.shipping || 0).toFixed(2)}`}
                         </Typography>
                       </Box>
                       <Box
@@ -1114,7 +1114,7 @@ const AdminOrders = ({ showToast }) => {
                           variant="body2"
                           sx={{ fontWeight: 600, color: "#0f172a" }}
                         >
-                          ${(selectedOrder.tax || 0).toFixed(2)}
+                          ₹{(selectedOrder.tax || 0).toFixed(2)}
                         </Typography>
                       </Box>
                       <Divider sx={{ borderColor: "#e2e8f0", my: 0.5 }} />
@@ -1128,7 +1128,7 @@ const AdminOrders = ({ showToast }) => {
                           Total
                         </Typography>
                         <Typography sx={{ fontWeight: 800, color: "#0f172a" }}>
-                          ${(selectedOrder.grandTotal || 0).toFixed(2)}
+                          ₹{(selectedOrder.grandTotal || 0).toFixed(2)}
                         </Typography>
                       </Box>
                     </Stack>
@@ -1466,7 +1466,7 @@ const AdminOrders = ({ showToast }) => {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                      ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                     </Typography>
                   </Box>
                 ))}

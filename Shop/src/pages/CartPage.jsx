@@ -183,7 +183,7 @@ export const CartPage = () => {
                 <div className="flex items-center gap-2 mb-3">
                   <Truck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-                    Free shipping on orders above $100!
+                    Free shipping on orders above ₹100!
                   </p>
                 </div>
                 <div className="w-full bg-amber-200 dark:bg-amber-800 rounded-full h-2 mb-2">
@@ -193,7 +193,7 @@ export const CartPage = () => {
                   />
                 </div>
                 <p className="text-xs text-amber-600 dark:text-amber-400">
-                  Add ${(100 - subtotal).toFixed(2)} more to qualify for free
+                  Add ₹{(100 - subtotal).toFixed(2)} more to qualify for free
                   shipping
                 </p>
               </div>
@@ -248,7 +248,7 @@ export const CartPage = () => {
                         </div>
                       </div>
                       <p className="text-lg lg:text-xl font-bold text-primary-600 dark:text-primary-400 whitespace-nowrap">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
 
@@ -279,7 +279,7 @@ export const CartPage = () => {
 
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-400 hidden sm:block">
-                          ${item.price.toFixed(2)} each
+                          ₹{item.price.toFixed(2)} each
                         </span>
                         <button
                           onClick={() =>
@@ -333,7 +333,7 @@ export const CartPage = () => {
                         Subtotal ({totalItems} items)
                       </span>
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        ${subtotal.toFixed(2)}
+                        ₹{subtotal.toFixed(2)}
                       </span>
                     </div>
 
@@ -348,14 +348,14 @@ export const CartPage = () => {
                             : "font-semibold text-gray-900 dark:text-white"
                         }
                       >
-                        {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                        {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
                       </span>
                     </div>
 
                     {shipping === 0 && (
                       <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-lg">
                         <Truck className="h-3 w-3" />
-                        You saved $15.00 on shipping!
+                        You saved ₹15.00 on shipping!
                       </div>
                     )}
 
@@ -364,7 +364,7 @@ export const CartPage = () => {
                         Tax (8%)
                       </span>
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        ${tax.toFixed(2)}
+                        ₹{tax.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export const CartPage = () => {
                       </span>
                       <div className="text-right">
                         <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                          ${grandTotal.toFixed(2)}
+                          ₹{grandTotal.toFixed(2)}
                         </span>
                         <p className="text-[10px] text-gray-400 mt-0.5">
                           Including all taxes

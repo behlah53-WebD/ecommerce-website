@@ -465,7 +465,7 @@ const UserTable = ({
                         {/* Price */}
                         <TableCell>
                           <Typography sx={{ color: "#0f172a", fontWeight: 800, fontSize: "0.95rem" }}>
-                            ${Number(item.price || 0).toFixed(2)}
+                            ₹{Number(item.price || 0).toFixed(2)}
                           </Typography>
                         </TableCell>
 

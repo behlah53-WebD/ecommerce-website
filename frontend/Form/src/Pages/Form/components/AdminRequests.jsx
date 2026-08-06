@@ -123,7 +123,7 @@ const AdminRequests = ({ showToast }) => {
       { key: "sku", label: "SKU" },
       { key: "category", label: "Category" },
       { key: "brand", label: "Brand" },
-      { key: "price", label: "Price ($)" },
+      { key: "price", label: "Price (₹)" },
       { key: "stock", label: "Stock" },
       { key: "productStatus", label: "Availability" },
       { key: "description", label: "Description" },
@@ -311,10 +311,10 @@ const AdminRequests = ({ showToast }) => {
                           <Typography variant="body2" sx={{ color: "#0f172a", fontWeight: 700 }}>
                             {pending?.price !== undefined ? (
                               <>
-                                <span style={{ textDecoration: "line-through", color: "#94a3b8" }}>${item.price}</span>{" "}
-                                <span style={{ color: "#15803d", fontWeight: 800 }}>${pending.price}</span>
+                                <span style={{ textDecoration: "line-through", color: "#94a3b8" }}>₹{item.price}</span>{" "}
+                                <span style={{ color: "#15803d", fontWeight: 800 }}>₹{pending.price}</span>
                               </>
-                            ) : `$${item.price || 0}`}
+                            ) : `₹${item.price || 0}`}
                           </Typography>
                         </Grid>
                         <Grid item xs={6} md={3}>
@@ -424,7 +424,7 @@ const AdminRequests = ({ showToast }) => {
                       {productName}
                     </Typography>
                     <Typography variant="caption" sx={{ color: "#64748b" }}>
-                      {item.category && `${item.category} • `}${item.price !== undefined ? `$${item.price}` : ""}{item.brand ? ` • ${item.brand}` : ""}
+                      {item.category && `${item.category} • `}${item.price !== undefined ? `₹${item.price}` : ""}{item.brand ? ` • ${item.brand}` : ""}
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>

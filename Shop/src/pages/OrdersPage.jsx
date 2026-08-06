@@ -40,8 +40,8 @@ const handleDownloadInvoice = (order) => {
         ${item.color || item.size ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px;">${item.color ? `Color: ${item.color}` : ''} ${item.size ? `· Size: ${item.size}` : ''}</div>` : ''}
       </td>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: center; color: #475569;">${item.quantity}</td>
-      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; color: #475569;">$${item.price.toFixed(2)}</td>
-      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; font-weight: 600; color: #1e293b;">$${((item.price) * (item.quantity)).toFixed(2)}</td>
+      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; color: #475569;">₹${item.price.toFixed(2)}</td>
+      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; font-weight: 600; color: #1e293b;">₹${((item.price) * (item.quantity)).toFixed(2)}</td>
     </tr>
   `
     )
@@ -366,19 +366,19 @@ const handleDownloadInvoice = (order) => {
           <table class="summary-table">
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Subtotal</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">$${(order.subtotal || 0).toFixed(2)}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">₹${(order.subtotal || 0).toFixed(2)}</td>
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Shipping</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? 'FREE' : `$${(order.shipping || 0).toFixed(2)}`}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? 'FREE' : `₹${(order.shipping || 0).toFixed(2)}`}</td>
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Tax</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">$${(order.tax || 0).toFixed(2)}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">₹${(order.tax || 0).toFixed(2)}</td>
             </tr>
             <tr class="total-row">
               <td style="padding: 8px 16px; font-size: 14px;">Total Amount</td>
-              <td style="text-align: right; color: #4f46e5; padding: 8px 16px; font-size: 14px;">$${(order.grandTotal || 0).toFixed(2)}</td>
+              <td style="text-align: right; color: #4f46e5; padding: 8px 16px; font-size: 14px;">₹${(order.grandTotal || 0).toFixed(2)}</td>
             </tr>
           </table>
         </div>
@@ -712,7 +712,7 @@ const OrderCard = ({ order }) => {
               {displayStatus}
             </span>
             <p className="text-base sm:text-lg font-bold text-primary-600 dark:text-primary-400">
-              ${order.grandTotal?.toFixed(2)}
+                      ₹{order.grandTotal?.toFixed(2)}
             </p>
           </div>
         </div>
@@ -993,7 +993,7 @@ const OrderCard = ({ order }) => {
                       </p>
                     </div>
                     <span className="text-sm font-bold text-gray-900 dark:text-white shrink-0">
-                      ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                      ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -1031,7 +1031,7 @@ const OrderCard = ({ order }) => {
                 <div className="text-sm space-y-2">
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Subtotal</span>
-                    <span>${order.subtotal?.toFixed(2)}</span>
+                    <span>₹{order.subtotal?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Shipping</span>
@@ -1044,17 +1044,17 @@ const OrderCard = ({ order }) => {
                     >
                       {order.shipping === 0
                         ? "FREE"
-                        : `$${order.shipping?.toFixed(2)}`}
+                        : `₹${order.shipping?.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Tax</span>
-                    <span>${order.tax?.toFixed(2)}</span>
+                    <span>₹{order.tax?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-700">
                     <span>Total</span>
                     <span className="text-primary-600 dark:text-primary-400">
-                      ${order.grandTotal?.toFixed(2)}
+              ₹{order.grandTotal?.toFixed(2)}
                     </span>
                   </div>
                   <button

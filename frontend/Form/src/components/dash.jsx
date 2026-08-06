@@ -1341,7 +1341,7 @@ function Dash({ onNavigate }) {
                               fontSize: "0.9rem",
                             }}
                           >
-                            ${Number(product.price || 0).toFixed(2)}
+                            ₹{Number(product.price || 0).toFixed(2)}
                           </Typography>
                         </TableCell>
                         <TableCell>{getStockProgress(product.stock)}</TableCell>

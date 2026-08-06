@@ -449,7 +449,7 @@ export const ShopPage = () => {
 
               {(priceRange[0] !== 0 || priceRange[1] !== 1000) && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
-                  Price: ${priceRange[0]} - ${priceRange[1]}
+                  Price: ₹{priceRange[0]} - ₹{priceRange[1]}
 
                   <button
                     onClick={() => setPriceRange([0, 1000])}

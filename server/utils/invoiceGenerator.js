@@ -16,8 +16,8 @@ function generateInvoiceHtml(order) {
         ${item.color || item.size ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px;">${item.color ? `Color: ${item.color}` : ''} ${item.size ? `· Size: ${item.size}` : ''}</div>` : ''}
       </td>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: center; color: #475569;">${item.quantity}</td>
-      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; color: #475569;">$${(item.price || 0).toFixed(2)}</td>
-      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; font-weight: 600; color: #1e293b;">$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
+      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; color: #475569;">₹${(item.price || 0).toFixed(2)}</td>
+      <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; font-weight: 600; color: #1e293b;">₹${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
     </tr>
   `
     )
@@ -251,19 +251,19 @@ function generateInvoiceHtml(order) {
           <table class="summary-table">
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Subtotal</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">$${(order.subtotal || 0).toFixed(2)}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">₹${(order.subtotal || 0).toFixed(2)}</td>
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Shipping</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? 'FREE' : `$${(order.shipping || 0).toFixed(2)}`}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? 'FREE' : `₹${(order.shipping || 0).toFixed(2)}`}</td>
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Tax</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">$${(order.tax || 0).toFixed(2)}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">₹${(order.tax || 0).toFixed(2)}</td>
             </tr>
             <tr class="total-row">
               <td style="padding: 8px 16px; font-size: 14px;">Total Amount</td>
-              <td style="text-align: right; color: #4f46e5; padding: 8px 16px; font-size: 14px;">$${(order.grandTotal || 0).toFixed(2)}</td>
+              <td style="text-align: right; color: #4f46e5; padding: 8px 16px; font-size: 14px;">₹${(order.grandTotal || 0).toFixed(2)}</td>
             </tr>
           </table>
         </div>

@@ -6,7 +6,7 @@ export const FeatureBanner = () => {
     {
       icon: <Truck className="h-6 w-6 text-primary-600 dark:text-primary-400" />,
       title: 'Free Shipping',
-      desc: 'Free shipping on all orders over $100. Express delivery available.',
+      desc: 'Free shipping on all orders over ₹100. Express delivery available.',
     },
     {
       icon: <ShieldCheck className="h-6 w-6 text-primary-600 dark:text-primary-400" />,

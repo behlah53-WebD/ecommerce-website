@@ -489,7 +489,7 @@ const ShockingDealsCustomization = ({ showToast }) => {
                             </Box>
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600, color: "#334155" }}>
-                            ${product.price}
+                            ₹{product.price}
                           </TableCell>
                           <TableCell>
                             {isChecked ? (
@@ -515,7 +515,7 @@ const ShockingDealsCustomization = ({ showToast }) => {
                             )}
                           </TableCell>
                           <TableCell sx={{ fontWeight: 700, color: isChecked ? "#10b981" : "#94a3b8" }}>
-                            {isChecked ? `$${dealPrice}` : `—`}
+                            {isChecked ? `₹${dealPrice}` : `—`}
                           </TableCell>
                         </TableRow>
                       );

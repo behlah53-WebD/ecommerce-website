@@ -293,13 +293,13 @@ export const ProductDetailPage = () => {
             {/* Price */}
             <div className="mt-6 flex items-baseline gap-4">
               <span className="font-display text-3xl font-bold text-gray-900 dark:text-white">
-                ${product.price}
+                ₹{product.price}
               </span>
 
               {product.originalPrice &&
                 product.originalPrice > product.price && (
                   <span className="text-lg text-gray-400 line-through">
-                    ${product.originalPrice}
+                    ₹{product.originalPrice}
                   </span>
                 )}
             </div>
@@ -472,7 +472,7 @@ export const ProductDetailPage = () => {
                   </p>
 
                   <p className="text-gray-500 dark:text-gray-400">
-                    Orders over $100
+                    Orders over ₹100
                   </p>
                 </div>
               </div>

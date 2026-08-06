@@ -306,7 +306,7 @@ const SellerOrders = ({ showToast, currentUser }) => {
                         <Grid item xs={6} md={3}>
                           <Typography variant="caption" sx={{ color: "#64748b", fontWeight: 800 }}>TOTAL</Typography>
                           <Typography variant="body2" sx={{ color: "#0f172a", fontWeight: 700 }}>
-                            ${sellerTotal.toFixed(2)}
+                            ₹{sellerTotal.toFixed(2)}
                           </Typography>
                         </Grid>
                         <Grid item xs={6} md={3}>
@@ -425,10 +425,10 @@ const SellerOrders = ({ showToast, currentUser }) => {
                     Price Breakdown
                   </Typography>
                   <div sx={{ color: "#374151" }}>
-                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Subtotal</span><span>${(selectedOrder.subtotal || 0).toFixed(2)}</span></div>
-                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Shipping</span><span>{selectedOrder.shipping === 0 ? 'FREE' : `$${(selectedOrder.shipping || 0).toFixed(2)}`}</span></div>
-                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Tax</span><span>${(selectedOrder.tax || 0).toFixed(2)}</span></div>
-                    <div sx={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", borderTop: "1px solid #e2e8f0", pt: 1, mt: 2 }}><span>Total</span><span>${(selectedOrder.grandTotal || 0).toFixed(2)}</span></div>
+                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Subtotal</span>                    <span>₹{(selectedOrder.subtotal || 0).toFixed(2)}</span></div>
+                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Shipping</span>                    <span>{selectedOrder.shipping === 0 ? 'FREE' : `₹${(selectedOrder.shipping || 0).toFixed(2)}`}</span></div>
+                    <div sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}><span>Tax</span>                    <span>₹{(selectedOrder.tax || 0).toFixed(2)}</span></div>
+                    <div sx={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", borderTop: "1px solid #e2e8f0", pt: 1, mt: 2 }}><span>Total</span>                    <span>₹{(selectedOrder.grandTotal || 0).toFixed(2)}</span></div>
                   </div>
                 </Grid>
               </Grid>
@@ -454,7 +454,7 @@ const SellerOrders = ({ showToast, currentUser }) => {
                     </Typography>
                   </Box>
                   <Typography sx={{ fontWeight: 700, color: "#0f172a" }}>
-                    ${((item.price || 0) * (item.quantity || 1)).toFixed(2)}
+                    ₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                   </Typography>
                 </Box>
               ))}

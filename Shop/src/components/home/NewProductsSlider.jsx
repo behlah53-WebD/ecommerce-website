@@ -367,14 +367,14 @@ export const NewProductsSlider = ({
 
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-extrabold text-white sm:text-3xl">
-                  ${activeProduct.price || 0}
+                  ₹{activeProduct.price || 0}
                 </span>
 
                 {activeProduct.originalPrice &&
                   Number(activeProduct.originalPrice) >
                     Number(activeProduct.price) && (
                     <span className="text-sm text-white/60 line-through">
-                      ${activeProduct.originalPrice}
+                      ₹{activeProduct.originalPrice}
                     </span>
                   )}
               </div>

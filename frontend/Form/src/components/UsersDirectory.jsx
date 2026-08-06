@@ -729,7 +729,7 @@ function UsersDirectory({ roleFilter = "All" }) {
                               Stock Value
                             </Typography>
                             <Typography variant="caption" sx={{ color: "#10b981", fontWeight: 800 }}>
-                              ${(user.productStats?.value || sellerProductsList.reduce((sum, p) => sum + (p.price * p.stock), 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ₹{(user.productStats?.value || sellerProductsList.reduce((sum, p) => sum + (p.price * p.stock), 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </Typography>
                           </Box>
                         </Box>
@@ -860,7 +860,7 @@ function UsersDirectory({ roleFilter = "All" }) {
                               {user.productStats?.count || sellerProductsList.length} items
                             </Typography>
                             <Typography variant="caption" sx={{ color: "#10b981", fontWeight: 700 }}>
-                              ${(user.productStats?.value || sellerProductsList.reduce((sum, p) => sum + (p.price * p.stock), 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              ₹{(user.productStats?.value || sellerProductsList.reduce((sum, p) => sum + (p.price * p.stock), 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </Typography>
                           </Box>
                         ) : (
@@ -1222,7 +1222,7 @@ function UsersDirectory({ roleFilter = "All" }) {
                                     {product.sku || "N/A"}
                                   </TableCell>
                                   <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 700 }}>
-                                    ${Number(product.price || 0).toFixed(2)}
+                                    ₹{Number(product.price || 0).toFixed(2)}
                                   </TableCell>
                                   <TableCell align="right">
                                     <Chip 

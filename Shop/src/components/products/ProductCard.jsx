@@ -198,13 +198,13 @@ export const ProductCard = ({ product }) => {
         {/* Price */}
         <div className="mt-2 flex items-center gap-2">
           <span className="font-bold text-gray-900 dark:text-white">
-            ${product.price}
+            ₹{product.price}
           </span>
 
           {product.originalPrice &&
             product.originalPrice > product.price && (
               <span className="text-xs text-gray-400 line-through">
-                ${product.originalPrice}
+                ₹{product.originalPrice}
               </span>
             )}
         </div>

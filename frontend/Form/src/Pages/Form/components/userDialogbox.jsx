@@ -357,7 +357,7 @@ const UserDialog = ({
                 <TextField
                   fullWidth
                   name="price"
-                  label="Price (USD) *"
+                  label="Price (₹) *"
                   placeholder="0.00"
                   type="number"
                   inputProps={{ min: 0, step: "0.01" }}

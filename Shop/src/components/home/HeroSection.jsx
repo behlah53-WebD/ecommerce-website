@@ -130,7 +130,7 @@ export const HeroSection = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold">Free Express Shipping</p>
-                <p className="text-xs text-gray-300">On orders over $100</p>
+                <p className="text-xs text-gray-300">On orders over ₹100</p>
               </div>
             </div>
           </div>
