@@ -35,7 +35,7 @@ import SignupVerifyModal from "../components/common/SignupVerifyModal";
 import EditProfileModal from "../components/common/EditProfileModal";
 
 export const AccountPage = () => {
-  const { currentUser, isLoggedIn, login, signup, logout } = useAuth();
+  const { currentUser, isLoggedIn, isAuthLoading, login, signup, logout } = useAuth();
   const { wishlistCount } = useWishlist();
   const { totalItems } = useCart();
   const navigate = useNavigate();
@@ -64,6 +64,8 @@ export const AccountPage = () => {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
   useEffect(() => {
+    if (isAuthLoading || !isLoggedIn) return;
+
     const fetchAccountOrders = async () => {
       try {
         const { data } = await apiClient.get("/orders/my");
@@ -80,7 +82,7 @@ export const AccountPage = () => {
     };
 
     fetchAccountOrders();
-  }, []);
+  }, [isLoggedIn, isAuthLoading]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
