@@ -111,7 +111,8 @@ export const AuthProvider = ({ children }) => {
         );
 
         if (res.data && res.data.success) {
-          setCurrentUser(res.data.data);
+          const newUser = res.data.data || currentUser;
+          setCurrentUser(prev => ({ ...prev, ...newUser }));
           return { success: true, message: res.data.message || 'Profile updated.' };
         }
         return {
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errMsg };
       }
     },
-    [],
+    [currentUser],
   );
 
   const promptLogin = useCallback((message, actionPayload = null) => {

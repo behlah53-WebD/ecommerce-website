@@ -65,10 +65,7 @@ export const AccountPage = () => {
   const [ordersError, setOrdersError] = useState("");
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
-  useEffect(() => {
-    if (isAuthLoading || !isLoggedIn) return;
-
-    const fetchAccountOrders = async () => {
+  const fetchAccountOrders = async () => {
       try {
         const { data } = await apiClient.get("/orders/my");
         if (data.success) {
@@ -83,7 +80,14 @@ export const AccountPage = () => {
       }
     };
 
-    fetchAccountOrders();
+    const fetchOrders = () => {
+    if (isLoggedIn && !isAuthLoading) {
+      fetchAccountOrders();
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, [isLoggedIn, isAuthLoading]);
 
   const handleLoginSubmit = async (e) => {
@@ -789,7 +793,11 @@ export const AccountPage = () => {
                                         ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
                                         : order.status === "Cancelled"
                                           ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                          : order.status === "Return Pending"
+                                            ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                            : order.status === "Returned"
+                                              ? "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400"
+                                              : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                                 }`}
                               >
                                 {order.status || "Pending"}
