@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMessage, setAuthModalMessage] = useState('Please sign in to continue.');
+  const [authModalMessage, setAuthModalMessage] = useState('Please sign in to continue!!!!!!.');
   const [pendingAction, setPendingAction] = useState(null);
 
   
