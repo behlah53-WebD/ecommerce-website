@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
         const loggedUser = userData || { email, role: 'Buyer', name: 'Buyer User' };
         const userRole = loggedUser.role;
         if (userRole?.toLowerCase() !== 'buyer') {
-          return { success: false, message: 'Only buyer accounts can log in to the shop.' };
+          return { success: false, message: 'Only buyer accounts can log in to the shop!!!!!.' };
         }
         localStorage.setItem('accessToken', accessToken);
         if (refreshToken) {
