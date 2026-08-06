@@ -229,418 +229,443 @@ export const Navbar = ({ onOpenSearch }) => {
           .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
           }
-
-
+ 
+ 
           .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
             border-radius: 10px;
           }
-
-
+ 
+ 
           .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #e2e8f0;
             border-radius: 10px;
           }
-
-
+ 
+ 
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #cbd5e1;
           }
-
-
+ 
+ 
           .dark .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #374151;
           }
-
-
+ 
+ 
           .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #4b5563;
           }
         `}
       </style>
 
-      {/* Sticky Navbar */}
-      <header
-        className={`fixed top-8 left-0 z-[9999] w-full transition-all duration-300 ease-in-out ${
-          !isHome || scrolled
-            ? "border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/95"
-            : "border-b border-transparent bg-transparent"
+      {/*
+        Floating wrapper: this outer element controls the horizontal inset,
+        top offset, and max-width. It animates from "flush full-width bar"
+        to "detached floating pill" purely with transition on margin/padding,
+        so the header inside never has to remount.
+      */}
+      <div
+        className={`fixed left-0 top-0 z-[9999] w-full transition-all duration-300 ease-in-out ${
+          scrolled ? "px-3 pt-3 sm:px-6 sm:pt-4" : "px-0 pt-8"
         }`}
       >
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="flex h-16 items-center justify-between lg:h-20">
-            {/* Mobile menu button */}
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen((currentValue) => !currentValue);
-                setShowProfileDropdown(false);
-              }}
-              className={`rounded-lg p-2 transition-colors lg:hidden ${
-                !isHome || scrolled
-                  ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                  : "text-white hover:bg-white/10"
-              }`}
-              aria-label="Toggle menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-
-            {/* Logo */}
-            <Link
-              to="/"
-              onClick={closeMenus}
-              className={`flex items-center gap-2 font-display text-2xl font-bold tracking-tight transition-colors ${
-                !isHome || scrolled ? "text-gray-900 dark:text-white" : "text-white"
+        <header
+          className={`mx-auto transition-all duration-300 ease-in-out ${
+            scrolled
+              ? "max-w-6xl rounded-2xl border border-gray-100 bg-white/90 shadow-lg shadow-gray-900/5 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90"
+              : `max-w-full rounded-none border ${
+                  !isHome
+                    ? "border-gray-100 bg-white/95 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/95"
+                    : "border-transparent bg-transparent"
+                }`
+          }`}
+        >
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div
+              className={`flex items-center justify-between transition-all duration-300 ${
+                scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"
               }`}
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-lg font-black text-white">
-                Z
-              </span>
-
-              <span>ZYRA</span>
-            </Link>
-
-            {/* Desktop navigation */}
-            <nav className="hidden items-center gap-8 lg:flex">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors ${
-                      !isHome || scrolled
-                        ? isActive
-                          ? "font-semibold text-primary-600"
-                          : "text-gray-700 hover:text-primary-600 dark:text-gray-300"
-                        : isActive
-                          ? "font-semibold text-primary-400"
-                          : "text-white/90 hover:text-white"
-                    }`
-                  }
-                >
-                  {link.name}
-                </NavLink>
-              ))}
-            </nav>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {/* Search */}
+              {/* Mobile menu button */}
               <button
                 type="button"
-                onClick={onOpenSearch}
-                className={`rounded-lg p-2 transition-colors ${
+                onClick={() => {
+                  setMobileMenuOpen((currentValue) => !currentValue);
+                  setShowProfileDropdown(false);
+                }}
+                className={`rounded-lg p-2 transition-colors lg:hidden ${
                   !isHome || scrolled
                     ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                     : "text-white hover:bg-white/10"
                 }`}
-                aria-label="Search"
+                aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
               >
-                <Search className="h-5 w-5" />
-              </button>
-
-              {/* Theme toggle */}
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className={`rounded-lg p-2 transition-colors ${
-                  !isHome || scrolled
-                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                    : "text-white hover:bg-white/10"
-                }`}
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-5 w-5 text-amber-400" />
-                ) : (!isHome || scrolled) ? (
-                  <Moon className="h-5 w-5 text-gray-600" />
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
                 ) : (
-                  <Moon className="h-5 w-5 text-white" />
+                  <Menu className="h-6 w-6" />
                 )}
               </button>
 
-              {/* Wishlist */}
+              {/* Logo */}
               <Link
-                to="/wishlist"
-                className={`relative hidden rounded-lg p-2 transition-colors sm:block ${
+                to="/"
+                onClick={closeMenus}
+                className={`flex items-center gap-2 font-display text-2xl font-bold tracking-tight transition-colors ${
                   !isHome || scrolled
-                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                    : "text-white hover:bg-white/10"
+                    ? "text-gray-900 dark:text-white"
+                    : "text-white"
                 }`}
-                aria-label="Wishlist"
               >
-                <Heart className="h-5 w-5" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-lg font-black text-white">
+                  Z
+                </span>
 
-                {wishlistCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    {wishlistCount}
-                  </span>
-                )}
+                <span>ZYRA</span>
               </Link>
 
-              {/* Profile dropdown */}
-              <div className="relative hidden sm:block" ref={dropdownRef}>
+              {/* Desktop navigation */}
+              <nav className="hidden items-center gap-8 lg:flex">
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    className={({ isActive }) =>
+                      `text-sm font-medium transition-colors ${
+                        !isHome || scrolled
+                          ? isActive
+                            ? "font-semibold text-primary-600"
+                            : "text-gray-700 hover:text-primary-600 dark:text-gray-300"
+                          : isActive
+                            ? "font-semibold text-primary-400"
+                            : "text-white/90 hover:text-white"
+                      }`
+                    }
+                  >
+                    {link.name}
+                  </NavLink>
+                ))}
+              </nav>
+
+              {/* Right actions */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* Search */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowProfileDropdown((currentValue) => !currentValue);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-2 rounded-lg p-2 transition-colors ${
+                  onClick={onOpenSearch}
+                  className={`rounded-lg p-2 transition-colors ${
                     !isHome || scrolled
                       ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                       : "text-white hover:bg-white/10"
                   }`}
-                  aria-label="Account"
-                  aria-expanded={showProfileDropdown}
+                  aria-label="Search"
                 >
-                  {isLoggedIn ? (
-                    accountAvatar ? (
-                      <img
-                        src={accountAvatar}
-                        alt={accountName}
-                        className="h-6 w-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-[11px] font-bold text-white">
-                        {(accountName || accountEmail || "B")
-                          .charAt(0)
-                          .toUpperCase()}
-                      </span>
-                    )
+                  <Search className="h-5 w-5" />
+                </button>
+
+                {/* Theme toggle */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={`rounded-lg p-2 transition-colors ${
+                    !isHome || scrolled
+                      ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                  aria-label="Toggle dark mode"
+                >
+                  {isDarkMode ? (
+                    <Sun className="h-5 w-5 text-amber-400" />
+                  ) : !isHome || scrolled ? (
+                    <Moon className="h-5 w-5 text-gray-600" />
                   ) : (
-                    <User className="h-5 w-5" />
+                    <Moon className="h-5 w-5 text-white" />
                   )}
                 </button>
 
-                {showProfileDropdown && (
-                  <div className="absolute right-0 top-full z-[10000] mt-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+                {/* Wishlist */}
+                <Link
+                  to="/wishlist"
+                  className={`relative hidden rounded-lg p-2 transition-colors sm:block ${
+                    !isHome || scrolled
+                      ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                  aria-label="Wishlist"
+                >
+                  <Heart className="h-5 w-5" />
+
+                  {wishlistCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Profile dropdown */}
+                <div className="relative hidden sm:block" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileDropdown((currentValue) => !currentValue);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center gap-2 rounded-lg p-2 transition-colors ${
+                      !isHome || scrolled
+                        ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                        : "text-white hover:bg-white/10"
+                    }`}
+                    aria-label="Account"
+                    aria-expanded={showProfileDropdown}
+                  >
                     {isLoggedIn ? (
-                      <>
-                        {/* User information */}
-                        <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 p-5 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800/50">
-                          <div className="flex items-center gap-3">
-                            {accountAvatar ? (
-                              <img
-                                src={accountAvatar}
-                                alt={accountName}
-                                className="h-12 w-12 flex-shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-gray-700"
-                              />
-                            ) : (
-                              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-600 text-base font-bold text-white">
-                                {(accountName || accountEmail || "B")
-                                  .charAt(0)
-                                  .toUpperCase()}
-                              </span>
-                            )}
+                      accountAvatar ? (
+                        <img
+                          src={accountAvatar}
+                          alt={accountName}
+                          className="h-6 w-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-600 text-[11px] font-bold text-white">
+                          {(accountName || accountEmail || "B")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                      )
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </button>
 
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                                {accountName}
-                              </p>
-
-                              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                                {accountEmail || "No email added"}
-                              </p>
-
-                              <div className="mt-1 flex items-center gap-1">
-                                <Crown className="h-3 w-3 text-yellow-500" />
-
-                                <span className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-500">
-                                  Premium Member
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 top-full z-[10000] mt-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+                      {isLoggedIn ? (
+                        <>
+                          {/* User information */}
+                          <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 p-5 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800/50">
+                            <div className="flex items-center gap-3">
+                              {accountAvatar ? (
+                                <img
+                                  src={accountAvatar}
+                                  alt={accountName}
+                                  className="h-12 w-12 flex-shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-gray-700"
+                                />
+                              ) : (
+                                <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-600 text-base font-bold text-white">
+                                  {(accountName || accountEmail || "B")
+                                    .charAt(0)
+                                    .toUpperCase()}
                                 </span>
+                              )}
+
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                                  {accountName}
+                                </p>
+
+                                <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                  {accountEmail || "No email added"}
+                                </p>
+
+                                <div className="mt-1 flex items-center gap-1">
+                                  <Crown className="h-3 w-3 text-yellow-500" />
+
+                                  <span className="text-[10px] font-semibold text-yellow-600 dark:text-yellow-500">
+                                    Premium Member
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Quick stats */}
+                            <div className="mt-4 grid grid-cols-3 gap-2">
+                              <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
+                                <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                                  12
+                                </p>
+
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                  Orders
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
+                                <p className="text-lg font-bold text-pink-600 dark:text-pink-400">
+                                  {wishlistCount}
+                                </p>
+
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                  Wishlist
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
+                                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                  450
+                                </p>
+
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                                  Points
+                                </p>
                               </div>
                             </div>
                           </div>
 
-                          {/* Quick stats */}
-                          <div className="mt-4 grid grid-cols-3 gap-2">
-                            <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
-                              <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
-                                12
+                          {/* Scrollable menu */}
+                          <div className="custom-scrollbar max-h-[300px] overflow-y-auto">
+                            <div className="p-2">
+                              <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                Account
                               </p>
 
-                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                                Orders
-                              </p>
+                              <div className="space-y-0.5">
+                                {accountMenuItems.map(renderMenuLink)}
+                              </div>
                             </div>
 
-                            <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
-                              <p className="text-lg font-bold text-pink-600 dark:text-pink-400">
-                                {wishlistCount}
+                            <div className="mx-3 border-t border-gray-100 dark:border-gray-700" />
+
+                            <div className="p-2">
+                              <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                Activity
                               </p>
 
-                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                                Wishlist
-                              </p>
+                              <div className="space-y-0.5">
+                                {activityItems.map(renderMenuLink)}
+                              </div>
                             </div>
 
-                            <div className="rounded-lg bg-white p-2 text-center dark:bg-gray-800">
-                              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                450
+                            <div className="mx-3 border-t border-gray-100 dark:border-gray-700" />
+
+                            <div className="p-2">
+                              <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                Settings
                               </p>
 
-                              <p className="text-[10px] text-gray-500 dark:text-gray-400">
-                                Points
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Scrollable menu */}
-                        <div className="custom-scrollbar max-h-[300px] overflow-y-auto">
-                          <div className="p-2">
-                            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                              Account
-                            </p>
-
-                            <div className="space-y-0.5">
-                              {accountMenuItems.map(renderMenuLink)}
+                              <div className="space-y-0.5">
+                                {settingsItems.map(renderMenuLink)}
+                              </div>
                             </div>
                           </div>
 
-                          <div className="mx-3 border-t border-gray-100 dark:border-gray-700" />
-
-                          <div className="p-2">
-                            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                              Activity
-                            </p>
-
-                            <div className="space-y-0.5">
-                              {activityItems.map(renderMenuLink)}
+                          {/* Logout */}
+                          <div className="border-t border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/50">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowProfileDropdown(false);
+                                logout();
+                                navigate("/account");
+                              }}
+                              className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-red-600 transition-all duration-150 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                            >
+                              <LogOut className="h-4 w-4" />
+                              Sign Out
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        /* Guest user */
+                        <div className="p-5 text-center">
+                          <div className="mb-3 flex justify-center">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                              <User className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                             </div>
                           </div>
 
-                          <div className="mx-3 border-t border-gray-100 dark:border-gray-700" />
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                            Welcome to ZYRA
+                          </h3>
 
-                          <div className="p-2">
-                            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                              Settings
-                            </p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Sign in to access your account and enjoy exclusive
+                            benefits.
+                          </p>
 
-                            <div className="space-y-0.5">
-                              {settingsItems.map(renderMenuLink)}
+                          <div className="mt-5 space-y-2">
+                            <Link
+                              to="/account?authMode=login"
+                              onClick={closeMenus}
+                              className="block w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700"
+                            >
+                              Sign In
+                            </Link>
+
+                            <Link
+                              to="/account?authMode=signup"
+                              onClick={closeMenus}
+                              className="block w-full rounded-lg bg-primary-50 px-4 py-2.5 text-sm font-semibold text-primary-600 transition-all duration-150 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
+                            >
+                              Create Account
+                            </Link>
+                          </div>
+
+                          <div className="mt-5 border-t border-gray-100 pt-5 dark:border-gray-700">
+                            <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                              <Gift className="h-3.5 w-3.5" />
+                              <span>New members get 10% off first order</span>
                             </div>
                           </div>
                         </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-                        {/* Logout */}
-                        <div className="border-t border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/50">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowProfileDropdown(false);
-                              logout();
-                              navigate("/account");
-                            }}
-                            className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-red-600 transition-all duration-150 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                          >
-                            <LogOut className="h-4 w-4" />
-                            Sign Out
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      /* Guest user */
-                      <div className="p-5 text-center">
-                        <div className="mb-3 flex justify-center">
-                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-                            <User className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-                          </div>
-                        </div>
+                {/* Cart */}
+                <button
+                  type="button"
+                  onClick={() => setIsCartOpen(true)}
+                  className={`relative rounded-lg p-2 transition-colors ${
+                    !isHome || scrolled
+                      ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      : "text-white hover:bg-white/10"
+                  }`}
+                  aria-label="Cart"
+                >
+                  <ShoppingBag className="h-5 w-5" />
 
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                          Welcome to ZYRA
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                          Sign in to access your account and enjoy exclusive
-                          benefits.
-                        </p>
-
-                        <div className="mt-5 space-y-2">
-                          <Link
-                            to="/account?authMode=login"
-                            onClick={closeMenus}
-                            className="block w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700"
-                          >
-                            Sign In
-                          </Link>
-
-                          <Link
-                            to="/account?authMode=signup"
-                            onClick={closeMenus}
-                            className="block w-full rounded-lg bg-primary-50 px-4 py-2.5 text-sm font-semibold text-primary-600 transition-all duration-150 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30"
-                          >
-                            Create Account
-                          </Link>
-                        </div>
-
-                        <div className="mt-5 border-t border-gray-100 pt-5 dark:border-gray-700">
-                          <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <Gift className="h-3.5 w-3.5" />
-                            <span>New members get 10% off first order</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {totalItems > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
               </div>
-
-              {/* Cart */}
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(true)}
-                className={`relative rounded-lg p-2 transition-colors ${
-                  !isHome || scrolled
-                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                    : "text-white hover:bg-white/10"
-                }`}
-                aria-label="Cart"
-              >
-                <ShoppingBag className="h-5 w-5" />
-
-                {totalItems > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-white">
-                    {totalItems}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
-        </div>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:hidden">
-            <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `block rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                      isActive
-                        ? "bg-primary-50 text-primary-600 dark:bg-gray-900 dark:text-primary-400"
-                        : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900"
-                    }`
-                  }
-                >
-                  {link.name}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-        )}
-      </header>
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div
+              className={`border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:hidden ${
+                scrolled ? "rounded-b-2xl" : ""
+              }`}
+            >
+              <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `block rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                        isActive
+                          ? "bg-primary-50 text-primary-600 dark:bg-gray-900 dark:text-primary-400"
+                          : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900"
+                      }`
+                    }
+                  >
+                    {link.name}
+                  </NavLink>
+                ))}
+              </nav>
+            </div>
+          )}
+        </header>
+      </div>
     </>
   );
 };
