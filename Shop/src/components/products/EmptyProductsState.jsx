@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { PackageOpen, RefreshCw, Server } from 'lucide-react';
 import { useProducts } from '../../hooks/useProducts';
 
-export const EmptyProductsState = ({ title, message, onRefresh, loading }) => {
+export const EmptyProductsState = React.memo(({ title, message, onRefresh, loading }) => {
   const ctx = useProducts();
   const refresh = onRefresh || ctx.refreshProducts;
   const isLoading = loading !== undefined ? loading : ctx.isLoading;
@@ -38,4 +38,4 @@ export const EmptyProductsState = ({ title, message, onRefresh, loading }) => {
       </div>
     </div>
   );
-};
+});

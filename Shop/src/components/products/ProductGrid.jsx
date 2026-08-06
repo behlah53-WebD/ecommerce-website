@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { ProductCard } from './ProductCard';
 import { ProductSkeleton } from './ProductSkeleton';

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { getProducts, getCategories, fetchBrands } from '../api/productService';
 import { useAuth } from './AuthContext';
 
@@ -36,6 +36,18 @@ export const ProductProvider = ({ children }) => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedBrands, setSelectedBrands] = useState([]);
 
+  // Memoized filter building to avoid recalculating on every render
+  const buildShopFilters = useMemo(() => {
+    return () => ({
+      search: searchQuery.trim() || undefined,
+      category: selectedCategory !== 'All' ? selectedCategory : undefined,
+      sort: selectedSort !== 'featured' ? selectedSort : undefined,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+      brand: selectedBrands.length > 0 ? selectedBrands.join(',') : undefined,
+    });
+  }, [searchQuery, selectedCategory, selectedSort, priceRange, selectedBrands]);
+
   const loadCategories = async () => {
     try {
       const cats = await getCategories();
@@ -56,14 +68,8 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  const buildShopFilters = () => ({
-    search: searchQuery.trim() || undefined,
-    category: selectedCategory !== 'All' ? selectedCategory : undefined,
-    sort: selectedSort !== 'featured' ? selectedSort : undefined,
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
-    brand: selectedBrands.length > 0 ? selectedBrands.join(',') : undefined,
-  });
+  // Memoized filter object to prevent unnecessary re-renders
+  const shopFilters = useMemo(() => buildShopFilters(), [buildShopFilters]);
 
   // Home page: fetch all products (unfiltered). Not affected by shop filters.
   const fetchProductsList = async (page = 1, append = false) => {
@@ -100,7 +106,7 @@ export const ProductProvider = ({ children }) => {
     setShopLoading(true);
     setShopError(null);
     try {
-       const result = await getProducts({ page, limit: 8, ...buildShopFilters() });
+       const result = await getProducts({ page, limit: 8, ...shopFilters });
       const newProducts = result.products || [];
       const pg = result.pagination || { currentPage: 1, totalPages: 1, totalRecords: 0, hasNextPage: false };
 

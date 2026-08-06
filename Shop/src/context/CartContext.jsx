@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -621,15 +622,18 @@ export const CartProvider = ({ children }) => {
     }
   }, [isLoggedIn, showToast]);
 
-  const totalItems = cartItems.reduce(
-    (total, item) => total + (Number(item.quantity) || 0),
-    0,
+  // Memoized computed values for performance optimization
+  const totalItems = useMemo(() => 
+    cartItems.reduce((total, item) => total + (Number(item.quantity) || 0), 0),
+    [cartItems]
   );
 
-  const subtotal = cartItems.reduce(
-    (total, item) =>
+  const subtotal = useMemo(() => 
+    cartItems.reduce((total, item) =>
       total + (Number(item.price) || 0) * (Number(item.quantity) || 0),
-    0,
+      0
+    ),
+    [cartItems]
   );
 
   return (
@@ -677,3 +681,4 @@ export const useCart = () => {
 
   return context;
 };
+

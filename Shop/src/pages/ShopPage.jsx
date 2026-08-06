@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "../components/products/ProductCard";
 import { ProductSkeleton } from "../components/products/ProductSkeleton";
@@ -23,7 +23,7 @@ export const ShopPage = () => {
     shopTotalCount,
     selectedCategory,
     setSelectedCategory,
-    categories,
+    categories = [],
     shopProducts,
     shopLoading,
     shopHasMore,
@@ -31,25 +31,23 @@ export const ShopPage = () => {
     loadMoreShopProducts,
     priceRange,
     setPriceRange,
-    brands,
+    brands = [],
     selectedBrands,
     setSelectedBrands,
     searchQuery,
     setSearchQuery,
   } = useProducts();
 
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  // Local component states
   const [sortBy, setSortBy] = useState("featured");
-  const [searchTerm, setSearchTerm] = useState("");
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearchQuery(searchTerm);
-    }, 400);
+  // Map context search state to component search terms
+  const searchTerm = searchQuery ?? "";
+  const setSearchTerm = setSearchQuery;
 
-    return () => clearTimeout(handler);
-  }, [searchTerm, setSearchQuery]);
+  const backendCategories = (categories || []).filter((cat) => cat !== "All");
 
   const sortOptions = [
     { value: "featured", label: "Featured" },
@@ -62,10 +60,11 @@ export const ShopPage = () => {
     { value: "popular", label: "Most Popular" },
   ];
 
-  const sortedProducts = useMemo(() => {
-    if (!shopProducts) return [];
+  // Memoized sort function to prevent recreation on every render
+  const sortProducts = useCallback((products, sortBy) => {
+    if (!products || products.length === 0) return [];
 
-    const sorted = [...shopProducts];
+    const sorted = [...products];
 
     switch (sortBy) {
       case "price-low":
@@ -76,8 +75,7 @@ export const ShopPage = () => {
 
       case "newest":
         return sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
         );
 
       case "rating":
@@ -102,7 +100,12 @@ export const ShopPage = () => {
       default:
         return sorted;
     }
-  }, [shopProducts, sortBy]);
+  }, []);
+
+  const sortedProducts = useMemo(
+    () => sortProducts(shopProducts || [], sortBy),
+    [shopProducts, sortBy, sortProducts],
+  );
 
   const { sentinelRef } = useInfiniteScroll({
     next: loadMoreShopProducts,
@@ -111,8 +114,6 @@ export const ShopPage = () => {
     scrollThreshold: "200px",
     scrollableTarget: "shop-scroll-target",
   });
-
-  const backendCategories = categories.filter((cat) => cat !== "All");
 
   const categoryIcons = {
     clothing: "👕",
@@ -143,24 +144,30 @@ export const ShopPage = () => {
     stationery: "📚",
   };
 
-  const getCategoryIcon = (catName) => {
+  // Memoized category icon function
+  const getCategoryIcon = useCallback((catName) => {
     const key = String(catName || "")
       .trim()
       .toLowerCase();
 
     return categoryIcons[key] || "📦";
-  };
+  }, []);
 
-  const displayedCategories = showAllCategories
-    ? backendCategories
-    : backendCategories.slice(0, 6);
+  const displayedCategories = useMemo(
+    () =>
+      showAllCategories ? backendCategories : backendCategories.slice(0, 6),
+    [backendCategories, showAllCategories],
+  );
 
-  const hasActiveFilters =
-    selectedCategory !== "All" ||
-    selectedBrands.length > 0 ||
-    priceRange[0] !== 0 ||
-    priceRange[1] !== 1000 ||
-    Boolean(searchQuery);
+  const hasActiveFilters = useMemo(
+    () =>
+      selectedCategory !== "All" ||
+      selectedBrands.length > 0 ||
+      priceRange[0] !== 0 ||
+      priceRange[1] !== 1000 ||
+      Boolean(searchQuery),
+    [selectedCategory, selectedBrands, priceRange, searchQuery],
+  );
 
   return (
     <div className="h-fit bg-gray-50 dark:bg-gray-950">
@@ -179,15 +186,13 @@ export const ShopPage = () => {
               )}
 
               <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white">
-                {selectedCategory === "All"
-                  ? "All Products"
-                  : selectedCategory}
+                {selectedCategory === "All" ? "All Products" : selectedCategory}
               </h1>
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {shopTotalCount}{" "}
-              {shopTotalCount === 1 ? "product" : "products"} available
+              {shopTotalCount} {shopTotalCount === 1 ? "product" : "products"}{" "}
+              available
             </p>
           </div>
 
@@ -412,7 +417,10 @@ export const ShopPage = () => {
           </aside>
 
           {/* Products Grid */}
-          <main id="shop-scroll-target" className="flex-1 min-w-0 overflow-y-auto">
+          <main
+            id="shop-scroll-target"
+            className="flex-1 min-w-0 overflow-y-auto"
+          >
             {/* Active Filters */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {selectedCategory !== "All" && (
@@ -437,7 +445,6 @@ export const ShopPage = () => {
               {sortBy !== "featured" && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium">
                   Sort: {sortOptions.find((opt) => opt.value === sortBy)?.label}
-
                   <button
                     onClick={() => setSortBy("featured")}
                     aria-label="Clear sorting"
@@ -450,7 +457,6 @@ export const ShopPage = () => {
               {(priceRange[0] !== 0 || priceRange[1] !== 1000) && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/30 text-primary-700 dark:text-primary-400 text-xs font-medium">
                   Price: ₹{priceRange[0]} - ₹{priceRange[1]}
-
                   <button
                     onClick={() => setPriceRange([0, 1000])}
                     aria-label="Clear price filter"
@@ -482,9 +488,7 @@ export const ShopPage = () => {
                 ))}
 
               {!hasActiveFilters && (
-                <span className="text-xs text-gray-400">
-                  No active filters
-                </span>
+                <span className="text-xs text-gray-400">No active filters</span>
               )}
             </div>
 
@@ -513,8 +517,7 @@ export const ShopPage = () => {
             </div>
 
             {/* Products Display */}
-            {shopLoading &&
-            (!sortedProducts || sortedProducts.length === 0) ? (
+            {shopLoading && (!sortedProducts || sortedProducts.length === 0) ? (
               <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <ProductSkeleton key={idx} />

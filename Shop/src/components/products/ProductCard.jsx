@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -9,32 +9,65 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 
-export const ProductCard = ({ product }) => {
+export const ProductCard = React.memo(({ product }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   if (!product) return null;
 
-  const id = product.id || product._id;
-  const isWishlisted = isInWishlist(id);
+  // Stable computed values with useMemo
+  const id = useMemo(() => product.id || product._id, [product]);
+  const isWishlisted = useMemo(() => isInWishlist(id), [isInWishlist, id]);
+  const stock = useMemo(() => product.stock || 0, [product]);
 
-  const stock = product.stock || 0;
-
-  const productStatus =
+  const productStatus = useMemo(() =>
     product.productStatus ||
     (stock === 0
       ? 'Out of Stock'
       : stock <= 10
         ? 'Low Stock'
-        : 'In Stock');
+        : 'In Stock'),
+    [product, stock]
+  );
 
-  const isOutOfStock =
-    productStatus === 'Out of Stock' || stock <= 0;
+  const isOutOfStock = useMemo(() =>
+    productStatus === 'Out of Stock' || stock <= 0,
+    [productStatus, stock]
+  );
 
-  const isLowStock =
-    productStatus === 'Low Stock' || (stock > 0 && stock <= 10);
+  const isLowStock = useMemo(() =>
+    productStatus === 'Low Stock' || (stock > 0 && stock <= 10),
+    [productStatus, stock]
+  );
 
-  const getStockBadge = () => {
+  // Stable image URLs with useMemo
+  const mainImage = useMemo(() =>
+    product.images?.[0] ||
+    product.image ||
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=800&fit=crop',
+    [product]
+  );
+
+  const hoverImage = useMemo(() => product.images?.[1] || mainImage, [product, mainImage]);
+
+  // Stable event handlers with useCallback
+  const handleAddToCart = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isOutOfStock) {
+      addToCart(product);
+    }
+  }, [addToCart, isOutOfStock, product]);
+
+  const handleWishlistToggle = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+  }, [toggleWishlist, product]);
+
+  // Memoized stock badge component
+  const stockBadge = useMemo(() => {
     if (isOutOfStock) {
       return (
         <span className="flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
@@ -54,29 +87,7 @@ export const ProductCard = ({ product }) => {
     }
 
     return null;
-  };
-
-  const mainImage =
-    product.images?.[0] ||
-    product.image ||
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=800&fit=crop';
-
-  const hoverImage = product.images?.[1] || mainImage;
-
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!isOutOfStock) {
-      addToCart(product);
-    }
-  };
-
-  const handleWishlistToggle = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleWishlist(product);
-  };
+  }, [isOutOfStock, isLowStock, stock]);
 
   return (
     <div className="group relative rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
@@ -118,7 +129,7 @@ export const ProductCard = ({ product }) => {
             </span>
           )}
 
-          {getStockBadge()}
+          {stockBadge}
         </div>
 
          {/* Hover Actions - hidden on mobile, shown on desktop */}
@@ -259,4 +270,4 @@ export const ProductCard = ({ product }) => {
       </div>
     </div>
   );
-};
+});
