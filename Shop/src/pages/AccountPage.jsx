@@ -24,6 +24,7 @@ import {
   Phone,
   Calendar,
   Crown,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -150,6 +151,19 @@ export const AccountPage = () => {
     setEmail(e.target.value);
     setOtpVerified(false);
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary-600 mx-auto mb-4" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Loading...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
@@ -694,9 +708,13 @@ export const AccountPage = () => {
                   </div>
                 ) : ordersError ? (
                   <div className="p-6 text-center">
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {ordersError}
-                    </p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Reload
+                    </button>
                   </div>
                 ) : accountOrders.length === 0 ? (
                   <div className="text-center py-12">
