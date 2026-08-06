@@ -21,7 +21,7 @@ export const ProductProvider = ({ children }) => {
   // Shop page product list - isolated from the home page `products` so applying
   // a filter in the shop never customizes the home page product list.
   const [shopProducts, setShopProducts] = useState([]);
-  const [shopLoading, setShopLoading] = useState(false);
+  const [shopLoading, setShopLoading] = useState(true);
   const [shopError, setShopError] = useState(null);
   const [shopCurrentPage, setShopCurrentPage] = useState(1);
   const [shopTotalPages, setShopTotalPages] = useState(1);

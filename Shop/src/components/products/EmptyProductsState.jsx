@@ -28,7 +28,7 @@ export const EmptyProductsState = ({ title, message, onRefresh, loading }) => {
           className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          {isLoading ? 'Fetching API...' : 'Fetch from Backend API'}
+          {isLoading ? 'Fetching API...' : 'Reload'}
         </button>
       </div>
 
