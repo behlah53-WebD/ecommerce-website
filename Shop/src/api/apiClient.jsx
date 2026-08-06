@@ -94,7 +94,7 @@ apiClient.interceptors.response.use(
     }
 
     const errMsg = error.response?.data?.message || error.message;
-    console.error(`API Error [${status}] ${originalRequest?.url}:`, errMsg);
+    console.error(`API Errorr [${status}] ${originalRequest?.url}:`, errMsg);
 
     return Promise.reject(error);
   }
