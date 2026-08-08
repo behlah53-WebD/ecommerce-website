@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE_URL, API_ENDPOINTS, API_TIMEOUT, API_HEADERS } from '../config/api';
 
 const AuthContext = createContext();
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = API_BASE_URL;
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -18,12 +19,12 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       const token = localStorage.getItem('accessToken');
       if (token) {
-        try {
-          const res = await axios.get(`${API_BASE}/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+       try {
+           const res = await axios.get(`${API_BASE}${API_ENDPOINTS.auth.me}`, {
+             headers: {
+               Authorization: `Bearer ${token}`,
+             },
+           });
           if (res.data && res.data.success) {
             setCurrentUser(res.data.data);
           } else {
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
+       const res = await axios.post(`${API_BASE}${API_ENDPOINTS.auth.login}`, { email, password });
       if (res.data && res.data.success) {
         const { accessToken, refreshToken, data: userData } = res.data;
         const loggedUser = userData || { email, role: 'Buyer', name: 'Buyer User' };
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async ({ name, email, password }) => {
     try {
       
-      const res = await axios.post(`${API_BASE}/auth/signup`, {
+       const res = await axios.post(`${API_BASE}${API_ENDPOINTS.auth.signup}`, {
         name,
         email,
         password,
@@ -100,8 +101,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await axios.put(
-          `${API_BASE}/auth/profile`,
+         const res = await axios.put(
+           `${API_BASE}${API_ENDPOINTS.auth.profile}`,
           updates,
           {
             headers: {

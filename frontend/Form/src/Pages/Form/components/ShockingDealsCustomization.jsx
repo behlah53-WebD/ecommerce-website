@@ -39,29 +39,52 @@ const ShockingDealsCustomization = ({ showToast }) => {
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
- 
+
   const [title, setTitle] = useState("SHOCKING DEAL");
   const [subtitle, setSubtitle] = useState("The opportunity will quickly pass. Take it!");
   const [endTime, setEndTime] = useState("");
   const [selectedProducts, setSelectedProducts] = useState({}); // productId -> discountPercentage
- 
+
+  // Fetch all products (paginated since API has max limit of 50)
+  const fetchAllProducts = useCallback(async () => {
+    let allProducts = [];
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const res = await apiGet(`/users?page=${page}&limit=50`);
+      if (res.data && res.data.success) {
+        const items = res.data.data || [];
+        allProducts = [...allProducts, ...items];
+        
+        const pagination = res.data.pagination;
+        if (pagination && pagination.totalPages && page < pagination.totalPages) {
+          page++;
+        } else {
+          hasMore = false;
+        }
+      } else if (Array.isArray(res.data)) {
+        allProducts = [...allProducts, ...res.data];
+        hasMore = false;
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    return allProducts;
+  }, []);
+
   // Fetch initial shocking deal state & products list
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch products
-      const productsRes = await apiGet("/users?limit=10000");
-      let allProducts = [];
-      if (productsRes.data && productsRes.data.success) {
-        allProducts = productsRes.data.data || [];
-      } else if (Array.isArray(productsRes.data)) {
-        allProducts = productsRes.data;
-      }
+      // 1. Fetch ALL products (not just first 50)
+      const allProducts = await fetchAllProducts();
       
       // Filter out approved items only
       const approvedProducts = allProducts.filter((p) => p.status === "approved");
       setProducts(approvedProducts);
- 
+
       // 2. Fetch current deal settings
       const dealRes = await apiGet("/users/shocking-deal/admin");
       if (dealRes.data && dealRes.data.success && dealRes.data.data) {
@@ -76,7 +99,7 @@ const ShockingDealsCustomization = ({ showToast }) => {
           const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
           setEndTime(localISOTime);
         }
- 
+
         // Check if deal is active
         if (deal.isActive && new Date(deal.endTime) > new Date()) {
           const mapping = {};
@@ -96,7 +119,7 @@ const ShockingDealsCustomization = ({ showToast }) => {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, fetchAllProducts]);
  
   useEffect(() => {
     fetchData();

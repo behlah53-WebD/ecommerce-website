@@ -39,6 +39,9 @@ import {
   PendingActions as PendingIcon,
   Block as DeclinedIcon,
   Shield as ShieldIcon,
+  People as PeopleIcon,
+  Storefront as StorefrontIcon,
+  Receipt as ReceiptIcon,
 } from "@mui/icons-material";
 import { apiGet, getUserFromToken } from "@/API/api";
 
@@ -57,6 +60,14 @@ function Dash({ onNavigate }) {
     criticalProducts: [],
     role: "User",
     name: "User",
+    sellerCount: 0,
+    buyerCount: 0,
+    totalOrders: 0,
+    pendingSellerApprovals: 0,
+    pendingProductRequests: 0,
+    pendingOrderApprovals: 0,
+    pendingCancellations: 0,
+    pendingReturns: 0,
   });
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
@@ -83,10 +94,19 @@ function Dash({ onNavigate }) {
     }
 
     setLoading(true);
-    apiGet("/users?limit=10000")
-      .then((res) => {
-        if (res.data && res.data.success) {
-          const list = res.data.data || [];
+    
+    // Fetch all data in parallel
+    Promise.all([
+      apiGet("/users?limit=10000"),
+      apiGet("/auth/users-list"),
+      apiGet("/orders/admin/all"),
+      apiGet("/auth/seller-approval-requests"),
+      apiGet("/users/admin/requests"),
+    ])
+      .then(([productsRes, usersRes, ordersRes, sellerApprovalsRes, adminRequestsRes]) => {
+        // Process products data
+        if (productsRes.data && productsRes.data.success) {
+          const list = productsRes.data.data || [];
 
           const totalVal = list.reduce(
             (sum, item) =>
@@ -125,7 +145,7 @@ function Dash({ onNavigate }) {
 
           setStats((prev) => ({
             ...prev,
-            total: res.data.pagination?.totalRecords || list.length,
+            total: productsRes.data.pagination?.totalRecords || list.length,
             approved: list.filter((i) => i.status === "approved" || !i.status)
               .length,
             pending: list.filter(
@@ -141,6 +161,72 @@ function Dash({ onNavigate }) {
             criticalProducts: list
               .filter((item) => Number(item.stock || 0) <= 5)
               .slice(0, 5),
+          }));
+        }
+
+        // Process users data for seller/buyer counts
+        if (usersRes.data && usersRes.data.success) {
+          const users = usersRes.data.data || [];
+          const sellerCount = users.filter((u) => u.role === "Seller").length;
+          const buyerCount = users.filter((u) => u.role === "Buyer").length;
+          
+          setStats((prev) => ({
+            ...prev,
+            sellerCount,
+            buyerCount,
+          }));
+        }
+
+        // Process orders data
+        if (ordersRes.data && ordersRes.data.success) {
+          const orders = ordersRes.data.data || [];
+          const totalOrders = orders.length;
+          
+          // Count pending order approvals (status: Pending)
+          const pendingOrderApprovals = orders.filter((o) => o.status === "Pending").length;
+          
+          // Count pending cancellations
+          const pendingCancellations = orders.filter(
+            (o) => o.cancelRequest?.requested && o.cancelRequest?.status === "Pending"
+          ).length;
+          
+          // Count pending returns
+          const pendingReturns = orders.filter(
+            (o) => o.returnRequest?.requested && o.returnRequest?.status === "Pending"
+          ).length;
+          
+          setStats((prev) => ({
+            ...prev,
+            totalOrders,
+            pendingOrderApprovals,
+            pendingCancellations,
+            pendingReturns,
+          }));
+        }
+
+        // Process seller approval requests
+        if (sellerApprovalsRes.data && sellerApprovalsRes.data.success) {
+          const sellers = sellerApprovalsRes.data.data || [];
+          const pendingSellerApprovals = sellers.filter(
+            (s) => (s.approvalStatus || "approved") === "pending"
+          ).length;
+          
+          setStats((prev) => ({
+            ...prev,
+            pendingSellerApprovals,
+          }));
+        }
+
+        // Process admin product requests
+        if (adminRequestsRes.data && adminRequestsRes.data.success) {
+          const requests = adminRequestsRes.data.data || [];
+          const pendingProductRequests = requests.filter(
+            (r) => r.status && r.status.startsWith("pending")
+          ).length;
+          
+          setStats((prev) => ({
+            ...prev,
+            pendingProductRequests,
           }));
         }
       })
@@ -248,6 +334,39 @@ function Dash({ onNavigate }) {
       trend: stats.pending > 0 ? `${pendingRate}% of total` : "All clear",
       trendUp: stats.pending === 0,
       pulse: stats.pending > 0,
+    },
+    {
+      title: "Total Sellers",
+      value: stats.sellerCount,
+      subtitle: "Registered sellers",
+      icon: <StorefrontIcon sx={{ fontSize: 28 }} />,
+      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      iconBg: "rgba(240, 147, 251, 0.1)",
+      accent: "#ec4899",
+      trend: "Active sellers",
+      trendUp: true,
+    },
+    {
+      title: "Total Buyers",
+      value: stats.buyerCount,
+      subtitle: "Registered buyers",
+      icon: <PeopleIcon sx={{ fontSize: 28 }} />,
+      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      iconBg: "rgba(79, 172, 254, 0.1)",
+      accent: "#3b82f6",
+      trend: "Active buyers",
+      trendUp: true,
+    },
+    {
+      title: "Total Orders",
+      value: stats.totalOrders,
+      subtitle: "Orders placed",
+      icon: <ReceiptIcon sx={{ fontSize: 28 }} />,
+      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+      iconBg: "rgba(67, 233, 123, 0.1)",
+      accent: "#10b981",
+      trend: "All orders",
+      trendUp: true,
     },
   ];
 
@@ -790,7 +909,7 @@ function Dash({ onNavigate }) {
                     lineHeight: 1,
                   }}
                 >
-                  {stats.approved}
+                  {stats.total}
                 </Typography>
                 <Typography
                   variant="caption"

@@ -1,11 +1,16 @@
 import apiClient from './apiClient';
+import { API_ENDPOINTS } from '../config/api';
+import {
+  SHOCKING_DEAL_PRICE_MULTIPLIER,
+  FALLBACK_ORIGINAL_PRICE,
+} from '../constants/currency';
 
 let cachedActiveDeal = null;
 let lastDealFetchTime = 0;
 const DEAL_CACHE_DURATION = 15000; // 15 seconds
 
 export const getActiveShockingDeal = async () => {
-  const response = await apiClient.get('/users/shocking-deal/active');
+  const response = await apiClient.get(API_ENDPOINTS.products.shockingDeal);
   return response.data?.data || null;
 };
 
@@ -72,7 +77,7 @@ export const normalizeProduct = (item, activeDeal = null) => {
     ];
   }
 
-  let originalPrice = price > 0 ? Math.round(price * 1.2) : 99;
+   let originalPrice = price > 0 ? Math.round(price * SHOCKING_DEAL_PRICE_MULTIPLIER) : FALLBACK_ORIGINAL_PRICE;
   let shockingDiscount = null;
 
   if (activeDeal && Array.isArray(activeDeal.products)) {
@@ -114,7 +119,7 @@ export const getProducts = async (filters = {}) => {
   try {
     const [activeDeal, response] = await Promise.all([
       getActiveShockingDealCached(),
-      apiClient.get('/users', { params: filters }),
+      apiClient.get(API_ENDPOINTS.products.list, { params: filters }),
     ]);
     const rawData = response.data?.data || [];
     const pagination = response.data?.pagination || {
@@ -146,10 +151,10 @@ export const getProducts = async (filters = {}) => {
 
 export const getProductById = async (id) => {
   try {
-    const [activeDeal, response] = await Promise.all([
-      getActiveShockingDealCached(),
-      apiClient.get(`/users/${id}`),
-    ]);
+     const [activeDeal, response] = await Promise.all([
+       getActiveShockingDealCached(),
+       apiClient.get(`${API_ENDPOINTS.products.detail}/${id}`),
+     ]);
     const item = response.data?.data;
     if (!item) return null;
     return normalizeProduct(item, activeDeal);
@@ -166,7 +171,7 @@ export const getProductById = async (id) => {
 
 export const getCategories = async () => {
   try {
-    const response = await apiClient.get('/users/categories');
+    const response = await apiClient.get(API_ENDPOINTS.products.categories);
     const categories = response.data?.data || response.data || [];
     if (Array.isArray(categories)) {
       return categories.filter(Boolean);
@@ -180,7 +185,7 @@ export const getCategories = async () => {
 
 export const fetchBrands = async () => {
   try {
-    const response = await apiClient.get('/users/brands');
+    const response = await apiClient.get(API_ENDPOINTS.products.brands);
     const brands = response.data?.data || response.data || [];
     if (Array.isArray(brands)) {
       return brands.filter(Boolean);

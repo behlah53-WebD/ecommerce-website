@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { useCategories, useBrands, useInvalidateProducts } from '../hooks/useQueries';
 import { useAuth } from './AuthContext';
+import { DEFAULT_SORT, ALL_CATEGORY, DEFAULT_PRICE_RANGE } from '../constants';
 
 const ProductContext = createContext();
 
@@ -15,32 +16,42 @@ export const ProductProvider = ({ children }) => {
   const refreshShopProducts = useCallback(() => invalidateProducts(), [invalidateProducts]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedSort, setSelectedSort] = useState('featured');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY);
+  const [selectedSort, setSelectedSort] = useState(DEFAULT_SORT);
+  const [priceRange, setPriceRange] = useState(DEFAULT_PRICE_RANGE);
   const [selectedBrands, setSelectedBrands] = useState([]);
+
+  const toggleBrand = useCallback((brand, checked) => {
+    setSelectedBrands(prev => {
+      if (checked) {
+        return [...prev, brand];
+      } else {
+        return prev.filter(b => b !== brand);
+      }
+    });
+  }, []);
 
   const hasActiveFilters = useMemo(
     () =>
-      selectedCategory !== 'All' ||
+      selectedCategory !== ALL_CATEGORY ||
       selectedBrands.length > 0 ||
-      priceRange[0] !== 0 ||
-      priceRange[1] !== 1000 ||
+      priceRange[0] !== DEFAULT_PRICE_RANGE[0] ||
+      priceRange[1] !== DEFAULT_PRICE_RANGE[1] ||
       Boolean(searchQuery),
     [selectedCategory, selectedBrands, priceRange, searchQuery]
   );
 
   const buildShopFilters = useCallback(() => ({
     search: searchQuery.trim() || undefined,
-    category: selectedCategory !== 'All' ? selectedCategory : undefined,
-    sort: selectedSort !== 'featured' ? selectedSort : undefined,
+    category: selectedCategory !== ALL_CATEGORY ? selectedCategory : undefined,
+    sort: selectedSort !== DEFAULT_SORT ? selectedSort : undefined,
     minPrice: priceRange[0],
     maxPrice: priceRange[1],
     brand: selectedBrands.length > 0 ? selectedBrands.join(',') : undefined,
   }), [searchQuery, selectedCategory, selectedSort, priceRange, selectedBrands]);
 
   const value = useMemo(() => ({
-    categories: ['All', ...categories.filter((c) => c !== 'All')],
+    categories: [ALL_CATEGORY, ...categories.filter((c) => c !== ALL_CATEGORY)],
     brands,
     categoriesLoading,
     brandsLoading,
@@ -54,6 +65,7 @@ export const ProductProvider = ({ children }) => {
     setPriceRange,
     selectedBrands,
     setSelectedBrands,
+    toggleBrand,
     hasActiveFilters,
     buildShopFilters,
     refreshProducts,
@@ -72,6 +84,7 @@ export const ProductProvider = ({ children }) => {
     buildShopFilters,
     refreshProducts,
     refreshShopProducts,
+    toggleBrand,
   ]);
 
   return (

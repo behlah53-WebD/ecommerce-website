@@ -8,8 +8,17 @@ import { CategoryGrid } from '../components/home/CategoryGrid';
 import { ProductGrid } from '../components/products/ProductGrid';
 import {NewProductsSlider} from '../components/home/NewProductsSlider';
 import { Reveal } from '../components/common/Reveal';
+import { useHomeProducts } from '../hooks/useProducts';
 
 export const HomePage = () => {
+  const { 
+    products: homeProducts, 
+    isLoading: homeLoading, 
+    hasMore: homeHasMore,
+    loadMoreProducts,
+    refreshProducts
+  } = useHomeProducts();
+
   return (
     <div className="space-y-2">
       {}
@@ -55,7 +64,15 @@ export const HomePage = () => {
               </Link>
             </div>
 
-            <ProductGrid />
+            <ProductGrid
+              products={homeProducts}
+              isLoading={homeLoading}
+              hasMore={homeHasMore}
+              loadMore={loadMoreProducts}
+              onRefresh={refreshProducts}
+              emptyTitle="No Featured Products"
+              emptyMessage="No featured products available at the moment."
+            />
           </div>
         </section>
       </Reveal>

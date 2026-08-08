@@ -1,5 +1,6 @@
 import { useProductContext } from '../context/ProductContext';
 import { useInfiniteProducts } from '../hooks/useQueries';
+import { DEFAULT_PAGE_SIZE } from '../constants';
 
 export const useProducts = () => {
   const {
@@ -17,6 +18,7 @@ export const useProducts = () => {
     setPriceRange,
     selectedBrands,
     setSelectedBrands,
+    toggleBrand,
     hasActiveFilters,
     buildShopFilters,
   } = useProductContext();
@@ -31,7 +33,7 @@ export const useProducts = () => {
     hasNextPage: shopHasMore,
     isFetchingNextPage: shopFetchingMore,
     refetch: refreshShopProducts,
-  } = useInfiniteProducts({ ...shopFilters, limit: 8 });
+  } = useInfiniteProducts({ ...shopFilters, limit: DEFAULT_PAGE_SIZE });
 
   const shopProducts = shopData?.pages.flatMap(page => page.products) || [];
 
@@ -68,6 +70,7 @@ export const useProducts = () => {
     setPriceRange,
     selectedBrands,
     setSelectedBrands,
+    toggleBrand,
     hasActiveFilters,
   };
 };
@@ -81,7 +84,7 @@ export const useHomeProducts = () => {
     hasNextPage: homeHasMore,
     isFetchingNextPage: homeFetchingMore,
     refetch: refreshHomeProducts,
-  } = useInfiniteProducts({ limit: 8 });
+  } = useInfiniteProducts({ limit: DEFAULT_PAGE_SIZE });
 
   const homeProducts = homeData?.pages.flatMap(page => page.products) || [];
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
 const clamp = (min, max, value) => Math.min(max, Math.max(min, value));
 
@@ -8,6 +8,7 @@ export const PriceRangeSlider = ({
   step = 1,
   value,
   onCommit,
+  className = '',
 }) => {
   const [minVal, setMinVal] = useState(() =>
     clamp(min, max, value?.[0] ?? min),
@@ -46,7 +47,7 @@ export const PriceRangeSlider = ({
     const pos = positionFromClientX(e.clientX);
     if (pos === null) return;
     const [curMin, curMax] = liveRef.current;
-    if (draggingRef.current === "min") {
+    if (draggingRef.current === 'min') {
       setMinVal(clamp(min, curMax, pos));
     } else {
       setMaxVal(clamp(curMin, max, pos));
@@ -63,13 +64,13 @@ export const PriceRangeSlider = ({
     const delta = e.shiftKey ? 10 * step : step;
     const [curMin, curMax] = liveRef.current;
     let next = null;
-    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
       e.preventDefault();
-      if (which === "min") next = [clamp(min, curMax, curMin + delta), curMax];
+      if (which === 'min') next = [clamp(min, curMax, curMin + delta), curMax];
       else next = [curMin, clamp(curMin, max, curMax + delta)];
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
       e.preventDefault();
-      if (which === "min") next = [clamp(min, curMax, curMin - delta), curMax];
+      if (which === 'min') next = [clamp(min, curMax, curMin - delta), curMax];
       else next = [curMin, clamp(curMin, max, curMax - delta)];
     }
     if (next) {
@@ -85,11 +86,11 @@ export const PriceRangeSlider = ({
   };
 
   useEffect(() => {
-    document.addEventListener("pointermove", handlePointerMove);
-    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
     return () => {
-      document.removeEventListener("pointermove", handlePointerMove);
-      document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
     };
   }, []);
 
@@ -103,7 +104,7 @@ export const PriceRangeSlider = ({
   const fillWidth = Math.max(0, maxPct - minPct);
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div
         ref={trackRef}
         className="relative h-6"
@@ -122,8 +123,8 @@ export const PriceRangeSlider = ({
           aria-valuemax={max}
           aria-valuenow={minVal}
           tabIndex={0}
-          onPointerDown={handlePointerDown("min")}
-          onKeyDown={(e) => handleKeyDown("min")(e)}
+          onPointerDown={handlePointerDown('min')}
+          onKeyDown={(e) => handleKeyDown('min')(e)}
           onBlur={handleBlur}
           className="absolute top-1/2 -left-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-gray-900 bg-primary-600 shadow focus:outline-none focus:ring-2 focus:ring-primary-400"
           style={{ left: `${minPct}%` }}
@@ -135,8 +136,8 @@ export const PriceRangeSlider = ({
           aria-valuemax={max}
           aria-valuenow={maxVal}
           tabIndex={0}
-          onPointerDown={handlePointerDown("max")}
-          onKeyDown={(e) => handleKeyDown("max")(e)}
+          onPointerDown={handlePointerDown('max')}
+          onKeyDown={(e) => handleKeyDown('max')(e)}
           onBlur={handleBlur}
           className="absolute top-1/2 -left-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white dark:border-gray-900 bg-primary-600 shadow focus:outline-none focus:ring-2 focus:ring-primary-400"
           style={{ left: `${maxPct}%` }}
@@ -154,5 +155,7 @@ export const PriceRangeSlider = ({
     </div>
   );
 };
+
+PriceRangeSlider.displayName = 'PriceRangeSlider';
 
 export default PriceRangeSlider;

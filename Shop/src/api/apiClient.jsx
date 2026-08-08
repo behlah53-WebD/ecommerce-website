@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL, API_TIMEOUT, API_HEADERS } from "../config/api";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = API_BASE_URL;
 
 const pendingRequests = new Map();
 
@@ -11,10 +12,8 @@ const generateRequestKey = (config) => {
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 15000,
+  headers: API_HEADERS,
+  timeout: API_TIMEOUT,
 });
 
 apiClient.interceptors.request.use(
@@ -70,31 +69,31 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     const isTokenError = status === 401 || status === 403;
 
-    if (isTokenError && !originalRequest._retry && !originalRequest.url?.includes("/auth/refresh")) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
+     if (isTokenError && !originalRequest._retry && !originalRequest.url?.includes(API_ENDPOINTS.auth.refresh)) {
+       if (isRefreshing) {
+         return new Promise((resolve, reject) => {
+           failedQueue.push({ resolve, reject });
+         })
+           .then((token) => {
+             originalRequest.headers.Authorization = `Bearer ${token}`;
+             return apiClient(originalRequest);
+           })
+           .catch((err) => Promise.reject(err));
+       }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+       originalRequest._retry = true;
+       isRefreshing = true;
 
-      const refreshToken = sessionStorage.getItem("refreshToken");
+       const refreshToken = sessionStorage.getItem("refreshToken");
 
-      if (!refreshToken) {
-        isRefreshing = false;
-        localStorage.removeItem("accessToken");
-        return Promise.reject(error);
-      }
+       if (!refreshToken) {
+         isRefreshing = false;
+         localStorage.removeItem("accessToken");
+         return Promise.reject(error);
+       }
 
-      try {
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+       try {
+         const { data } = await axios.post(`${BASE_URL}${API_ENDPOINTS.auth.refresh}`, { refreshToken });
 
         if (data.success && data.accessToken) {
           localStorage.setItem("accessToken", data.accessToken);

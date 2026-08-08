@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { formatPrice } from '../../utils/formatPrice';
 
 export const CartDrawer = () => {
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
@@ -113,7 +114,7 @@ export const CartDrawer = () => {
             <div className="border-t border-gray-100 p-6 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
               <div className="flex justify-between text-base font-semibold text-gray-900 dark:text-white mb-4">
                 <span>Subtotal</span>
-                <span>                ₹{subtotal.toFixed(2)}</span>
+                 <span>                {formatPrice(subtotal)}</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
                 Shipping and taxes calculated at checkout.

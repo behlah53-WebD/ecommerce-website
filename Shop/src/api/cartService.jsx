@@ -1,8 +1,9 @@
 import apiClient from './apiClient';
+import { API_ENDPOINTS } from '../config/api';
 
 export const getBackendCart = async () => {
   try {
-    const response = await apiClient.get('/cart');
+    const response = await apiClient.get(API_ENDPOINTS.cart.get);
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Failed to fetch backend cart:', error);
@@ -26,7 +27,7 @@ export const addToBackendCart = async (product, quantity = 1, color = null, size
       size,
       quantity: Number(quantity) || 1,
     };
-    const response = await apiClient.post('/cart', payload);
+    const response = await apiClient.post(API_ENDPOINTS.cart.add, payload);
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Failed to add to backend cart:', error);
@@ -36,7 +37,7 @@ export const addToBackendCart = async (product, quantity = 1, color = null, size
 
 export const updateBackendCartItem = async (productId, color, size, delta) => {
   try {
-    const response = await apiClient.put('/cart/item', { productId, color, size, delta });
+    const response = await apiClient.put(API_ENDPOINTS.cart.update, { productId, color, size, delta });
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Failed to update backend cart item:', error);
@@ -46,7 +47,7 @@ export const updateBackendCartItem = async (productId, color, size, delta) => {
 
 export const removeFromBackendCart = async (productId, color, size) => {
   try {
-    const response = await apiClient.delete('/cart/item', { data: { productId, color, size } });
+    const response = await apiClient.delete(API_ENDPOINTS.cart.remove, { data: { productId, color, size } });
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Failed to remove item from backend cart:', error);
@@ -56,7 +57,7 @@ export const removeFromBackendCart = async (productId, color, size) => {
 
 export const syncCartWithBackend = async (cartItems) => {
   try {
-    const response = await apiClient.post('/cart/sync', { items: cartItems });
+    const response = await apiClient.post(API_ENDPOINTS.cart.sync, { items: cartItems });
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Backend cart sync error:', error);
@@ -66,7 +67,7 @@ export const syncCartWithBackend = async (cartItems) => {
 
 export const clearBackendCart = async () => {
   try {
-    const response = await apiClient.delete('/cart/clear');
+    const response = await apiClient.delete(API_ENDPOINTS.cart.clear);
     return response?.data?.items || [];
   } catch (error) {
     console.warn('Failed to clear backend cart:', error);

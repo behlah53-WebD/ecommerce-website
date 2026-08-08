@@ -1,8 +1,9 @@
 import apiClient from "./apiClient";
+import { API_ENDPOINTS } from "../config/api";
 
 export const getBackendWishlist = async () => {
   try {
-    const response = await apiClient.get('/wishlist');
+    const response = await apiClient.get(API_ENDPOINTS.wishlist.get);
     return response.data?.items || [];
   } catch (error) {
     console.warn('Failed to fetch backend wishlist:', error);
@@ -25,7 +26,7 @@ export const toggleBackendWishlist = async (product) => {
       category: product.category || '',
       brand: product.brand || '',
     };
-    const response = await apiClient.post('/wishlist/toggle', payload);
+    const response = await apiClient.post(API_ENDPOINTS.wishlist.toggle, payload);
     return response.data?.items || [];
   } catch (error) {
     console.warn('Failed to toggle backend wishlist:', error);
@@ -35,7 +36,7 @@ export const toggleBackendWishlist = async (product) => {
 
 export const syncWishlistWithBackend = async (wishlistItems) => {
   try {
-    const response = await apiClient.post('/wishlist/sync', { items: wishlistItems });
+    const response = await apiClient.post(API_ENDPOINTS.wishlist.sync, { items: wishlistItems });
     return response.data?.items || [];
   } catch (error) {
     console.warn('Backend wishlist sync error:', error);

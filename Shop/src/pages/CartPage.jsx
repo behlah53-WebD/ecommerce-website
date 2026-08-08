@@ -14,6 +14,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { formatPrice } from "../utils/formatPrice";
+import { FREE_SHIPPING_THRESHOLD } from "../constants";
 
 export const CartPage = () => {
   const {
@@ -88,11 +90,11 @@ export const CartPage = () => {
     );
   }
 
-  const shipping = subtotal > 100 ? 0 : 15;
+  const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : 15;
   const tax = subtotal * 0.08;
   const grandTotal = subtotal + shipping + tax;
   const savings = shipping === 0 ? 15 : 0;
-  const freeShippingProgress = Math.min((subtotal / 100) * 100, 100);
+  const freeShippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -183,7 +185,7 @@ export const CartPage = () => {
                 <div className="flex items-center gap-2 mb-3">
                   <Truck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-                    Free shipping on orders above ₹100!
+                    Free shipping on orders above {formatPrice(FREE_SHIPPING_THRESHOLD)}!
                   </p>
                 </div>
                 <div className="w-full bg-amber-200 dark:bg-amber-800 rounded-full h-2 mb-2">
@@ -193,7 +195,7 @@ export const CartPage = () => {
                   />
                 </div>
                 <p className="text-xs text-amber-600 dark:text-amber-400">
-                  Add ₹{(100 - subtotal).toFixed(2)} more to qualify for free
+                  Add {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} more to qualify for free
                   shipping
                 </p>
               </div>
@@ -248,7 +250,7 @@ export const CartPage = () => {
                         </div>
                       </div>
                       <p className="text-lg lg:text-xl font-bold text-primary-600 dark:text-primary-400 whitespace-nowrap">
-                        ₹{(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -279,7 +281,7 @@ export const CartPage = () => {
 
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-400 hidden sm:block">
-                          ₹{item.price.toFixed(2)} each
+                          {formatPrice(item.price)} each
                         </span>
                         <button
                           onClick={() =>
@@ -333,7 +335,7 @@ export const CartPage = () => {
                         Subtotal ({totalItems} items)
                       </span>
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        ₹{subtotal.toFixed(2)}
+                        {formatPrice(subtotal)}
                       </span>
                     </div>
 
@@ -348,14 +350,14 @@ export const CartPage = () => {
                             : "font-semibold text-gray-900 dark:text-white"
                         }
                       >
-                        {shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}
+                        {shipping === 0 ? "FREE" : formatPrice(shipping)}
                       </span>
                     </div>
 
                     {shipping === 0 && (
                       <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-lg">
                         <Truck className="h-3 w-3" />
-                        You saved ₹15.00 on shipping!
+                        You saved {formatPrice(15)} on shipping!
                       </div>
                     )}
 
@@ -364,7 +366,7 @@ export const CartPage = () => {
                         Tax (8%)
                       </span>
                       <span className="font-semibold text-gray-900 dark:text-white">
-                        ₹{tax.toFixed(2)}
+                        {formatPrice(tax)}
                       </span>
                     </div>
                   </div>
@@ -376,7 +378,7 @@ export const CartPage = () => {
                       </span>
                       <div className="text-right">
                         <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                          ₹{grandTotal.toFixed(2)}
+                          {formatPrice(grandTotal)}
                         </span>
                         <p className="text-[10px] text-gray-400 mt-0.5">
                           Including all taxes

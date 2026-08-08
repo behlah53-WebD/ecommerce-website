@@ -7,7 +7,6 @@ export const ProductSkeleton = () => {
   return (
     <div className="fade-in rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
       <div className={`aspect-[3/4] overflow-hidden rounded-xl ${shimmer}`} />
-
       <div className="mt-3 px-1 space-y-3">
         <div className={`h-3 w-1/4 rounded ${shimmer}`} />
         <div className={`h-4 w-3/4 rounded ${shimmer}`} />
@@ -21,3 +20,5 @@ export const ProductSkeleton = () => {
     </div>
   );
 };
+
+export default ProductSkeleton;

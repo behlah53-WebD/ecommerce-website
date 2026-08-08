@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Box,
   Drawer,
@@ -31,6 +31,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
+import { apiGet } from "@/API/api";
 
 function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = false, onMobileNavToggle }) {
   const drawerWidth = mobileNavExpanded
@@ -59,6 +60,75 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
 
   const role = currentUser?.role || "Buyer";
   const userName = currentUser?.name || "User";
+
+  // Pending counts state
+  const [pendingCounts, setPendingCounts] = useState({
+    sellerApprovals: 0,
+    productRequests: 0,
+    orderApprovals: 0,
+    cancellations: 0,
+    returns: 0,
+  });
+
+  // Fetch pending counts for glowing badges
+  useEffect(() => {
+    if (role !== "Admin") return;
+
+    const fetchPendingCounts = async () => {
+      try {
+        const [sellerApprovalsRes, adminRequestsRes, ordersRes] = await Promise.all([
+          apiGet("/auth/seller-approval-requests"),
+          apiGet("/users/admin/requests"),
+          apiGet("/orders/admin/all"),
+        ]);
+
+        let sellerApprovals = 0;
+        let productRequests = 0;
+        let orderApprovals = 0;
+        let cancellations = 0;
+        let returns = 0;
+
+        if (sellerApprovalsRes.data && sellerApprovalsRes.data.success) {
+          const sellers = sellerApprovalsRes.data.data || [];
+          sellerApprovals = sellers.filter(
+            (s) => (s.approvalStatus || "approved") === "pending"
+          ).length;
+        }
+
+        if (adminRequestsRes.data && adminRequestsRes.data.success) {
+          const requests = adminRequestsRes.data.data || [];
+          productRequests = requests.filter(
+            (r) => r.status && r.status.startsWith("pending")
+          ).length;
+        }
+
+        if (ordersRes.data && ordersRes.data.success) {
+          const orders = ordersRes.data.data || [];
+          orderApprovals = orders.filter((o) => o.status === "Pending").length;
+          cancellations = orders.filter(
+            (o) => o.cancelRequest?.requested && o.cancelRequest?.status === "Pending"
+          ).length;
+          returns = orders.filter(
+            (o) => o.returnRequest?.requested && o.returnRequest?.status === "Pending"
+          ).length;
+        }
+
+        setPendingCounts({
+          sellerApprovals,
+          productRequests,
+          orderApprovals,
+          cancellations,
+          returns,
+        });
+      } catch (err) {
+        console.error("Error fetching pending counts:", err);
+      }
+    };
+
+    fetchPendingCounts();
+    const interval = setInterval(fetchPendingCounts, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [role]);
 
   const getRoleColor = (userRole) => {
     switch (userRole) {
@@ -109,12 +179,14 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
       icon: <DashboardIcon />,
       value: "Dashboard",
       description: "Analytics & insights",
+      badge: 0,
     },
     {
       label: "Products Catalog",
       icon: <ShoppingBagIcon />,
       value: "user",
       description: "Manage inventory",
+      badge: 0,
     },
   ];
 
@@ -125,48 +197,56 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
         icon: <HowToRegIcon />,
         value: "requests",
         description: "Review & moderate",
+        badge: pendingCounts.productRequests,
       },
       {
         label: "Hero Customization",
         icon: <StarsIcon />,
         value: "hero-customization",
         description: "Customize shop banners",
+        badge: 0,
       },
       {
         label: "Shocking Deals",
         icon: <ElectricBoltIcon />,
         value: "shocking-deals",
         description: "Customize shocking deals",
+        badge: 0,
       },
       {
         label: "Seller Approval Requests",
         icon: <StorefrontIcon />,
         value: "seller-approvals",
         description: "Approve seller accounts",
+        badge: pendingCounts.sellerApprovals,
       },
       {
         label: "Orders Management",
         icon: <ReceiptIcon />,
         value: "orders",
         description: "Manage orders & approve",
+        badge: pendingCounts.orderApprovals + pendingCounts.cancellations + pendingCounts.returns,
       },
       {
         label: "All Users",
         icon: <PeopleIcon />,
         value: "users",
         description: "User management",
+        badge: 0,
       },
       {
         label: "Buyers Directory",
         icon: <PersonIcon />,
         value: "buyers",
         description: "Customer profiles",
+        badge: 0,
       },
       {
         label: "Sellers Directory",
         icon: <StorefrontIcon />,
         value: "sellers",
         description: "Merchant details",
+        badge: 0,
       },
     );
   }
@@ -177,6 +257,7 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
       icon: <ReceiptIcon />,
       value: "seller-orders",
       description: "View orders for your products",
+      badge: 0,
     });
   }
 
@@ -608,6 +689,35 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
                       }}
                     >
                       {item.icon}
+                      {item.badge > 0 && mobileNavExpanded && (
+                        <span
+                          sx={{
+                            position: "absolute",
+                            top: -4,
+                            right: -4,
+                            minWidth: 18,
+                            height: 18,
+                            borderRadius: 9,
+                            background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                            color: "#fff",
+                            fontSize: "0.65rem",
+                            fontWeight: 800,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            px: 0.5,
+                            boxShadow: "0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)",
+                            animation: "glowPulse 1.5s ease-in-out infinite",
+                            "@keyframes glowPulse": {
+                              "0%, 100%": { boxShadow: "0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)" },
+                              "50%": { boxShadow: "0 0 15px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.6)" },
+                            },
+                            border: "2px solid #fff",
+                          }}
+                        >
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </span>
+                      )}
                     </ListItemIcon>
                     <ListItemText
                       primary={item.label}
@@ -645,6 +755,38 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
                           },
                         }}
                       />
+                    )}
+                    {item.badge > 0 && !mobileNavExpanded && (
+                      <Tooltip title={`${item.badge} pending request${item.badge > 1 ? "s" : ""}`} placement="right" arrow>
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: "50%",
+                            right: 8,
+                            transform: "translateY(-50%)",
+                            minWidth: 18,
+                            height: 18,
+                            borderRadius: 9,
+                            background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                            color: "#fff",
+                            fontSize: "0.65rem",
+                            fontWeight: 800,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            px: 0.5,
+                            boxShadow: "0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)",
+                            animation: "glowPulse 1.5s ease-in-out infinite",
+                            "@keyframes glowPulse": {
+                              "0%, 100%": { boxShadow: "0 0 10px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.4)" },
+                              "50%": { boxShadow: "0 0 15px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.6)" },
+                            },
+                            border: "2px solid #fff",
+                          }}
+                        >
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </Box>
+                      </Tooltip>
                     )}
                   </ListItemButton>
                 </Tooltip>
