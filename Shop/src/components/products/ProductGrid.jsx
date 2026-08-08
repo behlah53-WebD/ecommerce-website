@@ -3,11 +3,11 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { ProductCard } from './ProductCard';
 import { ProductSkeleton } from './ProductSkeleton';
 import { EmptyProductsState } from './EmptyProductsState';
-import { useProducts } from '../../hooks/useProducts';
+import { useHomeProducts } from '../../hooks/useProducts';
 import { Loader2 } from 'lucide-react';
 
 export const ProductGrid = () => {
-  const { products, isLoading, hasMore, loadMoreProducts } = useProducts();
+  const { products, isLoading, hasMore, loadMoreProducts } = useHomeProducts();
 
   if (isLoading && (!products || products.length === 0)) {
     return (

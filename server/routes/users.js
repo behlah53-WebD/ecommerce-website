@@ -194,39 +194,53 @@ const getDetailsHandler = async (req, res) => {
 
     const searchQuery = String(req.query.search || "").trim();
     if (searchQuery) {
-      const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const searchRegex = new RegExp(escapedQuery, "i");
+      // Use MongoDB text search for better performance when possible
+      // Text search is faster and uses the text index
       const words = searchQuery.split(/\s+/).filter(Boolean);
+      
+      // For single-word or simple multi-word searches, use text index
+      // For complex queries with multiple filter fields, fall back to regex
+      const hasOtherFilters = conditions.length > 0;
+      const useTextSearch = !hasOtherFilters && words.length <= 3;
+      
+      if (useTextSearch) {
+        // Use MongoDB text search with the text index
+        conditions.push({ $text: { $search: searchQuery } });
+      } else {
+        // Fall back to regex search for complex queries
+        const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const searchRegex = new RegExp(escapedQuery, "i");
 
-      const searchOr = [
-        { productName: searchRegex },
-        { sku: searchRegex },
-        { category: searchRegex },
-        { brand: searchRegex },
-        { description: searchRegex },
-        { firstName: searchRegex },
-        { lastName: searchRegex },
-        { email: searchRegex },
-        { phone: searchRegex },
-        { username: searchRegex },
-        { city: searchRegex },
-        { state: searchRegex },
-        { sellerName: searchRegex },
-        { sellerEmail: searchRegex },
-      ];
+        const searchOr = [
+          { productName: searchRegex },
+          { sku: searchRegex },
+          { category: searchRegex },
+          { brand: searchRegex },
+          { description: searchRegex },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex },
+          { username: searchRegex },
+          { city: searchRegex },
+          { state: searchRegex },
+          { sellerName: searchRegex },
+          { sellerEmail: searchRegex },
+        ];
 
-      if (words.length > 1) {
-        const firstWordRegex = new RegExp(words[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-        const restWordsRegex = new RegExp(words.slice(1).join(" ").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-        searchOr.push({
-          $and: [
-            { productName: firstWordRegex },
-            { category: restWordsRegex },
-          ],
-        });
+        if (words.length > 1) {
+          const firstWordRegex = new RegExp(words[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+          const restWordsRegex = new RegExp(words.slice(1).join(" ").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+          searchOr.push({
+            $and: [
+              { productName: firstWordRegex },
+              { category: restWordsRegex },
+            ],
+          });
+        }
+
+        conditions.push({ $or: searchOr });
       }
-
-      conditions.push({ $or: searchOr });
     }
 
     const filter = conditions.length > 0 ? { $and: conditions } : {};
@@ -431,7 +445,7 @@ const saveDetailsHandler = async (req, res) => {
         existing.pendingChanges = null;
         await existing.save();
 
-        await invalidateCache('cache:/users*');
+        await invalidateCache('cache:/users?*page*');
 
         return res.json({
           success: true,
@@ -470,7 +484,7 @@ const saveDetailsHandler = async (req, res) => {
         status: initialStatus,
       });
 
-      await invalidateCache('cache:/users*');
+      await invalidateCache('cache:/users?*page*');
 
       return res.status(201).json({
         success: true,
@@ -524,7 +538,7 @@ if (role === "Seller") {
       existing.status = "pending_delete";
       await existing.save();
 
-      await invalidateCache('cache:/users*');
+      await invalidateCache('cache:/users?*page*');
 
       return res.json({
         success: true,
@@ -533,7 +547,7 @@ if (role === "Seller") {
     } else {
       await Detail.deleteOne({ id: detailId });
 
-      await invalidateCache('cache:/users*');
+      await invalidateCache('cache:/users?*page*');
 
       return res.json({
         success: true,
@@ -592,7 +606,7 @@ router.post("/admin/requests/:id/approve", authenticateToken, async (req, res) =
         .json({ success: false, message: "Request item not found." });
     }
 
-    if (item.status === "pending_add") {
+if (item.status === "pending_add") {
       item.status = "approved";
       await item.save();
     } else if (item.status === "pending_edit") {
@@ -605,6 +619,8 @@ router.post("/admin/requests/:id/approve", authenticateToken, async (req, res) =
     } else if (item.status === "pending_delete") {
       await Detail.deleteOne({ id: detailId });
     }
+
+    await invalidateCache('cache:/users?*page*');
 
     const prodName = item.productName || item.firstName || "Product";
 
@@ -648,6 +664,8 @@ router.post("/admin/requests/:id/decline", authenticateToken, async (req, res) =
     } else if (item.status === "pending_delete") {
       item.status = "approved";
       await item.save();
+
+      await invalidateCache('cache:/users?*page*');
     }
 
     const prodName = item.productName || item.firstName || "Product";

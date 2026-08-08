@@ -45,6 +45,10 @@ detailSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
 detailSchema.index({ category: 1, status: 1 });
 // Price range filter
 detailSchema.index({ price: 1, status: 1 });
+// Brand filter
+detailSchema.index({ brand: 1, status: 1 });
+// Composite index for common filter combination: status + category + price + brand + createdAt
+detailSchema.index({ status: 1, category: 1, price: 1, brand: 1, createdAt: -1 });
 // Text search on product fields (covers productName, brand, description, sku)
 detailSchema.index(
   { productName: "text", brand: "text", description: "text", sku: "text", category: "text" },

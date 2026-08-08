@@ -538,6 +538,7 @@ const displayedCategories = useMemo(
                 }
                 onRefresh={refreshShopProducts}
                 loading={shopLoading}
+                useShop={true}
               />
             ) : (
               <div className="flex flex-col items-center gap-8">

@@ -112,8 +112,10 @@ export const normalizeProduct = (item, activeDeal = null) => {
 
 export const getProducts = async (filters = {}) => {
   try {
-    const activeDeal = await getActiveShockingDealCached();
-    const response = await apiClient.get('/users', { params: filters });
+    const [activeDeal, response] = await Promise.all([
+      getActiveShockingDealCached(),
+      apiClient.get('/users', { params: filters }),
+    ]);
     const rawData = response.data?.data || [];
     const pagination = response.data?.pagination || {
       currentPage: 1,
@@ -144,8 +146,10 @@ export const getProducts = async (filters = {}) => {
 
 export const getProductById = async (id) => {
   try {
-    const activeDeal = await getActiveShockingDealCached();
-    const response = await apiClient.get(`/users/${id}`);
+    const [activeDeal, response] = await Promise.all([
+      getActiveShockingDealCached(),
+      apiClient.get(`/users/${id}`),
+    ]);
     const item = response.data?.data;
     if (!item) return null;
     return normalizeProduct(item, activeDeal);

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
+const API_BASE = "http://localhost:3000";
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);

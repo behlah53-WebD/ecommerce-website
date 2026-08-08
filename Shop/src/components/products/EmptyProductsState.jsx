@@ -1,11 +1,13 @@
 import React, { useCallback } from 'react';
 import { PackageOpen, RefreshCw, Server } from 'lucide-react';
-import { useProducts } from '../../hooks/useProducts';
+import { useProducts, useHomeProducts } from '../../hooks/useProducts';
 
-export const EmptyProductsState = React.memo(({ title, message, onRefresh, loading }) => {
-  const ctx = useProducts();
-  const refresh = onRefresh || ctx.refreshProducts;
-  const isLoading = loading !== undefined ? loading : ctx.isLoading;
+export const EmptyProductsState = React.memo(({ title, message, onRefresh, loading, useShop = false }) => {
+  const shopCtx = useProducts();
+  const homeCtx = useHomeProducts();
+  const ctx = useShop ? shopCtx : homeCtx;
+  const refresh = onRefresh || ctx.refreshProducts || ctx.refreshShopProducts;
+  const isLoading = loading !== undefined ? loading : (useShop ? ctx.shopLoading : ctx.isLoading);
 
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-12 text-center my-8">

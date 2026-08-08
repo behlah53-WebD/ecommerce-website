@@ -1,5 +1,5 @@
 import { useProductContext } from '../context/ProductContext';
-import { useProducts as useProductsQuery, useInfiniteProducts } from '../hooks/useQueries';
+import { useInfiniteProducts } from '../hooks/useQueries';
 
 export const useProducts = () => {
   const {
@@ -24,16 +24,6 @@ export const useProducts = () => {
   const shopFilters = buildShopFilters();
 
   const {
-    data: homeData,
-    isLoading: homeLoading,
-    error: homeError,
-    fetchNextPage: loadMoreHomeProducts,
-    hasNextPage: homeHasMore,
-    isFetchingNextPage: homeFetchingMore,
-    refetch: refreshHomeProducts,
-  } = useInfiniteProducts({ limit: 8 });
-
-  const {
     data: shopData,
     isLoading: shopLoading,
     error: shopError,
@@ -43,15 +33,7 @@ export const useProducts = () => {
     refetch: refreshShopProducts,
   } = useInfiniteProducts({ ...shopFilters, limit: 8 });
 
-  const homeProducts = homeData?.pages.flatMap(page => page.products) || [];
   const shopProducts = shopData?.pages.flatMap(page => page.products) || [];
-
-  const homePagination = homeData?.pages[homeData.pages.length - 1]?.pagination || {
-    currentPage: 1,
-    totalPages: 1,
-    totalRecords: 0,
-    hasNextPage: false,
-  };
 
   const shopPagination = shopData?.pages[shopData.pages.length - 1]?.pagination || {
     currentPage: 1,
@@ -65,17 +47,6 @@ export const useProducts = () => {
     brands,
     categoriesLoading,
     brandsLoading,
-    products: homeProducts,
-    isLoading: homeLoading,
-    error: homeError,
-    refreshProducts: refreshHomeProducts,
-    loadMoreProducts: loadMoreHomeProducts,
-    currentPage: homePagination.currentPage,
-    totalPages: homePagination.totalPages,
-    totalCount: homePagination.totalRecords,
-    hasMore: homeHasMore,
-    isFetchingMore: homeFetchingMore,
-
     shopProducts,
     shopLoading,
     shopError,
@@ -98,5 +69,39 @@ export const useProducts = () => {
     selectedBrands,
     setSelectedBrands,
     hasActiveFilters,
+  };
+};
+
+export const useHomeProducts = () => {
+  const {
+    data: homeData,
+    isLoading: homeLoading,
+    error: homeError,
+    fetchNextPage: loadMoreHomeProducts,
+    hasNextPage: homeHasMore,
+    isFetchingNextPage: homeFetchingMore,
+    refetch: refreshHomeProducts,
+  } = useInfiniteProducts({ limit: 8 });
+
+  const homeProducts = homeData?.pages.flatMap(page => page.products) || [];
+
+  const homePagination = homeData?.pages[homeData.pages.length - 1]?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+    hasNextPage: false,
+  };
+
+  return {
+    products: homeProducts,
+    isLoading: homeLoading,
+    error: homeError,
+    refreshProducts: refreshHomeProducts,
+    loadMoreProducts: loadMoreHomeProducts,
+    currentPage: homePagination.currentPage,
+    totalPages: homePagination.totalPages,
+    totalCount: homePagination.totalRecords,
+    hasMore: homeHasMore,
+    isFetchingMore: homeFetchingMore,
   };
 };
