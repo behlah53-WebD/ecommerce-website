@@ -144,7 +144,60 @@ export const CategoryGrid = () => {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Mobile: featured banner + 2-column grid */}
+        <div className="mt-8 grid grid-cols-2 gap-3 px-4 lg:hidden">
+          {finalCategories.map((cat, idx) => {
+            const catName = typeof cat === 'string' ? cat : cat.name;
+            const catImage = typeof cat === 'string' ? getCategoryImage(cat) : cat.image;
+            const isFeatured = idx === 0;
+
+            return (
+              <div
+                key={idx}
+                onClick={() => handleSelectCategory(catName)}
+                className={`group relative cursor-pointer overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:shadow-xl active:scale-[0.98] ${
+                  isFeatured ? 'col-span-2' : ''
+                }`}
+              >
+                <div
+                  className={`relative overflow-hidden ${
+                    isFeatured ? 'aspect-[16/10]' : 'aspect-square'
+                  }`}
+                >
+                  <img
+                    src={catImage}
+                    alt={catName}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent" />
+
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
+                    <div>
+                      {isFeatured && (
+                        <span className="mb-1.5 block w-fit rounded-full bg-primary-500/90 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
+                          Popular
+                        </span>
+                      )}
+                      <h3
+                        className={`font-display font-bold leading-tight text-white ${
+                          isFeatured ? 'text-2xl' : 'text-lg'
+                        }`}
+                      >
+                        {catName}
+                      </h3>
+                    </div>
+                    <span className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-transform duration-300 group-hover:translate-x-1">
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop: original grid layout (unchanged) */}
+        <div className="mt-12 hidden grid-cols-3 gap-6 lg:grid">
           {finalCategories.map((cat, idx) => {
             const catName = typeof cat === 'string' ? cat : cat.name;
             const catImage = typeof cat === 'string' ? getCategoryImage(cat) : cat.image;
