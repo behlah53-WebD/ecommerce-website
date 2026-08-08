@@ -92,7 +92,7 @@ export const ProductCard = React.memo(({ product }) => {
   }, [isOutOfStock, isLowStock, stock]);
 
   return (
-    <div className="group relative rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
+    <div className="group relative animate-fade-up rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl dark:border-gray-800 dark:bg-gray-900">
       {/* Product Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
         <Link to={`/product/${id}`}>
@@ -107,7 +107,7 @@ export const ProductCard = React.memo(({ product }) => {
           />
 
           {!imageLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 bg-[length:200%_100%]" />
+            <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] dark:from-gray-700 dark:via-gray-800 dark:to-gray-700" />
           )}
 
           {product.images?.length > 1 && (

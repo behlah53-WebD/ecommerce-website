@@ -29,6 +29,7 @@ export const ProductGrid = () => {
       next={loadMoreProducts}
       hasMore={hasMore}
       hasChildren
+      style={{ overflow: 'visible' }}
       loader={
         <div className="flex flex-col items-center justify-center pt-4 pb-8">
           <div className="flex flex-col items-center gap-2.5 text-gray-500 dark:text-gray-400">

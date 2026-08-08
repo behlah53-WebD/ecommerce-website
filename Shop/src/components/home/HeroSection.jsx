@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, ArrowRight, Star, ShieldCheck, Truck } from 'lucide-react';
+import { Sparkles, ArrowRight, Star, ShieldCheck, Truck, ChevronDown } from 'lucide-react';
 import apiClient from '../../api/apiClient';
 
 const HERO_CACHE_KEY = 'hero_banner_cache';
@@ -64,21 +64,33 @@ export const HeroSection = () => {
       <div className="relative mx-auto flex min-h-screen max-w-7xl items-center px-4 pt-[112px] pb-20 lg:px-8 lg:pt-[120px] w-full">
         <div className="max-w-2xl">
           {heroData.subtitle && (
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md border border-white/10">
+            <span
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-md border border-white/10 animate-fade-up"
+              style={{ animationDelay: '0.05s' }}
+            >
               <Sparkles className="h-4 w-4 text-primary-400" />
               {heroData.subtitle}
             </span>
           )}
 
-          <h1 className="mt-6 font-display text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight">
+          <h1
+            className="mt-6 font-display text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight animate-fade-up"
+            style={{ animationDelay: '0.15s' }}
+          >
             {heroData.title}
           </h1>
 
-          <p className="mt-6 text-lg text-gray-300 sm:text-xl">
+          <p
+            className="mt-6 text-lg text-gray-300 sm:text-xl animate-fade-up"
+            style={{ animationDelay: '0.25s' }}
+          >
             {heroData.description}
           </p>
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <div
+            className="mt-10 flex flex-col gap-4 sm:flex-row animate-fade-up"
+            style={{ animationDelay: '0.35s' }}
+          >
             {heroData.buttonText1 && (
               <Link
                 to={heroData.buttonLink1 || "/shop"}
@@ -100,7 +112,7 @@ export const HeroSection = () => {
           </div>
 
           {/* Bottom Stats Banner */}
-          <div className="mt-16 flex items-center gap-8 border-t border-white/15 pt-8">
+          <div className="mt-16 flex items-center gap-8 border-t border-white/15 pt-8 animate-fade-up" style={{ animationDelay: '0.45s' }}>
             <div>
               <div className="font-display text-2xl sm:text-3xl font-bold text-white">50K+</div>
               <div className="text-xs sm:text-sm text-gray-400">Happy Customers</div>
@@ -122,7 +134,7 @@ export const HeroSection = () => {
         </div>
 
         {/* Right Info Overlay Cards */}
-        <div className="absolute bottom-12 right-8 hidden space-y-4 lg:block">
+        <div className="absolute bottom-12 right-8 hidden animate-float space-y-4 lg:block">
           <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-md border border-white/10 text-white">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500/20 text-primary-300">
@@ -148,6 +160,26 @@ export const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      {/* Animated scroll cue */}
+      <a
+        href="#categories"
+        aria-label="Scroll to explore"
+        className="group absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 animate-fade-up flex-col items-center gap-3 text-white/80 transition-colors hover:text-white sm:bottom-8"
+        style={{ animationDelay: '0.6s' }}
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/70">
+          Scroll to explore
+        </span>
+        <span className="relative flex h-10 w-[3px] justify-center overflow-hidden rounded-full bg-white/25">
+          <span className="absolute left-1/2 top-0 h-3 w-[3px] -translate-x-1/2 rounded-full bg-primary-400 shadow-[0_0_10px_2px_rgba(99,102,241,0.8)] animate-scroll-line" />
+        </span>
+        <span className="-mt-1 flex flex-col items-center leading-none">
+          <ChevronDown className="h-4 w-4 text-white/70 animate-scroll-chevron" style={{ animationDelay: '0s' }} />
+          <ChevronDown className="h-4 w-4 text-white/50 animate-scroll-chevron" style={{ animationDelay: '0.18s' }} />
+          <ChevronDown className="h-4 w-4 text-white/30 animate-scroll-chevron" style={{ animationDelay: '0.36s' }} />
+        </span>
+      </a>
     </section>
   );
 };

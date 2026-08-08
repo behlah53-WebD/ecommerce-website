@@ -5,21 +5,28 @@ let lastDealFetchTime = 0;
 const DEAL_CACHE_DURATION = 15000; // 15 seconds
 
 export const getActiveShockingDeal = async () => {
-  try {
-    const response = await apiClient.get('/users/shocking-deal/active');
-    return response.data?.data || null;
-  } catch (error) {
-    console.warn('Failed to fetch active shocking deal:', error);
-    return null;
-  }
+  const response = await apiClient.get('/users/shocking-deal/active');
+  return response.data?.data || null;
 };
 
-export const getActiveShockingDealCached = async () => {
+export const getActiveShockingDealCached = async (throwOnError = false) => {
   const now = Date.now();
-  if (!cachedActiveDeal || (now - lastDealFetchTime > DEAL_CACHE_DURATION)) {
-    cachedActiveDeal = await getActiveShockingDeal();
-    lastDealFetchTime = now;
+  const isStale = !cachedActiveDeal || (now - lastDealFetchTime > DEAL_CACHE_DURATION);
+
+  if (isStale) {
+    try {
+      cachedActiveDeal = await getActiveShockingDeal();
+      lastDealFetchTime = now;
+    } catch (error) {
+      // Let the dedicated deal query surface the error so React Query can
+      // retry/refetch. For consumers that only need deal pricing (products),
+      // keep any existing cache or fall back to null without poisoning the
+      // timestamp, so a later call can retry immediately.
+      if (throwOnError) throw error;
+      if (!cachedActiveDeal) return null;
+    }
   }
+
   if (cachedActiveDeal && new Date(cachedActiveDeal.endTime) <= new Date()) {
     cachedActiveDeal = null;
   }

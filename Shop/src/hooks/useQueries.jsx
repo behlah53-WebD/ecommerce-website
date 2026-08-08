@@ -63,8 +63,12 @@ export const useBrands = (options = {}) => {
 export const useShockingDeal = (options = {}) => {
   return useQuery({
     queryKey: [SHOCKING_DEAL_KEY],
-    queryFn: getActiveShockingDealCached,
+    queryFn: () => getActiveShockingDealCached(true),
     staleTime: 15000,
+    retry: 4,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
     ...options,
   });
 };
@@ -83,6 +87,8 @@ export const useShockingDealProducts = (deal, options = {}) => {
     },
     enabled: !!deal?.products?.length,
     staleTime: 15000,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     ...options,
   });
 };

@@ -7,6 +7,7 @@ import { ShockingDealSection } from '../components/home/ShockingDealSection';
 import { CategoryGrid } from '../components/home/CategoryGrid';
 import { ProductGrid } from '../components/products/ProductGrid';
 import {NewProductsSlider} from '../components/home/NewProductsSlider';
+import { Reveal } from '../components/common/Reveal';
 
 export const HomePage = () => {
   return (
@@ -15,41 +16,49 @@ export const HomePage = () => {
       <HeroSection />
 
       {}
-      <FeatureBanner />
+      <Reveal direction="left">
+        <FeatureBanner />
+      </Reveal>
 
-      <ShockingDealSection />
+      <Reveal direction="right">
+        <ShockingDealSection />
+      </Reveal>
 
-      <NewProductsSlider/>
+      <Reveal direction="up">
+        <NewProductsSlider/>
+      </Reveal>
 
       {}
-      <div className="py-5 -mt-25">
-      <CategoryGrid />
-    </div>
+      <Reveal direction="down" className="py-5 -mt-25">
+        <CategoryGrid />
+      </Reveal>
 
       {}
-      <section className="bg-white py-16 dark:bg-gray-950 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row mb-12">
-            <div>
-              <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white lg:text-4xl">
-                Featured Products
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                Handpicked selection of trending items ready for your backend API data
-              </p>
+      <Reveal direction="left">
+        <section className="bg-white py-16 dark:bg-gray-950 lg:py-24">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row mb-12">
+              <div>
+                <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white lg:text-4xl">
+                  Featured Products
+                </h2>
+                <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  Handpicked selection of trending items ready for your backend API data
+                </p>
+              </div>
+              <Link
+                to="/shop"
+                className="group inline-flex items-center gap-2 font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400"
+              >
+                <span>View All Products</span>
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
-            <Link
-              to="/shop"
-              className="group inline-flex items-center gap-2 font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400"
-            >
-              <span>View All Products</span>
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
 
-          <ProductGrid />
-        </div>
-      </section>
+            <ProductGrid />
+          </div>
+        </section>
+      </Reveal>
     </div>
   );
 };

@@ -55,7 +55,7 @@ export const ShockingDealSection = () => {
     return () => clearInterval(interval);
   }, [deal, timeLeft.expired]);
 
-  if (dealLoading || dealError) {
+  if (dealLoading || productsLoading || dealError) {
     return (
       <div className="relative w-full overflow-hidden border-t-4 border-amber-400 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 py-12 dark:from-black dark:via-gray-950 dark:to-black">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -70,7 +70,7 @@ export const ShockingDealSection = () => {
     );
   }
 
-  if (!deal || timeLeft.expired || products.length === 0) {
+  if (!deal || timeLeft.expired || (products.length === 0 && !productsLoading)) {
     return null;
   }
 

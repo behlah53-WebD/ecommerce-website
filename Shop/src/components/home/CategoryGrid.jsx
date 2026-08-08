@@ -133,7 +133,7 @@ export const CategoryGrid = () => {
   };
 
   return (
-    <section className="bg-gray-50 py-16 dark:bg-gray-900 lg:py-24">
+    <section id="categories" className="bg-gray-50 py-16 dark:bg-gray-900 lg:py-24 scroll-mt-24">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="text-center">
           <h2 className="font-display text-3xl font-bold text-gray-900 dark:text-white lg:text-4xl">

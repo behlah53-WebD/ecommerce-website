@@ -217,6 +217,94 @@
     }
   }
 
+  /* Section / element reveal on scroll */
+  @keyframes fadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth loading shimmer for skeletons */
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Hero scroll indicator */
+  @keyframes scrollDot {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(9px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes scrollBounce {
+    0%,
+    100% {
+      transform: translate(-50%, 0);
+      opacity: 0.55;
+    }
+    50% {
+      transform: translate(-50%, 7px);
+      opacity: 1;
+    }
+  }
+
+  /* Gentle floating for hero accent cards */
+  @keyframes floaty {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Hero scroll-line indicator */
+  @keyframes scrollLine {
+    0% {
+      transform: translate(-50%, -120%);
+      opacity: 0;
+    }
+    35% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, 320%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes scrollChevron {
+    0%,
+    100% {
+      opacity: 0.2;
+      transform: translateY(-1px);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(3px);
+    }
+  }
+
   .animate-slideInRight {
     animation: slideInRight 0.3s ease-out;
   }
@@ -229,6 +317,79 @@
     animation: fadeIn 0.2s ease-in;
   }
 
+  .animate-fade-up {
+    animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+
+  .animate-scroll-dot {
+    animation: scrollDot 1.6s ease-in-out infinite;
+  }
+
+  .animate-scroll-bounce {
+    animation: scrollBounce 1.8s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: floaty 4s ease-in-out infinite;
+  }
+
+  .animate-scroll-line {
+    animation: scrollLine 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .animate-scroll-chevron {
+    animation: scrollChevron 1.4s ease-in-out infinite;
+  }
+
+  @keyframes spinSlow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spinSlow 3s linear infinite;
+  }
+
+  /* Scroll-reveal primitive (used by <Reveal>) */
+  .reveal {
+    opacity: 0;
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.reveal-up {
+    transform: translateY(34px);
+  }
+
+  .reveal.reveal-down {
+    transform: translateY(-34px);
+  }
+
+  .reveal.reveal-left {
+    transform: translateX(-48px);
+  }
+
+  .reveal.reveal-right {
+    transform: translateX(48px);
+  }
+
+  .reveal.reveal-scale {
+    transform: scale(0.94);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -236,5 +397,26 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .animate-fade-up,
+  .animate-shimmer,
+  .animate-scroll-dot,
+  .animate-scroll-bounce,
+  .animate-scroll-line,
+  .animate-scroll-chevron,
+  .animate-spin-slow,
+  .animate-float,
+  .animate-slideInRight,
+  .animate-slideDown {
+    animation: none !important;
   }
 }
