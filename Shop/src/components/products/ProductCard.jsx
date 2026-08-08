@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -12,6 +12,8 @@ import { useWishlist } from '../../context/WishlistContext';
 export const ProductCard = React.memo(({ product }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
 
   if (!product) return null;
 
@@ -97,14 +99,26 @@ export const ProductCard = React.memo(({ product }) => {
           <img
             src={mainImage}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
           />
+
+          {!imageLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 bg-[length:200%_100%]" />
+          )}
 
           {product.images?.length > 1 && (
             <img
               src={hoverImage}
               alt={product.name}
-              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+                hoverImageLoaded ? 'opacity-100' : 'opacity-0'
+              } group-hover:opacity-100`}
+              loading="lazy"
+              onLoad={() => setHoverImageLoaded(true)}
             />
           )}
         </Link>

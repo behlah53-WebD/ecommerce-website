@@ -10,13 +10,12 @@ import {
   Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getProducts } from "../../api/productService";
+import { useProducts as useProductsQuery } from "../../hooks/useQueries";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 
 const PRODUCTS_TO_SHOW = 5;
 const SLIDE_INTERVAL = 3500;
-const BACKEND_REFRESH_INTERVAL = 30000;
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=1500&fit=crop";
@@ -43,26 +42,6 @@ const getProductImage = (product) => {
   return product?.images?.[0] || product?.image || fallbackImage;
 };
 
-const normalizeProductsResponse = (response) => {
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (Array.isArray(response?.products)) {
-    return response.products;
-  }
-
-  if (Array.isArray(response?.data)) {
-    return response.data;
-  }
-
-  if (Array.isArray(response?.data?.products)) {
-    return response.data.products;
-  }
-
-  return [];
-};
-
 const sortNewestProducts = (products) => {
   return [...products].sort((firstProduct, secondProduct) => {
     const dateDifference =
@@ -82,63 +61,30 @@ export const NewProductsSlider = ({
   title = "New Arrivals",
   subtitle = "Explore the latest products recently added to our collection.",
 }) => {
-  const [products, setProducts] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [products, setProducts] = useState([]);
+
+  const { data: homeData, isLoading, error } = useProductsQuery({ limit: 50 });
 
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const fetchNewProducts = useCallback(async (showLoader = false) => {
-    try {
-      if (showLoader) {
-        setLoading(true);
-      }
-
-      setError("");
-
-      const response = await getProducts();
-      const backendProducts = normalizeProductsResponse(response);
-
-      const latestProducts = sortNewestProducts(backendProducts).slice(
+  useEffect(() => {
+    if (homeData?.products) {
+      const latestProducts = sortNewestProducts(homeData.products).slice(
         0,
         PRODUCTS_TO_SHOW,
       );
-
       setProducts(latestProducts);
 
       setActiveIndex((currentIndex) => {
         if (latestProducts.length === 0) {
           return 0;
         }
-
         return Math.min(currentIndex, latestProducts.length - 1);
       });
-    } catch (fetchError) {
-      console.error("Failed to fetch new products:", fetchError);
-
-      if (showLoader) {
-        setError("Unable to load new products.");
-      }
-    } finally {
-      if (showLoader) {
-        setLoading(false);
-      }
     }
-  }, []);
-
-  useEffect(() => {
-    fetchNewProducts(true);
-
-    const refreshTimer = window.setInterval(() => {
-      fetchNewProducts(false);
-    }, BACKEND_REFRESH_INTERVAL);
-
-    return () => {
-      window.clearInterval(refreshTimer);
-    };
-  }, [fetchNewProducts]);
+  }, [homeData]);
 
   useEffect(() => {
     if (products.length <= 1) {
@@ -194,7 +140,7 @@ export const NewProductsSlider = ({
     toggleWishlist(product);
   };
 
-  if (loading) {
+  if (isLoading && (!products || products.length === 0)) {
     return (
       <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
         <div className="h-[560px] overflow-hidden rounded-[2rem] bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 bg-[length:200%_100%] animate-pulse dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
@@ -209,16 +155,8 @@ export const NewProductsSlider = ({
           <AlertCircle className="mx-auto h-8 w-8 text-red-500" />
 
           <p className="mt-3 font-semibold text-red-600 dark:text-red-400">
-            {error}
+            {error.message || "Unable to load new products."}
           </p>
-
-          <button
-            type="button"
-            onClick={() => fetchNewProducts(true)}
-            className="mt-5 rounded-full bg-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-600/20 transition-all hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/30 active:scale-95"
-          >
-            Try Again
-          </button>
         </div>
       </section>
     );
@@ -286,6 +224,7 @@ export const NewProductsSlider = ({
             src={activeImage}
             alt={activeProduct.name || "Product"}
             className="h-full w-full object-cover transition-transform duration-[3000ms] ease-out"
+            loading="lazy"
           />
         </Link>
 

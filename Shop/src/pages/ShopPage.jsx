@@ -6,6 +6,7 @@ import { EmptyProductsState } from "../components/products/EmptyProductsState";
 import { useProducts } from "../hooks/useProducts";
 import { useInfiniteScroll } from "react-infinite-scroll-component";
 import { PriceRangeSlider } from "../components/filters/PriceRangeSlider";
+import { useDebounce } from "../hooks/useDebounce";
 import {
   Sparkles,
   SlidersHorizontal,
@@ -36,16 +37,26 @@ export const ShopPage = () => {
     setSelectedBrands,
     searchQuery,
     setSearchQuery,
+    hasActiveFilters,
   } = useProducts();
 
   // Local component states
   const [sortBy, setSortBy] = useState("featured");
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchQuery || "");
+
+  const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
+
+  useEffect(() => {
+    if (debouncedSearchTerm !== searchQuery) {
+      setSearchQuery(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, searchQuery, setSearchQuery]);
 
   // Map context search state to component search terms
-  const searchTerm = searchQuery ?? "";
-  const setSearchTerm = setSearchQuery;
+  const searchTerm = localSearchTerm;
+  const setSearchTerm = setLocalSearchTerm;
 
   const backendCategories = (categories || []).filter((cat) => cat !== "All");
 
@@ -153,20 +164,10 @@ export const ShopPage = () => {
     return categoryIcons[key] || "📦";
   }, []);
 
-  const displayedCategories = useMemo(
+const displayedCategories = useMemo(
     () =>
       showAllCategories ? backendCategories : backendCategories.slice(0, 6),
     [backendCategories, showAllCategories],
-  );
-
-  const hasActiveFilters = useMemo(
-    () =>
-      selectedCategory !== "All" ||
-      selectedBrands.length > 0 ||
-      priceRange[0] !== 0 ||
-      priceRange[1] !== 1000 ||
-      Boolean(searchQuery),
-    [selectedCategory, selectedBrands, priceRange, searchQuery],
   );
 
   return (

@@ -1,11 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../../hooks/useProducts';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export const SearchModal = ({ isOpen, onClose }) => {
   const { searchQuery, setSearchQuery } = useProducts();
   const navigate = useNavigate();
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchQuery || '');
+  const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
+
+  useEffect(() => {
+    if (debouncedSearchTerm !== searchQuery) {
+      setSearchQuery(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, searchQuery, setSearchQuery]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -40,8 +49,8 @@ export const SearchModal = ({ isOpen, onClose }) => {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
             placeholder="Search by product title, category, or description..."
             className="w-full rounded-xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             autoFocus

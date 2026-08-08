@@ -18,18 +18,17 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Magnifier } from "solguruz-react-image-magnifier";
-import { getProductById } from "../api/productService";
+import { useProduct } from "../hooks/useQueries";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 
 export const ProductDetailPage = () => {
   const { id } = useParams();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Share modal state
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -38,35 +37,14 @@ export const ProductDetailPage = () => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      setLoading(true);
+  const { data: product, isLoading, error } = useProduct(id);
 
-      try {
-        const data = await getProductById(id);
+  const fallbackImage =
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=1500&fit=crop";
 
-        setProduct(data);
+  const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
 
-        if (data?.sizes?.length > 0) {
-          setSelectedSize(data.sizes[0]);
-        } else {
-          setSelectedSize(null);
-        }
-
-        setActiveImageIndex(0);
-        setQuantity(1);
-      } catch (error) {
-        console.error("Failed to fetch product details:", error);
-        setProduct(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetail();
-  }, [id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4 py-16 lg:px-8">
         <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-primary-600" />
@@ -74,7 +52,7 @@ export const ProductDetailPage = () => {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-7xl flex-col items-center justify-center px-4 py-16 text-center lg:px-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -96,12 +74,6 @@ export const ProductDetailPage = () => {
       </div>
     );
   }
-
-  const productId = product.id || product._id;
-  const isWishlisted = isInWishlist(productId);
-
-  const fallbackImage =
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=1500&fit=crop";
 
   const images =
     product.images?.length > 0

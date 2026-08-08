@@ -5,6 +5,7 @@ const { Detail } = require("../models/Detail");
 const { authenticateToken, optionalAuthenticateToken } = require("../middleware/auth");
 const { getPagination } = require("../utils/pagination");
 const { uploadBufferToCloudinary, isCloudinaryConfigured } = require("../utils/cloudinary");
+const { cacheMiddleware, invalidateCache } = require("../utils/cache");
 
 const router = express.Router();
 
@@ -231,7 +232,7 @@ const getDetailsHandler = async (req, res) => {
     const filter = conditions.length > 0 ? { $and: conditions } : {};
 
     const page = parseInt(req.query.page || 1, 10);
-    const limit = parseInt(req.query.limit || 10, 10);
+    const limit = Math.min(parseInt(req.query.limit || 10, 10), 50);
 
     const totalRecords = await Detail.countDocuments(filter);
     const pagination = getPagination(page, limit, totalRecords);
@@ -430,6 +431,8 @@ const saveDetailsHandler = async (req, res) => {
         existing.pendingChanges = null;
         await existing.save();
 
+        await invalidateCache('cache:/users*');
+
         return res.json({
           success: true,
           message: "Product updated successfully.",
@@ -466,6 +469,8 @@ const saveDetailsHandler = async (req, res) => {
         files: detailData.files,
         status: initialStatus,
       });
+
+      await invalidateCache('cache:/users*');
 
       return res.status(201).json({
         success: true,
@@ -515,10 +520,11 @@ const deleteDetailsHandler = async (req, res) => {
         message: "You can only delete details added by your seller account.",
       });
     }
-
-    if (role === "Seller") {
+if (role === "Seller") {
       existing.status = "pending_delete";
       await existing.save();
+
+      await invalidateCache('cache:/users*');
 
       return res.json({
         success: true,
@@ -526,6 +532,9 @@ const deleteDetailsHandler = async (req, res) => {
       });
     } else {
       await Detail.deleteOne({ id: detailId });
+
+      await invalidateCache('cache:/users*');
+
       return res.json({
         success: true,
         message: "Detail deleted successfully.",
@@ -771,12 +780,12 @@ router.delete("/hero/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/categories", optionalAuthenticateToken, getCategoriesHandler);
-router.get("/brands", optionalAuthenticateToken, getBrandsHandler);
-router.get("/", optionalAuthenticateToken, getDetailsHandler);
+router.get("/categories", optionalAuthenticateToken, cacheMiddleware(3600), getCategoriesHandler);
+router.get("/brands", optionalAuthenticateToken, cacheMiddleware(3600), getBrandsHandler);
+router.get("/", optionalAuthenticateToken, cacheMiddleware(300), getDetailsHandler);
 
 // Single product by ID — returns full data including files (used by product detail page)
-router.get("/:id", optionalAuthenticateToken, async (req, res) => {
+router.get("/:id", optionalAuthenticateToken, cacheMiddleware(600), async (req, res) => {
   try {
     const item = await Detail.findOne({ id: req.params.id }).lean();
     if (!item) {

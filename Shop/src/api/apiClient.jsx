@@ -1,13 +1,20 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
+const BASE_URL = "http://localhost:3000";
+
+const pendingRequests = new Map();
+
+const generateRequestKey = (config) => {
+  const { method, url, params, data } = config;
+  return `${method}:${url}:${JSON.stringify(params)}:${JSON.stringify(data)}`;
+};
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 15000,
 });
 
 apiClient.interceptors.request.use(
@@ -16,6 +23,15 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (config.method === 'get') {
+      const key = generateRequestKey(config);
+      if (pendingRequests.has(key)) {
+        console.log(`[Dedupe] Returning existing promise for: ${key}`);
+        return pendingRequests.get(key);
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -36,9 +52,20 @@ const processQueue = (error, token = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.config.method === 'get') {
+      const key = generateRequestKey(response.config);
+      pendingRequests.delete(key);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+
+    if (originalRequest?.method === 'get') {
+      const key = generateRequestKey(originalRequest);
+      pendingRequests.delete(key);
+    }
 
     const status = error.response?.status;
     const isTokenError = status === 401 || status === 403;
@@ -94,7 +121,7 @@ apiClient.interceptors.response.use(
     }
 
     const errMsg = error.response?.data?.message || error.message;
-    console.error(`API Errorr [${status}] ${originalRequest?.url}:`, errMsg);
+    console.error(`API Error [${status}] ${originalRequest?.url}:`, errMsg);
 
     return Promise.reject(error);
   }
