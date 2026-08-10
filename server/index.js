@@ -32,7 +32,7 @@ const configuredOrigins = (process.env.FRONTEND_URLS || "")
   .filter(Boolean);
 
 const allowedOrigins = [
-  // Frontend on Vercel
+ 
   "https://shopzyra.onrender.com",
   "https://shopzyra-adminportal.onrender.com",
   "https://shopzyra.vercel.app",
