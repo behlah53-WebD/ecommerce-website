@@ -126,14 +126,14 @@ export const ProductCard = React.memo(({ product, variant = 'default' }) => {
 
   const renderHoverActions = () => (
     <div className="absolute bottom-3 left-3 right-3 hidden gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100 md:flex">
-      <button
+<button
         type="button"
         onClick={handleAddToCart}
         disabled={isOutOfStock}
-        className={`flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+        className={`relative flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 ${
           isOutOfStock
             ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 focus:ring-gray-500'
-            : 'bg-white text-primary-600 hover:bg-primary-600 hover:text-white shadow-lg shadow-primary-500/20 focus:ring-primary-500'
+            : 'bg-white text-gray-900 hover:bg-primary-600 hover:text-white shadow-lg shadow-primary-500/20 focus:ring-primary-500'
         }`}
       >
         <ShoppingBag className="h-4 w-4 flex-shrink-0" />
