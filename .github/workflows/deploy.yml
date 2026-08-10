@@ -23,8 +23,8 @@ jobs:
       - name: Build & Push Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ./server
+          file: ./server/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
 
@@ -32,8 +32,8 @@ jobs:
       - name: Build & Push Admin Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./admin-frontend
-          file: ./admin-frontend/Dockerfile
+          context: ./frontend/Form
+          file: ./frontend/Form/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-admin:latest
 
@@ -41,8 +41,8 @@ jobs:
       - name: Build & Push Shop Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./shop-frontend
-          file: ./shop-frontend/Dockerfile
+          context: ./Shop
+          file: ./Shop/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-shop:latest
 
