@@ -44,6 +44,8 @@ jobs:
           context: ./Shop
           file: ./Shop/Dockerfile
           push: true
+          build-args: |
+            VITE_API_BASE_URL=https://shopbackend-nicr.onrender.com
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-shop:latest
 
       # --- 4. TRIGGER RENDER DEPLOYMENTS ---
