@@ -369,7 +369,7 @@ export const NewProductsSlider = ({
 
         {/* Slide indicators, overlaid on image */}
         {products.length > 1 && (
-          <div className="absolute bottom-4 right-6 z-20 flex items-center gap-2 sm:bottom-6">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 sm:bottom-6 sm:left-auto sm:right-6 sm:translate-x-0">
             {products.map((product, index) => {
               const productId = getProductId(product);
 

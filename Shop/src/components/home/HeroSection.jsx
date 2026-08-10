@@ -165,7 +165,7 @@ export const HeroSection = () => {
       <a
         href="#categories"
         aria-label="Scroll to explore"
-        className="group absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 animate-fade-up flex-col items-center gap-3 text-white/80 transition-colors hover:text-white sm:bottom-8"
+        className="group absolute bottom-6 left-[43%] z-20 flex -translate-x-1/2 animate-fade-up flex-col items-center gap-3 text-white/80 transition-colors hover:text-white sm:bottom-8"
         style={{ animationDelay: '0.6s' }}
       >
         <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/70">
