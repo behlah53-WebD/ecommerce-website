@@ -1,0 +1,57 @@
+name: Build & Deploy to Render
+
+on:
+  push:
+    branches:
+      - main # Main branch par commit hone pe chalega
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # --- 1. BUILD & PUSH BACKEND ---
+      - name: Build & Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-backend:latest
+
+      # --- 2. BUILD & PUSH ADMIN FRONTEND ---
+      - name: Build & Push Admin Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./admin-frontend
+          file: ./admin-frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-admin:latest
+
+      # --- 3. BUILD & PUSH SHOP FRONTEND ---
+      - name: Build & Push Shop Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./shop-frontend
+          file: ./shop-frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-shop:latest
+
+      # --- 4. TRIGGER RENDER DEPLOYMENTS ---
+      - name: Deploy Backend to Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+
+      - name: Deploy Admin to Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_ADMIN }}
+
+      - name: Deploy Shop to Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_SHOP }}
