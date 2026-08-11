@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || "https://shopbackend-nicr.onrender.com";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
