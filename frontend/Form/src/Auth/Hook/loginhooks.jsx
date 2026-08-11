@@ -6,7 +6,7 @@ import { getUserFromToken } from "@/API/api";
 
 // Use environment variable for the base URL, with the deployed API as fallback.
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://ecommerce-api-9ayg.onrender.com";
+  import.meta.env.VITE_API_BASE_URL || "https://shopbackend-nicr.onrender.com";
 
 export const useAuth = (setIsLoggedIn) => {
   const [view, setView] = useState("login");
