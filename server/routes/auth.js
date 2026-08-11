@@ -152,10 +152,11 @@ router.get("/user", async (req, res) => {
 
 router.post("/signup", validate(signupSchema), async (req, res) => {
   try {
-    const { name, email, password, role } = req.validatedBody;
+    const { name, email, password } = req.validatedBody;
+    let role = req.validatedBody.role;
 
-   
-    if (role.toLowerCase() === "admin") role = "Admin";
+    if (!role || role.toLowerCase() === "buyer") role = "Buyer";
+    else if (role.toLowerCase() === "admin") role = "Admin";
     else if (role.toLowerCase() === "seller") role = "Seller";
     else role = "Buyer";
 
@@ -210,7 +211,8 @@ router.post("/signup", validate(signupSchema), async (req, res) => {
 
 router.post("/login", validate(loginSchema), async (req, res) => {
   try {
-    const { email, password } = req.validatedBody;
+    const { password } = req.validatedBody;
+    const email = normalizeEmail(req.validatedBody.email);
 
     const user = await User.findOne({ authEmail: email });
     if (!user || !(await bcrypt.compare(password, user.authPassword))) {

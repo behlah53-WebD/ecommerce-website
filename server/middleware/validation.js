@@ -34,10 +34,20 @@ const signupSchema = Joi.object({
   role: Joi.string().valid("Buyer", "Seller", "Admin").optional(),
 });
 
-// Login validation schema
+// Login validation schema — no password pattern enforcement here;
+// the DB bcrypt compare handles credential correctness.
+const loginEmailSchema = Joi.string().email({ tlds: { allow: false } }).required().messages({
+  "string.email": "Please provide a valid email address",
+  "any.required": "Email is required",
+  "string.empty": "Email is required",
+});
+
 const loginSchema = Joi.object({
-  email: emailSchema,
-  password: passwordSchema,
+  email: loginEmailSchema,
+  password: Joi.string().required().messages({
+    "any.required": "Password is required",
+    "string.empty": "Password is required",
+  }),
 });
 
 // Change password validation schema

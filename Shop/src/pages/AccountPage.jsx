@@ -300,16 +300,9 @@ export const AccountPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
-                          email && validateEmail(email) ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
-                        }`}
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
                       />
                     </div>
-                    {email && validateEmail(email) && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
-                        <AlertCircle className="h-3.5 w-3.5" /> {validateEmail(email)}
-                      </p>
-                    )}
                   </div>
 
                   <div>
