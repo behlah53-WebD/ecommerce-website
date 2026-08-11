@@ -35,6 +35,30 @@ import ForgotPasswordModal from "../components/common/ForgotPasswordModal";
 import SignupVerifyModal from "../components/common/SignupVerifyModal";
 import EditProfileModal from "../components/common/EditProfileModal";
 
+// Validation helper functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return "Please enter a valid email address";
+  if (!email.endsWith(".com")) return "Email must end with .com";
+  return null;
+};
+
+const validatePassword = (password) => {
+  if (!password) return "Password is required";
+  if (password.length < 8) return "Password must be at least 8 characters long";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least 1 capital letter";
+  if (!/[a-z].*[a-z].*[a-z].*[a-z].*[a-z].*[a-z]/.test(password)) return "Password must contain at least 6 lowercase letters";
+  if (!/\d/.test(password)) return "Password must contain at least 1 digit";
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return "Password must contain at least 1 special symbol";
+  return null;
+};
+
+const validateName = (name) => {
+  if (!name || name.trim().length < 2) return "Name must be at least 2 characters long";
+  if (name.trim().length > 50) return "Name cannot exceed 50 characters";
+  return null;
+};
+
 export const AccountPage = () => {
   const { currentUser, isLoggedIn, isAuthLoading, login, signup, logout } =
     useAuth();
@@ -109,16 +133,34 @@ export const AccountPage = () => {
     setSuccessMsg("");
     setLoading(true);
 
-    if (!signupPassword || signupPassword.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
+    // Client-side validation
+    const nameError = validateName(name);
+    if (nameError) {
+      setErrorMsg(nameError);
       setLoading(false);
       return;
     }
+
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setErrorMsg(emailError);
+      setLoading(false);
+      return;
+    }
+
+    const passwordError = validatePassword(signupPassword);
+    if (passwordError) {
+      setErrorMsg(passwordError);
+      setLoading(false);
+      return;
+    }
+
     if (signupPassword !== signupConfirmPassword) {
       setErrorMsg("Passwords do not match.");
       setLoading(false);
       return;
     }
+
     if (!otpVerified) {
       setErrorMsg("Please verify your email before registering.");
       setLoading(false);
@@ -258,9 +300,16 @@ export const AccountPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
+                        className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
+                          email && validateEmail(email) ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
+                        }`}
                       />
                     </div>
+                    {email && validateEmail(email) && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                        <AlertCircle className="h-3.5 w-3.5" /> {validateEmail(email)}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -315,9 +364,16 @@ export const AccountPage = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="John Doe"
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
+                        className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
+                          name && validateName(name) ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
+                        }`}
                       />
                     </div>
+                    {name && validateName(name) && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                        <AlertCircle className="h-3.5 w-3.5" /> {validateName(name)}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -332,9 +388,16 @@ export const AccountPage = () => {
                         value={email}
                         onChange={handleEmailChange}
                         placeholder="you@example.com"
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
+                        className={`w-full rounded-xl border border-gray-200 bg-gray-50 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
+                          email && validateEmail(email) ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
+                        }`}
                       />
                     </div>
+                    {email && validateEmail(email) && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                        <AlertCircle className="h-3.5 w-3.5" /> {validateEmail(email)}
+                      </p>
+                    )}
                     {otpVerified && (
                       <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                         <ShieldCheck className="h-3.5 w-3.5" /> Email verified
@@ -374,8 +437,10 @@ export const AccountPage = () => {
                             required
                             value={signupPassword}
                             onChange={(e) => setSignupPassword(e.target.value)}
-                            placeholder="Minimum 6 characters"
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 pr-10 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
+                            placeholder="At least 8 chars: 1 cap, 6 lower, 1 digit, 1 symbol"
+                            className={`w-full rounded-xl border border-gray-200 bg-gray-50 px-4 pr-10 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
+                              signupPassword && validatePassword(signupPassword) ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
+                            }`}
                           />
                           <button
                             type="button"
@@ -391,6 +456,11 @@ export const AccountPage = () => {
                             )}
                           </button>
                         </div>
+                        {signupPassword && validatePassword(signupPassword) && (
+                          <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                            <AlertCircle className="h-3.5 w-3.5" /> {validatePassword(signupPassword)}
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -406,7 +476,9 @@ export const AccountPage = () => {
                               setSignupConfirmPassword(e.target.value)
                             }
                             placeholder="Re-enter your password"
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 pr-10 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all"
+                            className={`w-full rounded-xl border border-gray-200 bg-gray-50 px-4 pr-10 py-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-all ${
+                              signupConfirmPassword && signupConfirmPassword !== signupPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""
+                            }`}
                           />
                           <button
                             type="button"
@@ -422,6 +494,12 @@ export const AccountPage = () => {
                             )}
                           </button>
                         </div>
+                        {signupConfirmPassword &&
+                          signupConfirmPassword !== signupPassword && (
+                            <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                              <AlertCircle className="h-3.5 w-3.5" /> Passwords do not match
+                            </p>
+                          )}
                         {signupConfirmPassword &&
                           signupConfirmPassword === signupPassword && (
                             <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">

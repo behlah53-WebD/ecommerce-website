@@ -13,6 +13,24 @@ import {
 } from "lucide-react";
 import apiClient from "../../api/apiClient";
 
+// Validation helper functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return "Please enter a valid email address";
+  if (!email.endsWith(".com")) return "Email must end with .com";
+  return null;
+};
+
+const validatePassword = (password) => {
+  if (!password) return "Password is required";
+  if (password.length < 8) return "Password must be at least 8 characters long";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least 1 capital letter";
+  if (!/[a-z].*[a-z].*[a-z].*[a-z].*[a-z].*[a-z]/.test(password)) return "Password must contain at least 6 lowercase letters";
+  if (!/\d/.test(password)) return "Password must contain at least 1 digit";
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return "Password must contain at least 1 special symbol";
+  return null;
+};
+
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1); // 1 | 2 | 3
   const [email, setEmail] = useState("");
@@ -71,10 +89,13 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setError("");
-    if (!email.trim()) {
-      setError("Please enter your email address.");
+    
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
       return;
     }
+    
     setLoading(true);
     try {
       const { data } = await apiClient.post("/auth/forgot-password/send-otp", {
@@ -117,14 +138,18 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError("");
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+    
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
+    
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
+    
     setLoading(true);
     try {
       const { data } = await apiClient.post("/auth/forgot-password/reset", {
@@ -337,9 +362,16 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+                    className={`w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors ${
+                      email && validateEmail(email) ? "border-red-500 focus:border-red-500" : ""
+                    }`}
                     autoFocus
                   />
+                  {email && validateEmail(email) && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {validateEmail(email)}
+                    </p>
+                  )}
                 </div>
                 <button
                   id="fp-send-otp-btn"
@@ -450,8 +482,10 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Min. 6 characters"
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 pr-10 text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+                      placeholder="At least 8 chars: 1 cap, 6 lower, 1 digit, 1 symbol"
+                      className={`w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 pr-10 text-sm text-gray-900 focus:border-primary-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors ${
+                        newPassword && validatePassword(newPassword) ? "border-red-500 focus:border-red-500" : ""
+                      }`}
                       autoFocus
                     />
                     <button
@@ -466,6 +500,11 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
                       )}
                     </button>
                   </div>
+                  {newPassword && validatePassword(newPassword) && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {validatePassword(newPassword)}
+                    </p>
+                  )}
                   {/* Strength bar */}
                   {newPassword.length > 0 && (
                     <div className="mt-1.5 flex gap-1">
@@ -521,6 +560,11 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
                       )}
                     </button>
                   </div>
+                  {confirmPassword && confirmPassword !== newPassword && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> Passwords do not match
+                    </p>
+                  )}
                   {confirmPassword && confirmPassword === newPassword && (
                     <p className="mt-1 text-xs text-emerald-500 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" /> Passwords match

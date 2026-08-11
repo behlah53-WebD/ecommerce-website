@@ -1,9 +1,21 @@
 const express = require("express");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const { User } = require("../models/User");
 const { JWT_SECRET, REFRESH_SECRET } = require("../config/jwt");
+const {
+  validate,
+  signupSchema,
+  loginSchema,
+  changePasswordSchema,
+  forgotPasswordSendOtpSchema,
+  forgotPasswordResetSchema,
+  signupSendOtpSchema,
+  signupVerifyOtpSchema,
+  profileUpdateSchema,
+} = require("../middleware/validation");
 
 const router = express.Router();
 
@@ -66,7 +78,7 @@ router.get("/me", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/profile", authenticateToken, async (req, res) => {
+router.put("/profile", authenticateToken, validate(profileUpdateSchema), async (req, res) => {
   try {
     const user = await User.findOne({ id: req.user.id });
     if (!user)
@@ -74,7 +86,7 @@ router.put("/profile", authenticateToken, async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found." });
 
-    const { name, authEmail } = req.body || {};
+    const { name, authEmail } = req.validatedBody;
 
     if (name !== undefined) {
       const trimmedName = String(name || "").trim();
@@ -138,24 +150,14 @@ router.get("/user", async (req, res) => {
   }
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", validate(signupSchema), async (req, res) => {
   try {
-    const name = String(req.body.name || "").trim();
-    const email = normalizeEmail(req.body.email);
-    const password = String(req.body.password || "");
-    let role = String(req.body.role || "Buyer").trim();
+    const { name, email, password, role } = req.validatedBody;
 
    
     if (role.toLowerCase() === "admin") role = "Admin";
     else if (role.toLowerCase() === "seller") role = "Seller";
     else role = "Buyer";
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email and password are required.",
-      });
-    }
 
     if (role === "Admin") {
       const adminCount = await User.countDocuments({ role: "Admin" });
@@ -179,7 +181,7 @@ router.post("/signup", async (req, res) => {
     const user = await User.create({
       id: `user_${crypto.randomUUID()}`,
       authEmail: email,
-      authPassword: password,
+      authPassword: await bcrypt.hash(password, 12),
       name,
       role,
       approvalStatus: role === "Seller" ? "pending" : "approved",
@@ -206,18 +208,12 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", validate(loginSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    const password = String(req.body.password || "");
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required." });
-    }
+    const { email, password } = req.validatedBody;
 
     const user = await User.findOne({ authEmail: email });
-    if (!user || user.authPassword !== password) {
+    if (!user || !(await bcrypt.compare(password, user.authPassword))) {
       return res
         .status(401)
         .json({ success: false, message: "Invalid email or password." });
@@ -332,21 +328,13 @@ router.post("/refresh", async (req, res) => {
   });
 });
 
-router.put("/change-password", async (req, res) => {
+router.put("/change-password", validate(changePasswordSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    const id = req.body.id;
-    const password = String(req.body.password || "");
-    if ((!email && !id) || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "User identifier and new password are required.",
-      });
-    }
+    const { email, id, password } = req.validatedBody;
 
     const user = await User.findOneAndUpdate(
       email ? { authEmail: email } : { id },
-      { $set: { authPassword: password } },
+      { $set: { authPassword: await bcrypt.hash(password, 12) } },
       { returnDocument: 'after' },
     );
     if (!user)
@@ -375,12 +363,9 @@ const { sendEmail } = require('../utils/mailer');
  * Body: { email }
  * Generates a 6-digit OTP, stores it for 10 minutes, sends it via SMTP.
  */
-router.post('/forgot-password/send-otp', async (req, res) => {
+router.post('/forgot-password/send-otp', validate(forgotPasswordSendOtpSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email is required.' });
-    }
+    const { email } = req.validatedBody;
 
     const user = await User.findOne({ authEmail: email });
     if (!user) {
@@ -420,14 +405,9 @@ router.post('/forgot-password/send-otp', async (req, res) => {
 });
 
 
-router.post('/forgot-password/reset', async (req, res) => {
+router.post('/forgot-password/reset', validate(forgotPasswordResetSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    const { otp, newPassword } = req.body;
-
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Email, OTP and new password are required.' });
-    }
+    const { email, otp, newPassword } = req.validatedBody;
 
     const record = otpStore.get(email);
     if (!record) {
@@ -444,7 +424,7 @@ router.post('/forgot-password/reset', async (req, res) => {
     
     const user = await User.findOneAndUpdate(
       { authEmail: email },
-      { $set: { authPassword: newPassword } },
+      { $set: { authPassword: await bcrypt.hash(newPassword, 12) } },
       { returnDocument: 'after' }
     );
     if (!user) {
@@ -462,12 +442,9 @@ router.post('/forgot-password/reset', async (req, res) => {
 const signupOtpStore = new Map();
 
 
-router.post('/signup/send-otp', async (req, res) => {
+router.post('/signup/send-otp', validate(signupSendOtpSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email is required.' });
-    }
+    const { email } = req.validatedBody;
 
     // Check if user already exists
     const existingUser = await User.findOne({ authEmail: email });
@@ -507,14 +484,9 @@ router.post('/signup/send-otp', async (req, res) => {
 });
 
 
-router.post('/signup/verify-otp', async (req, res) => {
+router.post('/signup/verify-otp', validate(signupVerifyOtpSchema), async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    const { otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
-    }
+    const { email, otp } = req.validatedBody;
 
     const record = signupOtpStore.get(email);
     if (!record) {
