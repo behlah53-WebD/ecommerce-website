@@ -37,10 +37,7 @@ const signupSchema = Joi.object({
 // Login validation schema
 const loginSchema = Joi.object({
   email: emailSchema,
-  password: Joi.string().required().messages({
-    "any.required": "Password is required",
-    "string.empty": "Password is required",
-  }),
+  password: passwordSchema,
 });
 
 // Change password validation schema
