@@ -115,7 +115,7 @@ export const HeroSection = () => {
           <div className="mt-16 flex items-center gap-8 border-t border-white/15 pt-8 animate-fade-up" style={{ animationDelay: '0.45s' }}>
             <div>
               <div className="font-display text-2xl sm:text-3xl font-bold text-white">50K+</div>
-              <div className="text-xs sm:text-sm text-gray-400">Happy Customers</div>
+              <div className="text-xs sm:text-sm text-gray-400">Happy Customerssssss</div>
             </div>
             <div className="h-10 w-px bg-white/20" />
             <div>
