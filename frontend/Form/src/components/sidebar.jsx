@@ -395,7 +395,7 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
                     lineHeight: 1.2,
                   }}
                 >
-                  Market Hub
+                  Shop ZYRA
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
                   <CircleIcon sx={{ fontSize: 8, color: "#10b981" }} />
@@ -408,7 +408,7 @@ function Sidebar({ activeView, onChangeView, currentUser, mobileNavExpanded = fa
                       letterSpacing: "0.5px",
                     }}
                   >
-                    PRO PORTAL
+                    ADMIN PORTAL
                   </Typography>
                 </Box>
               </Box>
