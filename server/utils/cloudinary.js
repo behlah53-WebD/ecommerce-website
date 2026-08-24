@@ -13,8 +13,8 @@ cloudinary.config({
 const isCloudinaryConfigured = () => {
   return Boolean(
     process.env.CLOUDINARY_CLOUD_NAME &&
-      process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET,
   );
 };
 
@@ -29,8 +29,8 @@ const uploadBufferToCloudinary = (buffer, options = {}) => {
     if (!isCloudinaryConfigured()) {
       return reject(
         new Error(
-          "Cloudinary environment variables missing. Please configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in server/.env"
-        )
+          "Cloudinary environment variables missing. Please configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in server/.env",
+        ),
       );
     }
     const defaultOptions = {
@@ -43,7 +43,7 @@ const uploadBufferToCloudinary = (buffer, options = {}) => {
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
-      }
+      },
     );
     uploadStream.end(buffer);
   });

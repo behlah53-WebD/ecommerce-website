@@ -1,5 +1,3 @@
-const puppeteer = require("puppeteer");
-
 /**
  * Generates the invoice HTML string (identical layout to OrdersPage.jsx).
  * This is used both as the email body AND as the source for the PDF.
@@ -13,17 +11,19 @@ function generateInvoiceHtml(order) {
     <tr>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px;">
         <div style="font-weight: 600; color: #1e293b;">${item.name}</div>
-        ${item.color || item.size ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px;">${item.color ? `Color: ${item.color}` : ''} ${item.size ? `· Size: ${item.size}` : ''}</div>` : ''}
+        ${item.color || item.size ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px;">${item.color ? `Color: ${item.color}` : ""} ${item.size ? `· Size: ${item.size}` : ""}</div>` : ""}
       </td>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: center; color: #475569;">${item.quantity}</td>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; color: #475569;">₹${(item.price || 0).toFixed(2)}</td>
       <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; text-align: right; font-weight: 600; color: #1e293b;">₹${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
     </tr>
-  `
+  `,
     )
     .join("");
 
-  const formattedDate = new Date(order.createdAt || new Date()).toLocaleDateString("en-US", {
+  const formattedDate = new Date(
+    order.createdAt || new Date(),
+  ).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -36,7 +36,7 @@ function generateInvoiceHtml(order) {
       <meta charset="UTF-8">
       <title>Invoice - ${order.orderId}</title>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://googleapis.com');
         
         * {
           box-sizing: border-box;
@@ -217,19 +217,19 @@ function generateInvoiceHtml(order) {
           <div class="details-block">
             <h3>Invoice Information</h3>
             <p><strong>Date:</strong> ${formattedDate}</p>
-            <p><strong>Payment Method:</strong> ${order.paymentMethod || 'Card'}</p>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod || "Card"}</p>
             <p><strong>Payment Status:</strong> 
-              <span class="badge ${order.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid'}">
-                ${order.paymentStatus || 'Pending'}
+              <span class="badge ${order.paymentStatus === "Paid" ? "badge-paid" : "badge-unpaid"}">
+                ${order.paymentStatus || "Pending"}
               </span>
             </p>
           </div>
           <div class="details-block">
             <h3>Shipping Details</h3>
-            <p><strong>${order.shippingAddress?.firstName || ''} ${order.shippingAddress?.lastName || ''}</strong></p>
-            <p>${order.shippingAddress?.address || ''}</p>
-            <p>${order.shippingAddress?.city || ''}, ${order.shippingAddress?.postalCode || ''}</p>
-            <p>${order.shippingAddress?.email || ''}</p>
+            <p><strong>${order.shippingAddress?.firstName || ""} ${order.shippingAddress?.lastName || ""}</strong></p>
+            <p>${order.shippingAddress?.address || ""}</p>
+            <p>${order.shippingAddress?.city || ""}, ${order.shippingAddress?.postalCode || ""}</p>
+            <p>${order.shippingAddress?.email || ""}</p>
           </div>
         </div>
 
@@ -255,7 +255,7 @@ function generateInvoiceHtml(order) {
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Shipping</td>
-              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? 'FREE' : `₹${(order.shipping || 0).toFixed(2)}`}</td>
+              <td style="text-align: right; font-weight: 500; padding: 8px 16px; font-size: 14px;">${order.shipping === 0 ? "FREE" : `₹${(order.shipping || 0).toFixed(2)}`}</td>
             </tr>
             <tr>
               <td style="color: #64748b; padding: 8px 16px; font-size: 14px;">Tax</td>
@@ -280,16 +280,27 @@ function generateInvoiceHtml(order) {
 
 /**
  * Converts the invoice HTML (same layout as OrdersPage.jsx) to a PDF Buffer
- * using Puppeteer / Chromium — no custom pdfkit drawing needed.
+ * using Puppeteer / Chromium — optimized dynamically for Serverless Vercel.
  * @param {Object} order - The order document from the database
  * @returns {Promise<Buffer>}
  */
 async function generateInvoicePdf(order) {
   const html = generateInvoiceHtml(order);
 
+  // Dynamically require inside the function to prevent ESM compilation failures
+  const puppeteer = require("puppeteer-core");
+  const chromium = require("@sparticuz/chromium");
+
+  // Determine configuration settings dynamically depending on deployment layer
+  const isLocal = !process.env.VERCEL;
+
   const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: isLocal
+      ? ["--no-sandbox", "--disable-setuid-sandbox"]
+      : chromium.args,
+    defaultViewport: isLocal ? null : chromium.defaultViewport,
+    executablePath: isLocal ? undefined : await chromium.executablePath(),
+    headless: isLocal ? true : chromium.headless,
   });
 
   try {
@@ -303,11 +314,9 @@ async function generateInvoicePdf(order) {
       printBackground: true,
       margin: { top: "0px", right: "0px", bottom: "0px", left: "0px" },
     });
-
     return pdfBuffer;
   } finally {
     await browser.close();
   }
 }
-
 module.exports = { generateInvoiceHtml, generateInvoicePdf };
