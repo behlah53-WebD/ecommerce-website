@@ -12,6 +12,8 @@ import { Footer } from "./components/common/Footer";
 import { CartDrawer } from "./components/common/CartDrawer";
 import { SearchModal } from "./components/common/SearchModal";
 import { LoginPromptModal } from "./components/common/LoginPromptModal";
+import { PwaInstallPrompt } from "./components/common/PwaInstallPrompt";
+import { OfflineStatusNotifier } from "./components/common/OfflineStatusNotifier";
 
 const HomePage = lazy(() => import("./pages/HomePage").then(m => ({ default: m.HomePage })));
 const ShopPage = lazy(() => import("./pages/ShopPage").then(m => ({ default: m.ShopPage })));
@@ -41,6 +43,7 @@ function AppLayout({ isSearchOpen, setIsSearchOpen }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors">
+      <OfflineStatusNotifier />
       <AnnouncementBar />
       <Navbar onOpenSearch={() => setIsSearchOpen(true)} />
       <SearchModal
@@ -49,6 +52,7 @@ function AppLayout({ isSearchOpen, setIsSearchOpen }) {
       />
       <CartDrawer />
       <LoginPromptModal />
+      <PwaInstallPrompt />
 
       {/* Home page: no top padding — hero stretches under the transparent navbar */}
       {/* Other pages: normal padding so content clears the fixed navbar */}
