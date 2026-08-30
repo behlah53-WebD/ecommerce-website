@@ -69,7 +69,7 @@ export function PwaInstallPrompt() {
   return (
     <aside
       aria-label="Install App Banner"
-      className="fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300"
+      className="fixed bottom-20 lg:bottom-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300"
     >
       <div className="flex items-center gap-3 rounded-2xl bg-white/95 p-4 shadow-2xl backdrop-blur-md border border-gray-100 dark:bg-gray-900/95 dark:border-gray-800 text-gray-900 dark:text-gray-100">
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-600/10 text-primary-600 dark:bg-primary-500/20 dark:text-primary-400">

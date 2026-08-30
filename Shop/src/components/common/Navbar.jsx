@@ -287,28 +287,6 @@ export const Navbar = ({ onOpenSearch }) => {
                 scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"
               }`}
             >
-              {/* Mobile menu button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen((currentValue) => !currentValue);
-                  setShowProfileDropdown(false);
-                }}
-                className={`rounded-lg p-2 transition-colors lg:hidden ${
-                  !isHome || scrolled
-                    ? "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                    : "text-white hover:bg-white/10"
-                }`}
-                aria-label="Toggle menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </button>
-
               {/* Logo */}
               <Link
                 to="/"
@@ -636,34 +614,6 @@ export const Navbar = ({ onOpenSearch }) => {
               </div>
             </div>
           </div>
-
-          {/* Mobile menu */}
-          {mobileMenuOpen && (
-            <div
-              className={`border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:hidden ${
-                scrolled ? "rounded-b-2xl" : ""
-              }`}
-            >
-              <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
-                {navLinks.map((link) => (
-                  <NavLink
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `block rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                        isActive
-                          ? "bg-primary-50 text-primary-600 dark:bg-gray-900 dark:text-primary-400"
-                          : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-900"
-                      }`
-                    }
-                  >
-                    {link.name}
-                  </NavLink>
-                ))}
-              </nav>
-            </div>
-          )}
         </header>
       </div>
     </>

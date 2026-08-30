@@ -14,6 +14,7 @@ import { SearchModal } from "./components/common/SearchModal";
 import { LoginPromptModal } from "./components/common/LoginPromptModal";
 import { PwaInstallPrompt } from "./components/common/PwaInstallPrompt";
 import { OfflineStatusNotifier } from "./components/common/OfflineStatusNotifier";
+import { MobileBottomNav } from "./components/common/MobileBottomNav";
 
 const HomePage = lazy(() => import("./pages/HomePage").then(m => ({ default: m.HomePage })));
 const ShopPage = lazy(() => import("./pages/ShopPage").then(m => ({ default: m.ShopPage })));
@@ -56,7 +57,7 @@ function AppLayout({ isSearchOpen, setIsSearchOpen }) {
 
       {/* Home page: no top padding — hero stretches under the transparent navbar */}
       {/* Other pages: normal padding so content clears the fixed navbar */}
-      <main className={`flex-1 ${isHome ? "" : "pt-[96px] lg:pt-[112px]"}`}>
+      <main className={`flex-1 pb-16 lg:pb-0 ${isHome ? "" : "pt-[96px] lg:pt-[112px]"}`}>
         <Routes>
           <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
           <Route path="/shop" element={<PageWrapper><ShopPage /></PageWrapper>} />
@@ -75,6 +76,7 @@ function AppLayout({ isSearchOpen, setIsSearchOpen }) {
       </main>
 
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 }
