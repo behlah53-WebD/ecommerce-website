@@ -5,6 +5,8 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const https = require("https");
+const http = require("http");
 const { swaggerDocs, swaggerUi } = require("./config/swagger");
 
 const authRoutes = require("./routes/auth");
@@ -92,9 +94,13 @@ app.use(
   }),
 );
 
-// Simple test route to verify CORS
+// Health check route
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", origin: req.headers.origin });
+  res.status(200).json({
+    status: "ok",
+    message: "Server is healthy",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Routes – AFTER CORS
@@ -113,6 +119,36 @@ app.use((err, req, res, next) => {
 });
 
 const { runImageMigration } = require("./utils/migration");
+
+// Keep-alive: Auto ping /health every 2 minutes to prevent Render free instance from sleeping
+const BACKEND_URL =
+  process.env.RENDER_EXTERNAL_URL ||
+  process.env.BACKEND_URL ||
+  "https://shopbackend-nicr.onrender.com";
+
+const startHealthCheckPing = () => {
+  const ping = () => {
+    try {
+      const url = new URL(`${BACKEND_URL}/health`);
+      const client = url.protocol === "https:" ? https : http;
+      client
+        .get(url.href, (res) => {
+          console.log(`[Health Ping] Hit ${url.href} - Status: ${res.statusCode}`);
+        })
+        .on("error", (err) => {
+          console.error("[Health Ping] Ping error:", err.message);
+        });
+    } catch (err) {
+      console.error("[Health Ping] Ping failed:", err.message);
+    }
+  };
+
+  // Initial ping 5 seconds after server start
+  setTimeout(ping, 5000);
+
+  // Ping every 2 minutes (2 * 60 * 1000 ms)
+  setInterval(ping, 2 * 60 * 1000);
+};
 
 async function startServer() {
   try {
@@ -133,6 +169,7 @@ async function startServer() {
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
+      startHealthCheckPing();
     });
   } catch (error) {
     console.error("Server startup error:", error);
